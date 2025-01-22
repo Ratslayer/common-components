@@ -1,6 +1,4 @@
-﻿using Animancer;
-using BB.Di;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 namespace BB
 {
 	public sealed record Blackboard(IEvent<BoardChangedEvent> Changed) : EntitySystem, IBoard

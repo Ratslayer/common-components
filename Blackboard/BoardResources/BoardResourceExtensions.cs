@@ -1,7 +1,4 @@
-﻿using DG.Tweening.Core.Easing;
-using UnityEngine;
-
-namespace BB
+﻿namespace BB
 {
 	public static class BoardResourceExtensions
 	{

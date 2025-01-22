@@ -12,17 +12,5 @@
 				resc.SetToMax();
 			Board.FlushChanges();
 		}
-
-		[OnEvent]
-		void OnGameTimeAdvance(GameTimeAdvancedEvent time)
-		{
-
-			var flush = false;
-			foreach (var resc in Resources)
-				flush |= resc.AdvanceGeneration(time.Delta);
-
-			if (flush)
-				Board.FlushChanges();
-		}
 	}
 }
