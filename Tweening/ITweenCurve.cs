@@ -1,7 +1,9 @@
 ﻿using DG.Tweening;
-
-public interface ITweenCurve
+namespace BB
 {
-	void Apply(Tween tween);
-	float Duration { get; }
+	public interface ITweenCurve
+	{
+		void Apply(Tween tween);
+		float Duration { get; }
+	}
 }
