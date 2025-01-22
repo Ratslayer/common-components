@@ -18,7 +18,7 @@ namespace BB
 			if (e._state == InputActionState.Began)
 			{
 				foreach (var action in Actions.Value)
-					if (action._details.Event == e._event)
+					if (action._details.Event == e._action)
 					{
 						action._onBegin?.Invoke();
 						if (action._onEnd is null)
@@ -33,7 +33,7 @@ namespace BB
 				foreach (var i in -_pressedActions.Count)
 				{
 					var action = _pressedActions[i];
-					if (action._details.Event != e._event)
+					if (action._details.Event != e._action)
 						continue;
 					action._onEnd.Invoke();
 					_pressedActions.RemoveAt(i);

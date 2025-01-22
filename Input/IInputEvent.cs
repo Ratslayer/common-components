@@ -1,3 +1,3 @@
-﻿public interface IInputEvent
-{
-}
+﻿//public interface IInputEvent
+//{
+//}

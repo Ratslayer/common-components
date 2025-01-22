@@ -1,8 +1,8 @@
 ﻿public readonly struct InputActionEvent
 {
 	public readonly InputActionState _state;
-	public readonly IInputEvent _input;
-	public InputActionEvent(InputActionState state, IInputEvent input)
+	public readonly InputActionWrapperAsset _input;
+	public InputActionEvent(InputActionState state, InputActionWrapperAsset input)
 	{
 		_state = state;
 		_input = input;

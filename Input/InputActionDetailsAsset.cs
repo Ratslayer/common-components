@@ -7,7 +7,7 @@ namespace BB
 		[SerializeField] InputActionWrapperAsset _event;
 		[SerializeField] InputActionPosition _position;
 		public string Name => _name;
-		public IInputEvent Event => _event;
+		public InputActionWrapperAsset Event => _event;
 		public InputActionPosition Position => _position;
 		public string InputName
 		{

@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System;
 using BB.Di;
 using static UnityEngine.InputSystem.InputAction;
+using System.Numerics;
 namespace BB
 {
 	public interface IInputActionDetails
 	{
-		IInputEvent Event { get; }
+		InputActionWrapperAsset Event { get; }
 		string Name { get; }
 		string InputName { get; }
 		InputActionPosition Position { get; }
@@ -38,7 +39,7 @@ namespace BB
 		IEvent<InputEvent> InputPublisher) : IDisposable
 	{
 		readonly List<InputActionSubscription> _actionSubscriptions = new();
-		public string GetName(IInputEvent e)
+		public string GetName(InputActionWrapperAsset e)
 			=> _actionSubscriptions.TryGetValue(s => s.Event == e, out var sub) 
 			? sub.InputName : "[NO INPUT]";
 		UnityEngine.InputSystem.InputActionAsset Input => Config._inputSystemAsset;
@@ -65,7 +66,7 @@ namespace BB
 		sealed record InputActionSubscription(
 			UnityInput Input,
 			InputAction Action,
-			IInputEvent Event,
+			InputActionWrapperAsset Event,
 			IEvent<InputEvent> InputPublisher)
 		{
 			const string Regex = @"\[(.*)\]";
