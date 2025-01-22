@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 namespace BB
 {
-	public sealed class InputActionAsset : BaseScriptableObject, IInputActionDetails
+	public sealed class InputActionDetailsAsset : BaseScriptableObject, IInputActionDetails
 	{
 		[SerializeField] string _name;
-		[SerializeField] InputEventAsset _event;
+		[SerializeField] InputActionWrapperAsset _event;
 		[SerializeField] InputActionPosition _position;
 		public string Name => _name;
 		public IInputEvent Event => _event;

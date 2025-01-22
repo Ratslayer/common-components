@@ -34,7 +34,7 @@ namespace BB
 	}
 	public sealed record InputActions : StackValue<InputActions, List<InputActionData>>;
 	public sealed record UnityInput(
-		InputActionConfig Config,
+		InputConfig Config,
 		IEvent<InputEvent> InputPublisher) : IDisposable
 	{
 		readonly List<InputActionSubscription> _actionSubscriptions = new();
@@ -45,7 +45,7 @@ namespace BB
 		[OnCreate]
 		private void InitInputAsset()
 		{
-			foreach (var action in Config._events)
+			foreach (var action in Config._actions)
 				if (action)
 					_actionSubscriptions.Add(
 						new(this, Input[action._inputActionName], action, InputPublisher));
