@@ -19,13 +19,18 @@ namespace BB
 			{
 				if (_board is null || _key is null || _value.IsZero())
 					return;
-				_key.Add(-_value, new(_board));
+				_key.Add(-_value, _board);
 			}
 		}
 		public static BlackboardKeyDisposable Add(
 			this IBoardKey key,
 			double value,
-			in AddBoardContext context)
+			IBoard board)
+			=> key.Add(value, new AddBoardContext(board));
+		public static BlackboardKeyDisposable Add(
+			this IBoardKey key,
+			double value,
+			AddBoardContext context)
 		{
 			if (key is null
 				|| context._board is null
@@ -47,6 +52,8 @@ namespace BB
 
 			return context.Board.GetValue(key, context);
 		}
+		public static double Get(this IBoardKey key, IBoard board)
+			=> Get(key, new GetBoardContext(board));
 
 		public static double GetMultiplier(
 			this IBoardKey key,

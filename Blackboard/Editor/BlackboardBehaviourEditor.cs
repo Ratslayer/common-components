@@ -57,7 +57,7 @@ namespace BB
 
 			if (changedKey is not null)
 			{
-				changedKey.Add(diff, new(board));
+				changedKey.Add(diff, board);
 				board.FlushChanges();
 			}
 		}

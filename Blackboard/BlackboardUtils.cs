@@ -12,6 +12,7 @@ public static class BlackboardUtils
 		container.List<BoardResources>();
 		container.System<BoardResourceManager>();
 		container.Event<BoardResourceManager>();
+		container.Event<ResourceChangedEvent>();
 		if (initialValues is not null)
 			container.System<InitBlackboard>(initialValues);
 	}

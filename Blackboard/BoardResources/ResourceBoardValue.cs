@@ -28,7 +28,7 @@
 				foreach (var multiplierKey in ResourceKey.GainMultiplierKeys)
 					multipliedValue *= multiplierKey.GetMultiplier(new(Board));
 
-			var maxValue = ResourceKey.MaxValueKey.Get(new(Board));
+			var maxValue = ResourceKey.MaxValueKey.Get(Board);
 			Value = (Value + multipliedValue).Clamp(0, maxValue);
 
 			RaiseEvents(oldValue, Value);

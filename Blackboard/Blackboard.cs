@@ -31,7 +31,14 @@ namespace BB
 		}
 
 		public bool Has(IBoardKey key, out IBoardValueContainer wrapper)
-			=> _values.TryGetValue(key, out wrapper);
+		{
+			if (key is null)
+			{
+				wrapper = null;
+				return false;
+			}
+			return _values.TryGetValue(key, out wrapper);
+		}
 
 		public void FlushChanges()
 		{
