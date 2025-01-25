@@ -21,5 +21,7 @@ namespace BB
 			.WithKey(_key)
 			.WithMultiplier(_value)
 			.Add();
+		public static implicit operator bool(AbstractSerializedBoardValue<KeyType> value)
+			=> value.Key is not null && value.Value.NotZero();
 	}
 }
