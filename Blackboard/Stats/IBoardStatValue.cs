@@ -2,6 +2,6 @@
 {
 	public interface IBoardStatValue : IBoardValueContainer
 	{
-		void Add(in ConditionalBoardValue value, in AddBoardContext context);
+		//void Add(in ConditionalBoardValue value, in AddBoardContext context);
 	}
 }

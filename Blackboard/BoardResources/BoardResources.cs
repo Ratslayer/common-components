@@ -1,4 +1,4 @@
 ﻿namespace BB
 {
-	public sealed record BoardResources : ListVariable<BoardResources, IBoardResourceValue>;
+	public sealed record BoardResources : ListVariable<BoardResources, IBoardResourceKey>;
 }

@@ -3,22 +3,17 @@ using UnityEngine;
 namespace BB
 {
 	[Serializable]
-	public sealed class SerializedStatValue : AbstractSerializedBoardValue<Stat>, IBoardValueCondition
+	public sealed class SerializedStatValue : AbstractSerializedBoardValue<BoardStat>, IBoardValueCondition
 	{
 		[SerializeReference]
 		ISerializedValueCondition[] _conditions = { };
 
 		public override void Add(in AddBoardContext context)
 		{
-			var container = context._board.GetOrCreate(Key);
-			if (_conditions.IsNullOrEmpty() || container is not IBoardStatValue stat)
-			{
-				container.Add(Value, context);
-				return;
-			}
+			base.Add(context);
 
-			var conditionalValue = new ConditionalBoardValue(Key, Value, this);
-			stat.Add(conditionalValue, context);
+			var conditionalValue = new ConditionalBoardValue(context._board, Key, Value * context._value, this);
+			context._board.ConditionalValues.Add(conditionalValue);
 		}
 
 		public bool IsValid(in GetBoardContext context)

@@ -7,7 +7,7 @@ namespace BB
 	public sealed class BoardResource : BaseBoardKey, IBoardResourceKey
 	{
 		[SerializeField]
-		Stat _maxValue, _genValue;
+		BaseBoardKey _maxValue, _genValue;
 		[SerializeField]
 		BaseBoardKey[] _gainMultipliers;
 		public StyleSheet _style;
@@ -23,9 +23,8 @@ namespace BB
 			var resourceChanged = board.Entity.Require<IEvent<ResourceChangedEvent>>();
 			var result = new ResourceBoardValue(board, this, resourceChanged);
 			if (board.Entity.Has(out BoardResources resources))
-				resources.Add(result);
+				resources.Add(this);
 			return result;
 		}
-		public bool Has(IBoard board) => board.Has(this, out _);
 	}
 }

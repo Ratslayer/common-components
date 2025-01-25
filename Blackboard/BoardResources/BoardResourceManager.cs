@@ -10,15 +10,14 @@ namespace BB
 		void AfterSpawn()
 		{
 			foreach (var resc in Resources)
-				resc.SetToMax();
+				Board.SetToMax(resc);
 			Board.FlushChanges();
 		}
 		[OnUpdate]
 		void OnUpdate(UpdateTime time)
 		{
 			foreach (var resc in Resources)
-				if (Board.Has(resc.ResourceKey.GenRateKey, out var genRate))
-					resc.Add(genRate.GetValue(new(Board)) * time._delta, new(Board));
+				Board.AdvanceGeneration(resc, time._delta);
 		}
 	}
 }

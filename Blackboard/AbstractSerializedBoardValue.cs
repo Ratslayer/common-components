@@ -17,8 +17,9 @@ namespace BB
 		public KeyType Key => _key;
 		public double Value => _value;
 		public virtual void Add(in AddBoardContext context)
-		{
-			_key.Add(_value, context);
-		}
+			=> context
+			.WithKey(_key)
+			.WithMultiplier(_value)
+			.Add();
 	}
 }

@@ -6,9 +6,9 @@ namespace BB
 	{
 		public double Value { get; set; }
 		protected Entity Entity => Board.Entity;
-		public virtual void Add(double value, in AddBoardContext context)
-			=> Value += value * context._numStacks;
-		public virtual double GetValue(in GetBoardContext context)
+		public virtual void Add(in AddBoardContext context)
+			=> Value += context._value;
+		public virtual double Get(in GetBoardContext context)
 			=> Value;
 	}
 }

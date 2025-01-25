@@ -7,6 +7,6 @@ namespace BB.Serialized.Board.Conditions
 	public sealed class HasValue : BaseHasValue
 	{
 		protected override double GetValue(in GetBoardContext context)
-			=> _key.Get(context);
+			=> context.WithKey(_key).Apply();
 	}
 }

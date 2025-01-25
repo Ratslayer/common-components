@@ -17,7 +17,7 @@ namespace BB
 
 			var newKey = EditorGUILayout.ObjectField("Add new key", null, typeof(BaseBoardKey), false) as BaseBoardKey;
 			if (newKey)
-				board.GetOrCreate(newKey);
+				board.InitKey(newKey);
 
 			if (GUILayout.Button("Update Board"))
 				board.FlushChanges();
@@ -25,15 +25,15 @@ namespace BB
 			_searchString = EditorGUILayout.TextField("Search", _searchString)?.ToLower().Trim();
 			IBoardKey changedKey = default;
 			double diff = default;
-			foreach (var v in board.Values)
+			foreach (var key in board.Keys)
 			{
-				var name = v.Key.Name;
+				var name = key.Name;
 				//if there is a search string and name does not match it, skip field
 				if (!string.IsNullOrWhiteSpace(_searchString)
 					&& !name.ToLower().Contains(_searchString))
 					continue;
 				EditorGUILayout.BeginHorizontal();
-				if (v.Key is Object keyObj)
+				if (key is Object keyObj)
 				{
 					GUI.enabled = false;
 					EditorGUILayout.ObjectField(keyObj, typeof(UnityEngine.Object), false);
@@ -41,15 +41,13 @@ namespace BB
 				}
 				else EditorGUILayout.LabelField(name);
 				//draw editable field
-				if (v is IValue<double> value)
+				EditorGUI.BeginChangeCheck();
+				var value = board.Get(key);
+				var newValue = EditorGUILayout.DoubleField(value);
+				if (EditorGUI.EndChangeCheck())
 				{
-					EditorGUI.BeginChangeCheck();
-					var newValue = EditorGUILayout.DoubleField(value.Value);
-					if (EditorGUI.EndChangeCheck())
-					{
-						changedKey = v.Key;
-						diff = newValue - value.Value;
-					}
+					changedKey = key;
+					diff = newValue - value;
 				}
 
 				EditorGUILayout.EndHorizontal();
@@ -57,7 +55,7 @@ namespace BB
 
 			if (changedKey is not null)
 			{
-				changedKey.Add(diff, board);
+				board.Add(changedKey, diff);
 				board.FlushChanges();
 			}
 		}

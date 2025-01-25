@@ -1,15 +1,15 @@
-﻿using BB.Di;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 namespace BB
 {
 	public interface IBoard : IFlushable
 	{
 		Entity Entity { get; }
-		IBoardValueContainer GetOrCreate(IBoardKey key);
-		bool Has(IBoardKey key, out IBoardValueContainer wrapper);
-		double GetValue(IBoardKey key, in GetBoardContext context);
+		IConditionalBoardValues ConditionalValues { get; }
+		void Add(in AddBoardContext context);
+		double Get(in GetBoardContext context);
 		void AddProcessor(IBoardProcessor processor);
 		void RemoveProcessor(IBoardProcessor processor);
-		IEnumerable<IBoardValueContainer> Values { get; }
+		IEnumerable<IBoardKey> Keys { get; }
+		void InitKey(IBoardKey key);
 	}
 }

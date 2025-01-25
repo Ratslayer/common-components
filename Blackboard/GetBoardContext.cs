@@ -1,20 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-namespace BB
+﻿namespace BB
 {
 	public readonly struct GetBoardContext
 	{
-		public readonly IBoard Board;
-		public readonly IBoard TargetBoard;
+		public readonly IBoardKey _key;
+		public readonly IBoard _board, _targetBoard;
 
 		public GetBoardContext(
+			IBoardKey key,
 			IBoard board,
 			IBoard targetBoard = null)
 		{
-			Board = board;
-			TargetBoard = targetBoard;
+			_key = key;
+			_board = board;
+			_targetBoard = targetBoard;
 		}
-		public GetBoardContext Inverse()
-			=> new(TargetBoard, Board);
+
+		public static implicit operator bool(GetBoardContext context)
+			=> context._key is not null
+			&& context._board is not null;
 	}
 }

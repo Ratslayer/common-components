@@ -9,15 +9,24 @@ namespace BB
 	{
 		[SerializeField, ShowIf(nameof(_key))]
 		double _maxValue, _gainPerSecond;
-		public override void Add(in AddBoardContext context = default)
+		public override void Add(in AddBoardContext context)
 		{
 			if (!_key)
 				return;
 
-			_key.MaxValueKey.Add(_maxValue, context);
-			_key.GenRateKey.Add(_gainPerSecond, context);
-
 			base.Add(context);
+
+			context
+				.WithKey(_key.GenRateKey)
+				.WithMultiplier(_gainPerSecond)
+				.Add();
+
+			context
+				.WithKey(_key.MaxValueKey)
+				.WithMultiplier(_maxValue)
+				.Add();
+
+			
 		}
 	}
 	[Serializable]

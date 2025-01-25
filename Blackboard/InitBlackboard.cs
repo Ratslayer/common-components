@@ -1,11 +1,13 @@
 ﻿namespace BB
 {
-	public sealed record InitBlackboard(BoardValuesAsset Values) : EntitySystem
+	public sealed record InitBlackboard(
+		IBoard Board,
+		BoardValuesAsset Values) : EntitySystem
 	{
 		[OnSpawn]
 		void OnSpawn()
 		{
-			Values.Add(1, Entity);
+			Values.Add(new(Board, null, 1));
 		}
 	}
 }

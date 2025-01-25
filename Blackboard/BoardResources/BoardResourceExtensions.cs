@@ -2,10 +2,8 @@
 {
 	public static class BoardResourceExtensions
 	{
-		public static void SetToMax(this IBoardResourceValue value)
-			=> SetToMax(value.ResourceKey, value.Board);
-		public static void SetToMax(this IBoardResourceKey resc, IBoard board)
-			 => resc.Add(1e100, board);
+		public static void SetToMax(this IBoard board, IBoardResourceKey resc)
+			 => board.Add(resc, 1e100);
 		public static void TryAdd(this IBoardResourceValue resc, double value)
 			=> resc.ResourceKey.TryAdd(value, resc.Board);
 		public static bool TryAdd(this IBoardResourceKey resc, double value, IBoard board)
@@ -17,29 +15,29 @@
 				return true;
 
 
-			var currentValue = resc.Get(board);
+			var currentValue = board.Get(resc);
 
 			if (value < 0)
 			{
 				if (currentValue - value < 0)
 					return false;
-				resc.Add(value, board);
+				board.Add(resc, value);
 				return true;
 			}
 
-			var maxValue = resc.Get(board);
+			var maxValue = board.Get(resc);
 			if (maxValue < value + currentValue)
 				return false;
-			resc.Add(value, board);
+			board.Add(resc, value);
 			return true;
 		}
-		public static bool AdvanceGeneration(this IBoardResourceValue value, float deltaTime)
+		public static bool AdvanceGeneration(this IBoard board, IBoardResourceKey resc, float deltaTime)
 		{
-			var genStat = value.ResourceKey.GenRateKey.Get(value.Board);
+			var genStat = board.Get(resc.GenRateKey);
 			var genValue = genStat * deltaTime;
 			if (!genValue.IsZero())
 			{
-				value.ResourceKey.Add(genValue, value.Board);
+				board.Add(resc, genValue);
 				return true;
 			}
 			return false;

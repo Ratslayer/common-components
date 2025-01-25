@@ -5,8 +5,10 @@
 		public readonly IBoardKey _key;
 		public readonly double _value;
 		public readonly IBoardValueCondition _condition;
-		public ConditionalBoardValue(IBoardKey key, double value, IBoardValueCondition condition)
+		public readonly IBoard _board;
+		public ConditionalBoardValue(IBoard board, IBoardKey key, double value, IBoardValueCondition condition)
 		{
+			_board = board;
 			_key = key;
 			_value = value;
 			_condition = condition;

@@ -7,6 +7,7 @@ public static class BlackboardUtils
 		IBoardValuesProvider initialValues = null)
 	{
 		container.System<IBoard, Blackboard>();
+		container.System<IConditionalBoardValues, ConditionalBoardValues>();
 		container.Event<BoardChangedEvent>();
 		container.List<BoardTags>();
 		container.List<BoardResources>();

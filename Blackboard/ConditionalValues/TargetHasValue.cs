@@ -6,6 +6,6 @@ namespace BB.Serialized.Board.Conditions
 	public sealed class TargetHasValue : BaseHasValue
 	{
 		protected override double GetValue(in GetBoardContext context)
-			=> _key.Get(context.Inverse());
+			=> context.WithInversedTarget().Apply();
 	}
 }

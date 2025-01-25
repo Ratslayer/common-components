@@ -8,13 +8,13 @@
 		IBoardResourceValue
 	{
 
-		public override void Add(double value, in AddBoardContext context)
+		public override void Add(in AddBoardContext context)
 		{
-			if (value.IsZero() || context._numStacks <= 0)
+			if (!context)
 				return;
 
 			var oldValue = Value;
-			var additionalValue = value * context._numStacks;
+			var additionalValue = context._value;
 
 			if (additionalValue < 0)
 			{
@@ -26,9 +26,9 @@
 			var multipliedValue = additionalValue;
 			if (ResourceKey.GainMultiplierKeys is not null)
 				foreach (var multiplierKey in ResourceKey.GainMultiplierKeys)
-					multipliedValue *= multiplierKey.GetMultiplier(new(Board));
+					multipliedValue *= Board.GetMultiplier(multiplierKey);
 
-			var maxValue = ResourceKey.MaxValueKey.Get(Board);
+			var maxValue = Board.Get(ResourceKey.MaxValueKey);
 			Value = (Value + multipliedValue).Clamp(0, maxValue);
 
 			RaiseEvents(oldValue, Value);

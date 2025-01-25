@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace BB
 {
-	public sealed class Stat : BaseBoardKey, IBlackboardStatKey
+	public sealed class BoardStat : BaseBoardKey, IBlackboardStatKey
 	{
 		enum AdditionType
 		{

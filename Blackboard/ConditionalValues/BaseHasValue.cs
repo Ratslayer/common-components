@@ -23,3 +23,6 @@ namespace BB.Serialized.Board.Conditions
 		protected abstract double GetValue(in GetBoardContext context);
 	}
 }
+namespace BB
+{
+}

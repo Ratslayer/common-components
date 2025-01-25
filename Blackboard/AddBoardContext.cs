@@ -1,22 +1,26 @@
-﻿using BB.Di;
+﻿using UnityEngine.InputSystem;
 
 namespace BB
 {
 	public readonly struct AddBoardContext
 	{
-		public readonly double _numStacks;
 		public readonly IBoard _board;
-
+		public readonly IBoardKey _key;
+		public readonly double _value;
 		public AddBoardContext(
 			IBoard board,
-			double numStacks = 1)
+			IBoardKey key,
+			double value)
 		{
 			_board = board;
-			_numStacks = numStacks;
+			_key = key;
+			_value = value;
 		}
-		public static implicit operator AddBoardContext(in Entity entity)
-			=> new(entity.Get<IBoard>(), 1);
-		public AddBoardContext MultiplyStacks(double numStacks)
-			=> new(_board, _numStacks * numStacks);
+		public static implicit operator bool(AddBoardContext context)
+			=> context._board is not null
+			&& context._key is not null
+			&& context._value.NotZero();
+		public override string ToString()
+			=> $"{_value:N2} {_key} {_board}";
 	}
 }

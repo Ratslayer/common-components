@@ -1,13 +1,18 @@
 ﻿using System.Collections.Generic;
 namespace BB
 {
-	public sealed record Blackboard(IEvent<BoardChangedEvent> Changed) : EntitySystem, IBoard
+	public sealed record Blackboard(
+		IEvent<BoardChangedEvent> Changed,
+		IConditionalBoardValues ConditionalValues)
+		: EntitySystem, IBoard
 	{
 		[InjectFromParent]
 		readonly IBoard _parent;
 		readonly Dictionary<IBoardKey, IBoardValueContainer> _values = new();
 		readonly List<IBoardProcessor> _processors = new();
-		public IEnumerable<IBoardValueContainer> Values => _values.Values;
+
+		public IEnumerable<IBoardKey> Keys => _values.Keys;
+		public void InitKey(IBoardKey key) => GetOrCreate(key);
 		public void AddProcessor(IBoardProcessor processor) => _processors.Add(processor);
 		public void RemoveProcessor(IBoardProcessor processor) => _processors.Remove(processor);
 		public IBoardValueContainer GetOrCreate(IBoardKey key)
@@ -46,19 +51,89 @@ namespace BB
 				processor.Process(this);
 			Changed.Raise(new(this));
 		}
-
-		public double GetValue(IBoardKey key, in GetBoardContext context)
+		public double Get(in GetBoardContext context)
 		{
 			var result = 0d;
 
-			if (_values.TryGetValue(key, out var value))
-				result = key.AddValues(result, value.GetValue(context));
-			if (Entity.AttachedToEntity.Has(out IBoard board))
-				result = key.AddValues(result, board.GetValue(key, context));
-			else if (_parent is not null)
-				result = key.AddValues(result, _parent.GetValue(key, context));
+			//protection against circular dependencies
+			if (IncrementResolution("GetValue"))
+			{
+				try
+				{
+					GetResult(context);
+				}
+				finally
+				{
+					_isResolving = false;
+				}
+			}
+			else GetResult(context);
 
 			return result;
+
+			void GetResult(in GetBoardContext context)
+			{
+				var key = context._key;
+				if (_values.TryGetValue(key, out var value))
+					result = key.AddValues(result, value.Get(context));
+
+				if (Entity.AttachedToEntity.Has(out IBoard board))
+					result = key.AddValues(
+						result, 
+						board.Get(new(key, board, context._targetBoard)));
+				else if (_parent is not null)
+					result = key.AddValues(
+						result, 
+						_parent.Get(new(key, _parent, context._targetBoard)));
+			}
+		}
+
+		public void Add(in AddBoardContext context)
+		{
+			var key = context._key;
+			if (key is null)
+				return;
+
+			//protection against circular dependencies
+			if (IncrementResolution("AddValue"))
+			{
+				try
+				{
+					AddValue(context);
+				}
+				finally
+				{
+					_isResolving = false;
+				}
+			}
+			else AddValue(context);
+
+			void AddValue(in AddBoardContext context)
+			{
+				var container = GetOrCreate(key);
+				container.Add(context);
+			}
+		}
+		bool _isResolving;
+		int _resolutionCount;
+		const int MaxResolutionCount = 100;
+		bool IncrementResolution(string nameOfMethod)
+		{
+			if (_isResolving)
+			{
+				_resolutionCount++;
+				if (_resolutionCount > MaxResolutionCount)
+				{
+					_isResolving = false;
+					throw new System.Exception(
+						$"{Entity} board has reached {MaxResolutionCount} {nameOfMethod} calls. " +
+						$"It's prolly an infinite loop.");
+				}
+				return false;
+			}
+			_isResolving = true;
+			_resolutionCount = 0;
+			return true;
 		}
 	}
 }
