@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 namespace BB
 {
-	public interface IBoard : IFlushable
+	public interface IBoard : IAutoFlushable
 	{
 		Entity Entity { get; }
 		IConditionalBoardValues ConditionalValues { get; }

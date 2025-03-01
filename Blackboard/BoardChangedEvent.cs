@@ -1,4 +1,4 @@
 ﻿namespace BB
 {
-	public sealed record BoardChangedEvent(IBoard Board);
+	//public sealed record BoardChangedEvent(IBoard Board);
 }

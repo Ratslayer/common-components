@@ -4,7 +4,7 @@ namespace BB
 {
 	public static class CostUtils
 	{
-		
+
 		public static bool TrySpend(this ICost cost)
 		{
 			if (!cost.CanSpend())
@@ -41,6 +41,7 @@ namespace BB
 		public static TBuilder ModifyWith<TBuilder>(
 			this TBuilder builder,
 			IBuilderModifier<TBuilder> modifier)
+			where TBuilder : IBuilder
 		{
 			modifier?.Modify(builder);
 			return builder;

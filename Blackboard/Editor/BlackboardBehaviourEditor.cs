@@ -20,7 +20,7 @@ namespace BB
 				board.InitKey(newKey);
 
 			if (GUILayout.Button("Update Board"))
-				board.FlushChanges();
+				board.ForceFlushChanges();
 
 			_searchString = EditorGUILayout.TextField("Search", _searchString)?.ToLower().Trim();
 			IBoardKey changedKey = default;
@@ -42,7 +42,7 @@ namespace BB
 				else EditorGUILayout.LabelField(name);
 				//draw editable field
 				EditorGUI.BeginChangeCheck();
-				var value = board.Get(key);
+				var value = key.Get(board);
 				var newValue = EditorGUILayout.DoubleField(value);
 				if (EditorGUI.EndChangeCheck())
 				{
@@ -55,8 +55,8 @@ namespace BB
 
 			if (changedKey is not null)
 			{
-				board.Add(changedKey, diff);
-				board.FlushChanges();
+				changedKey.Add(board, diff);
+				board.ForceFlushChanges();
 			}
 		}
 	}

@@ -26,9 +26,9 @@
 			var multipliedValue = additionalValue;
 			if (ResourceKey.GainMultiplierKeys is not null)
 				foreach (var multiplierKey in ResourceKey.GainMultiplierKeys)
-					multipliedValue *= Board.GetMultiplier(multiplierKey);
+					multipliedValue *= multiplierKey.GetMultiplier(Board);
 
-			var maxValue = Board.Get(ResourceKey.MaxValueKey);
+			var maxValue = ResourceKey.MaxValueKey.Get(Board);
 			Value = (Value + multipliedValue).Clamp(0, maxValue);
 
 			RaiseEvents(oldValue, Value);
@@ -38,7 +38,7 @@
 			if (oldValue.Approximately(newValue))
 				return;
 			Changed.Raise(new(Board, ResourceKey, oldValue, newValue));
-			Board.FlushChanges();
+			Board.SetDirtyAndFlushChanges();
 		}
 	}
 }

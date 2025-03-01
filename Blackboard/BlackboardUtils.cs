@@ -8,12 +8,15 @@ public static class BlackboardUtils
 	{
 		container.System<IBoard, Blackboard>();
 		container.System<IConditionalBoardValues, ConditionalBoardValues>();
-		container.Event<BoardChangedEvent>();
+		container.Event<IBoard>();
+
 		container.List<BoardTags>();
+
 		container.List<BoardResources>();
-		container.System<BoardResourceManager>();
-		container.Event<BoardResourceManager>();
 		container.Event<ResourceChangedEvent>();
+		container.System<UpdateBoardResourceGeneration>();
+		container.System<UpdateBoardResourceOnMaxValueChange>();
+
 		if (initialValues is not null)
 			container.System<InitBlackboard>(initialValues);
 	}

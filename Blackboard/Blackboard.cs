@@ -2,7 +2,7 @@
 namespace BB
 {
 	public sealed record Blackboard(
-		IEvent<BoardChangedEvent> Changed,
+		IEvent<IBoard> Changed,
 		IConditionalBoardValues ConditionalValues)
 		: EntitySystem, IBoard
 	{
@@ -10,10 +10,18 @@ namespace BB
 		readonly IBoard _parent;
 		readonly Dictionary<IBoardKey, IBoardValueContainer> _values = new();
 		readonly List<IBoardProcessor> _processors = new();
-
+		public bool AutoFlushDisabled { get; set; }
 		public IEnumerable<IBoardKey> Keys => _values.Keys;
-		public void InitKey(IBoardKey key) => GetOrCreate(key);
-		public void AddProcessor(IBoardProcessor processor) => _processors.Add(processor);
+		public void InitKey(IBoardKey key)
+		{
+			GetOrCreate(key);
+			this.SetDirtyAndFlushChanges();
+		}
+		public void AddProcessor(IBoardProcessor processor)
+		{
+			_processors.Add(processor);
+			_processors.SortByPriority();
+		}
 		public void RemoveProcessor(IBoardProcessor processor) => _processors.Remove(processor);
 		public IBoardValueContainer GetOrCreate(IBoardKey key)
 		{
@@ -45,11 +53,12 @@ namespace BB
 			return _values.TryGetValue(key, out wrapper);
 		}
 
-		public void FlushChanges()
+		public void ForceFlushChanges()
 		{
+			using var _ = this.DisableAutoFlush();
 			foreach (var processor in _processors)
 				processor.Process(this);
-			Changed.Raise(new(this));
+			Changed.Raise(this);
 		}
 		public double Get(in GetBoardContext context)
 		{
@@ -79,11 +88,11 @@ namespace BB
 
 				if (Entity.AttachedToEntity.Has(out IBoard board))
 					result = key.AddValues(
-						result, 
+						result,
 						board.Get(new(key, board, context._targetBoard)));
 				else if (_parent is not null)
 					result = key.AddValues(
-						result, 
+						result,
 						_parent.Get(new(key, _parent, context._targetBoard)));
 			}
 		}
@@ -107,6 +116,8 @@ namespace BB
 				}
 			}
 			else AddValue(context);
+
+			this.SetDirtyAndFlushChanges();
 
 			void AddValue(in AddBoardContext context)
 			{
@@ -134,6 +145,13 @@ namespace BB
 			_isResolving = true;
 			_resolutionCount = 0;
 			return true;
+		}
+
+		[OnDespawn]
+		void OnDespawn()
+		{
+			_processors.Clear();
+			_values.DisposeAndClear();
 		}
 	}
 }

@@ -11,7 +11,7 @@
 				|| !context.Entity.Has(out IBoard board))
 				return false;
 
-			var value = board.Get(_key);
+			var value = _key.Get(board);
 			var result = value >= _value * context.Multiplier;
 			if (!result)
 				context.AddErrorMessage($"Not enough {_key.Name}");
@@ -25,7 +25,7 @@
 				|| !context.Entity.Has(out IBoard board))
 				return;
 
-			board.Add(_key, -_value * context.Multiplier);
+			_key.Add(board, -_value * context.Multiplier);
 		}
 		public override void Dispose()
 		{

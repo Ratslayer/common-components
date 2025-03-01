@@ -4,7 +4,9 @@ namespace BB
 {
 	public sealed class CostBuilder : ProtectedPooledObject<CostBuilder>, ICostBuilder, ICost
 	{
-		public ICostContext Context { get; set; }
+		public ICostContext Context => _context;
+
+		readonly CostContext _context = new();
 		readonly List<ICostComponent> _components = new();
 
 		public void AddComponent(ICostComponent component)
@@ -34,9 +36,13 @@ namespace BB
 		public static ICostBuilder Begin()
 		{
 			var result = GetPooledInternal();
-			result.Context = CostContext.GetPooled();
-			result.Context.Multiplier = 1;
 			return result;
+		}
+		public override void Dispose()
+		{
+			base.Dispose();
+			_context.Dispose();
+			_components.DisposeAndClear();
 		}
 	}
 }
