@@ -58,7 +58,7 @@ namespace BB
 			using var _ = this.DisableAutoFlush();
 			foreach (var processor in _processors)
 				processor.Process(this);
-			Changed.Raise(this);
+			Changed.Publish(this);
 		}
 		public double Get(in GetBoardContext context)
 		{

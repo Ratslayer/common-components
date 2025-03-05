@@ -87,7 +87,7 @@ namespace BB
 			{
 				InputActionState state = context.performed ? InputActionState.Performed
 					: context.started ? InputActionState.Began : InputActionState.Ended;
-				InputPublisher.Raise(new(Event, state));
+				InputPublisher.Publish(new(Event, state));
 
 			}
 		}
