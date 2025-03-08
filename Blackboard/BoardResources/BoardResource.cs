@@ -10,7 +10,6 @@ namespace BB
 		BaseBoardKey _maxValue, _genValue;
 		[SerializeField]
 		BaseBoardKey[] _gainMultipliers;
-		public StyleSheet _style;
 
 		public IBoardKey MaxValueKey => _maxValue;
 

@@ -18,8 +18,11 @@ namespace BB
 		string _key;
 		[SerializeField]
 		StringAsset _name, _description;
-		public string Key => _key;
 
+		[SerializeField]
+		BoardKeyColorScheme _colorScheme;
+		public string Key => _key;
+		public BoardKeyColorScheme ColorScheme => _colorScheme;
 		public string Name => _name.DefaultTo(name);
 
 		public string Desc => _description;
