@@ -13,6 +13,9 @@ namespace BB
 		SerializedResourceBoardValueWithStats[] _resources = { };
 
 		[SerializeField]
+		SerializedBoardValue[] _values = { };
+
+		[SerializeField]
 		BoardTag[] _tags = { };
 
 		[SerializeField]
@@ -22,6 +25,7 @@ namespace BB
 		{
 			Add(_stats, context);
 			Add(_resources, context);
+			Add(_values, context);
 			foreach (var tag in _tags)
 				context
 					.WithKey(tag)
@@ -32,7 +36,9 @@ namespace BB
 				if (asset)
 					asset.Add(context);
 
-			void Add(IEnumerable<ISerializedBoardValue> values, in AddBoardContext context)
+			static void Add(
+				IEnumerable<ISerializedBoardValue> values,
+				in AddBoardContext context)
 			{
 				foreach (var value in values)
 					value.Add(context);
