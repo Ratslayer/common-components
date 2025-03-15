@@ -11,5 +11,8 @@ namespace BB
 		void RemoveProcessor(IBoardProcessor processor);
 		IEnumerable<IBoardKey> Keys { get; }
 		void InitKey(IBoardKey key);
+
+		bool IsDirty(IBoardKey key);
+		IEnumerable<IBoardKey> DirtyKeys { get; }
 	}
 }

@@ -10,8 +10,12 @@ namespace BB
 		readonly IBoard _parent;
 		readonly Dictionary<IBoardKey, IBoardValueContainer> _values = new();
 		readonly List<IBoardProcessor> _processors = new();
+		readonly List<IBoardKey> _dirtyKeys = new();
+
 		public bool AutoFlushDisabled { get; set; }
 		public IEnumerable<IBoardKey> Keys => _values.Keys;
+		public IEnumerable<IBoardKey> DirtyKeys => _dirtyKeys;
+
 		public void InitKey(IBoardKey key)
 		{
 			GetOrCreate(key);
@@ -59,6 +63,7 @@ namespace BB
 			foreach (var processor in _processors)
 				processor.Process(this);
 			Changed.Publish(this);
+			_dirtyKeys.Clear();
 		}
 		public double Get(in GetBoardContext context)
 		{
@@ -117,6 +122,7 @@ namespace BB
 			}
 			else AddValue(context);
 
+			_dirtyKeys.Add(key);
 			this.SetDirtyAndFlushChanges();
 
 			void AddValue(in AddBoardContext context)
@@ -153,5 +159,8 @@ namespace BB
 			_processors.Clear();
 			_values.DisposeAndClear();
 		}
+
+		public bool IsDirty(IBoardKey key)
+			=> _dirtyKeys.Contains(key);
 	}
 }
