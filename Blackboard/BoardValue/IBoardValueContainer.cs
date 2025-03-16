@@ -12,7 +12,7 @@
 		double Get(in GetBoardContext context);
 		void Add(in AddBoardContext context);
 
-		double BaseValue { get; }
+		double Value { get; }
 		double PreviousValue { get; }
 		void FlushPreviousValue();
 	}

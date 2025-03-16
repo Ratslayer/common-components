@@ -13,13 +13,13 @@
 			if (!context)
 				return;
 
-			var oldValue = BaseValue;
+			var oldValue = Value;
 			var additionalValue = context._value;
 
 			if (additionalValue < 0)
 			{
-				BaseValue = (BaseValue + additionalValue).Min0();
-				RaiseEvents(oldValue, BaseValue);
+				Value = (Value + additionalValue).Min0();
+				RaiseEvents(oldValue, Value);
 				return;
 			}
 
@@ -29,9 +29,9 @@
 					multipliedValue *= multiplierKey.GetMultiplier(Board);
 
 			var maxValue = ResourceKey.MaxValueKey.Get(Board);
-			BaseValue = (BaseValue + multipliedValue).Clamp(0, maxValue);
+			Value = (Value + multipliedValue).Clamp(0, maxValue);
 
-			RaiseEvents(oldValue, BaseValue);
+			RaiseEvents(oldValue, Value);
 		}
 		void RaiseEvents(double oldValue, double newValue)
 		{

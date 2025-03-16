@@ -19,7 +19,7 @@ namespace BB
 		{
 			if (!_values.TryGetValue(key, out var container))
 				return 0;
-			var diff = container.BaseValue - container.PreviousValue;
+			var diff = container.Value - container.PreviousValue;
 			return diff;
 		}
 		public void InitKey(IBoardKey key)
