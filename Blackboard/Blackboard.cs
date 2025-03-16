@@ -15,7 +15,13 @@ namespace BB
 		public bool AutoFlushDisabled { get; set; }
 		public IEnumerable<IBoardKey> Keys => _values.Keys;
 		public IEnumerable<IBoardKey> DirtyKeys => _dirtyKeys;
-
+		public double GetChange(IBoardKey key)
+		{
+			if (!_values.TryGetValue(key, out var container))
+				return 0;
+			var diff = container.BaseValue - container.PreviousValue;
+			return diff;
+		}
 		public void InitKey(IBoardKey key)
 		{
 			GetOrCreate(key);
@@ -60,9 +66,15 @@ namespace BB
 		public void ForceFlushChanges()
 		{
 			using var _ = this.DisableAutoFlush();
+
 			foreach (var processor in _processors)
 				processor.Process(this);
+
 			Changed.Publish(this);
+
+			foreach (var key in _dirtyKeys)
+				if (_values.TryGetValue(key, out var container))
+					container.FlushPreviousValue();
 			_dirtyKeys.Clear();
 		}
 		public double Get(in GetBoardContext context)

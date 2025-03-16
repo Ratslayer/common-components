@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
 namespace BB
 {
-	public abstract class BaseBoardKey : AbstractKeyObject, IBoardKey
+	public abstract class BaseBoardKey
+		: AbstractKeyObject, IBoardKey, IBoardKeyDetails
 	{
 		public bool _addParentValues = true;
+		public Color _color = Color.white;
+		public Color Color => _color;
 
 		public virtual double AddValues(double v1, double v2)
 			=> v1 + v2;

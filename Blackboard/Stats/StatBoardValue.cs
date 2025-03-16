@@ -9,7 +9,7 @@ namespace BB
 		readonly List<ConditionalBoardValue> _values = new();
 		public override double Get(in GetBoardContext context)
 		{
-			var value = Value;
+			var value = BaseValue;
 			foreach (var bv in _values)
 				value += bv.GetValue(context);
 			return value;

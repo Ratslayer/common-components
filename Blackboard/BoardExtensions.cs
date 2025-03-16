@@ -4,6 +4,15 @@ namespace BB
 {
 	public static class BoardExtensions
 	{
+		public static bool IsDirty(
+			this IBoard board,
+			IBoardKey key,
+			out double change)
+		{
+			var changed = board.IsDirty(key);
+			change = board.GetChange(key);
+			return changed;
+		}
 		public static AddBoardContext Add(this IBoardKey key, IBoard board, double value)
 		{
 			var context = new AddBoardContext(board, key, value);

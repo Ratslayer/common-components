@@ -5,7 +5,7 @@ namespace BB
 	public abstract record BaseBoardValue(IBoardKey Key, IBoard Board) : IBoardValueContainer, IValue<double>
 	{
 		double _value;
-		public double Value
+		public double BaseValue
 		{
 			get => _value;
 			set
@@ -19,10 +19,15 @@ namespace BB
 				_value = value;
 			}
 		}
+		public double PreviousValue { get; private set; }
+		public void FlushPreviousValue()
+		{
+			PreviousValue = BaseValue;
+		}
 		protected Entity Entity => Board.Entity;
 		public virtual void Add(in AddBoardContext context)
-			=> Value += context._value;
+			=> BaseValue += context._value;
 		public virtual double Get(in GetBoardContext context)
-			=> Value;
+			=> BaseValue;
 	}
 }

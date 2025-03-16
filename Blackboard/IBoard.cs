@@ -14,5 +14,6 @@ namespace BB
 
 		bool IsDirty(IBoardKey key);
 		IEnumerable<IBoardKey> DirtyKeys { get; }
+		double GetChange(IBoardKey key);
 	}
 }

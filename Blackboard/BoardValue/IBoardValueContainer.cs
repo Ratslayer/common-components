@@ -11,6 +11,10 @@
 		IBoardKey Key { get; }
 		double Get(in GetBoardContext context);
 		void Add(in AddBoardContext context);
+
+		double BaseValue { get; }
+		double PreviousValue { get; }
+		void FlushPreviousValue();
 	}
 	public static class IBoardValueContainerExtensions
 	{
