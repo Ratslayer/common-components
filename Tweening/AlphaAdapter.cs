@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace BB
 {
-	public readonly struct AlphaProvider
+	public readonly struct AlphaAdapter
 	{
 		public enum ProviderType
 		{
@@ -12,14 +12,14 @@ namespace BB
 		}
 		public readonly Object _object;
 		public readonly ProviderType _type;
-		public AlphaProvider(Object obj, ProviderType type)
+		public AlphaAdapter(Object obj, ProviderType type)
 		{
 			_object = obj;
 			_type = type;
 		}
-		public static implicit operator AlphaProvider(CanvasGroup group)
+		public static implicit operator AlphaAdapter(CanvasGroup group)
 			=> new(group, ProviderType.CanvasGroup);
-		public static implicit operator AlphaProvider(TextMeshProUGUI tmp)
+		public static implicit operator AlphaAdapter(TextMeshProUGUI tmp)
 			=> new(tmp, ProviderType.TextMeshProUGUI);
 		public float Alpha
 		{
