@@ -4,6 +4,15 @@ namespace BB
 {
 	public static class TweenExtensions
 	{
+		public static Tween LinkToEntity(
+			this Tween tween,
+			Entity entity)
+		{
+			var linkComponent = LinkToEntityTweenComponent.GetPooled();
+			linkComponent._entity = entity;
+			linkComponent.Bind(tween);
+			return tween;
+		}
 		public static Tween Apply(this Tween tween, ITweenCurve curve)
 		{
 			curve.Apply(tween);
