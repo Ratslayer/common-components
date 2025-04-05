@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using BB.Di;
+using UnityEngine;
 namespace BB
 {
 	public readonly struct TransformAdapter
@@ -12,5 +13,9 @@ namespace BB
 			=> new(component.transform);
 		public static implicit operator TransformAdapter(Root root)
 			=> new(root.Transform);
+		public static implicit operator TransformAdapter(Entity entity)
+			=> new(entity.Root);
+		public static implicit operator bool(TransformAdapter adapter)
+			=> adapter._transform;
 	}
 }
