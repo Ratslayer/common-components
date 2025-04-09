@@ -40,5 +40,17 @@ namespace BB
 				alpha,
 				curve.Duration)
 			.Apply(curve);
+
+		public static Tween RotateForward(
+			this ITweenCurve curve,
+			in TransformAdapter transform,
+			Vector3 dir)
+		{
+			var t = transform._transform;
+			var rotation = Quaternion.LookRotation(dir);
+			return t
+				.DORotateQuaternion(rotation, curve.Duration)
+				.Apply(curve);
+		}
 	}
 }

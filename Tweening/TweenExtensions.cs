@@ -34,5 +34,7 @@ namespace BB
 			=> root.Transform
 			.DOMove(position, curve.Duration)
 			.Apply(curve);
+
+		public static void Forget(this Tween _) { }
 	}
 }
