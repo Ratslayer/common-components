@@ -5,5 +5,6 @@ namespace BB
 	{
 		public UnityEngine.InputSystem.InputActionAsset _inputSystemAsset;
 		public List<InputActionWrapperAsset> _actions = new();
+		public InputActionWrapperAsset _tap, _showTree;
 	}
 }

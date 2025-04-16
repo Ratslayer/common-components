@@ -1,14 +1,19 @@
-﻿using System.Numerics;
-
-public readonly struct InputEvent
+﻿public readonly struct InputEvent
 {
 	public readonly InputActionWrapperAsset _action;
 	public readonly InputActionState _state;
 	public InputEvent(
-		InputActionWrapperAsset e, 
+		InputActionWrapperAsset e,
 		InputActionState s)
 	{
 		_action = e;
 		_state = s;
 	}
+
+	public bool Performed(InputActionWrapperAsset action)
+		=> Is(action, InputActionState.Performed);
+	public bool Is(
+		InputActionWrapperAsset action, 
+		InputActionState state)
+		=> _action == action && _state == state;
 }
