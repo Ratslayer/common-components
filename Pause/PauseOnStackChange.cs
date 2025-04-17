@@ -7,7 +7,7 @@ namespace BB
 		[OnEvent]
 		void OnPauseChange(Paused paused)
 		{
-			Time.timeScale = paused.Value ? 0 : 1;
+			Time.timeScale = paused ? 0 : 1;
 		}
 	}
 }
