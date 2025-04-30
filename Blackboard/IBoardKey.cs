@@ -7,9 +7,11 @@ namespace BB
 		string Name { get; }
 		IBoardValueContainer CreateValue(IBoard board);
 		double AddValues(double v1, double v2);
+		double GetMinValue(IBoard board);
+		double GetMaxValue(IBoard board);
 	}
 	public interface IBoardKeyDetails
 	{
-		Color Color { get; }
+		IBoardKeyColorScheme ColorScheme { get; }
 	}
 }
