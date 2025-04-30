@@ -47,5 +47,17 @@ namespace BB
 					value.Add(context);
 			}
 		}
+		public IEnumerable<(BaseBoardKey, double)> GetAllValues()
+		{
+			foreach (var value in _values)
+				if (value)
+					yield return (value.Key, value.Value);
+			foreach (var value in _resources)
+				if (value)
+					yield return (value.Key, value.Value);
+			foreach (var value in _stats)
+				if (value)
+					yield return (value.Key, value.Value);
+		}
 	}
 }

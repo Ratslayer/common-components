@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace BB
 {
-	public sealed class BoardBuff : BaseBoardKey
+	public class BoardBuff : BaseBoardKey
 	{
 		[SerializeField]
-		SerializedBoardValues _values = new();
+		protected SerializedBoardValues _values = new();
 		public override IBoardValueContainer CreateValue(IBoard board)
 			=> new BoardValue(this, board);
 		sealed record BoardValue(BoardBuff Buff, IBoard Board)

@@ -20,15 +20,15 @@ namespace BB
 			return _type switch
 			{
 				SerializedValueType.Random => GetRandom(_minValue, _maxValue),
-				SerializedValueType.Asset => Convert(GetValueInternal(entity)),
+				SerializedValueType.Asset => Convert(GetEntityValue(entity)),
 				_ => _minValue,
 			};
 		}
 		protected abstract TValue GetRandom(TValue min, TValue max);
 		protected abstract TValue Convert(double value);
-		protected double GetValueInternal(Entity entity)
+		protected double GetEntityValue(Entity entity)
 		{
-			return 0;
+			return _asset.GetValue(entity);
 		}
 
 		#region UI

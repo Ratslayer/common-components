@@ -9,20 +9,19 @@ namespace BB
 		IGameActionFailure,
 		IGameActionSuccess
 	{
-
 		public bool CanExecute(GameActionContext context)
 		{
 			if (!_key)
 				return true;
 			if (!context.Entity.Has(out IBoard board))
 				return false;
-			return _key.CanAdd(board, _value);
+			return _key.CanAdd(board, GetValue(context.Entity));
 		}
 
 		public void ExecuteFailure(GameActionContext context)
 		{
 			if (!_key
-				|| _value.GreaterThanOrEquals(0)
+				|| GetValue(context.Entity).GreaterThanOrEquals(0)
 				|| !context.Entity.Has(out GameMessageBuffer messageBuffer, out UiConfig config))
 				return;
 
@@ -41,32 +40,38 @@ namespace BB
 			if (!_key || !context.Entity.Has(out IBoard board))
 				return;
 
-			_key.Add(board, _value);
+			_key.Add(board, GetValue(context.Entity));
 		}
 	}
 	public abstract class AbstractBoardValueAction<TSelf> : ProtectedPooledObject<TSelf>, IGameAction
 		where TSelf : AbstractBoardValueAction<TSelf>, new()
 	{
 		protected BaseBoardKey _key;
-		protected double _value;
-		public static TSelf GetPooled(BaseBoardKey key, double value)
+		double _value;
+		EntityExpression _expression;
+		public static TSelf GetPooled(BaseBoardKey key, double value, EntityExpression expression = null)
 		{
 			var result = GetPooledInternal();
 			result._key = key;
 			result._value = value;
+			result._expression = expression;
 			return result;
 		}
+		protected double GetValue(Entity entity)
+			=> _value * _expression?.GetValue(entity) ?? 1;
 	}
 	[Serializable]
 	public sealed class SerializedBoardValueCost : IFactory<IGameAction>
 	{
-		[SerializeField] SerializedBoardValue[] _values = { };
+		public BaseBoardKey _key;
+		public EntityExpression _expression = new();
 		public IGameAction Create()
 		{
-			var result = GameAction.GetPooled();
-			foreach (var value in _values)
-				result.Add(AddBoardValueAction.GetPooled(value.Key, -value.Value));
+			var result = GameAction.GetPooled()
+				.Add(AddBoardValueAction.GetPooled(_key, -1, _expression));
 			return result;
 		}
+		public double GetValue(Entity entity)
+			=> _expression.GetValue(entity);
 	}
 }
