@@ -28,6 +28,8 @@ namespace BB
 		bool ShowValue => _type == Type.Const;
 		bool ShowKey => _type == Type.Key;
 
+		public BaseBoardKey Key => ShowKey ? _key : null;
+
 	}
 	public abstract class BaseBoardKey
 		: AbstractKeyObject, IBoardKey, IBoardKeyDetails
@@ -45,7 +47,7 @@ namespace BB
 			=> _max.GetValue(board);
 
 		public double GetMinValue(IBoard board)
-			=>_min.GetValue(board);
+			=> _min.GetValue(board);
 
 		public override double GetValue(Entity entity)
 			=> this.Get(entity);

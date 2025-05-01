@@ -7,11 +7,11 @@ namespace BB
 	public sealed class BoardResource : BaseBoardKey, IBoardResourceKey
 	{
 		[SerializeField]
-		BaseBoardKey _maxValue, _genValue;
+		BaseBoardKey _genValue;
 		[SerializeField]
 		BaseBoardKey[] _gainMultipliers;
 
-		public IBoardKey MaxValueKey => _maxValue;
+		public IBoardKey MaxValueKey => _max.Key;
 
 		public IEnumerable<IBoardKey> GainMultiplierKeys => _gainMultipliers;
 

@@ -130,5 +130,9 @@ namespace BB
 					Data = message
 				});
 		}
+		public static GameAction AddBoardValue(this GameAction action, BaseBoardKey key, double value)
+			=> action.Add(AddConstBoardValueAction.GetPooled(key, value));
+		public static GameAction AddBoardValue(this GameAction action, BaseBoardKey key, BaseBoardKey otherKey, double multiplier = 1)
+			=> action.Add(AddOtherBoardValueAction.GetPooled(key, otherKey, multiplier));
 	}
 }

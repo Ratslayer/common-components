@@ -1,14 +1,67 @@
-﻿using System;
+﻿using Flee.PublicTypes;
+using System;
+using System.Linq.Expressions;
 using UnityEngine;
 
 namespace BB
 {
 	public sealed record GameMessageBuffer : ListVariable<GameMessageBuffer, TextData>;
-	public sealed class AddBoardValueAction : AbstractBoardValueAction<AddBoardValueAction>,
+	public sealed class AddConstBoardValueAction : AbstractAddBoardValueAction<AddConstBoardValueAction>
+	{
+		double _value;
+		public static AddConstBoardValueAction GetPooled(BaseBoardKey key, double value)
+		{
+			var result = GetPooledInternal();
+			result._key = key;
+			result._value = value;
+			return result;
+		}
+		protected override double GetValue(Entity entity)
+			=> _value;
+	}
+	public sealed class AddOtherBoardValueAction : AbstractAddBoardValueAction<AddOtherBoardValueAction>
+	{
+		double _multiplier;
+		BaseBoardKey _addedKey;
+		public static AddOtherBoardValueAction GetPooled(BaseBoardKey key, BaseBoardKey addedKey, double multiplier = 1)
+		{
+			var result = GetPooledInternal();
+			result._key = key;
+			result._multiplier = multiplier;
+			result._addedKey = addedKey;
+			return result;
+		}
+		protected override double GetValue(Entity entity)
+			=> _addedKey.Get(entity) * _multiplier;
+	}
+	public sealed class AddExpressionBoardValueAction : AbstractAddBoardValueAction<AddExpressionBoardValueAction>
+	{
+		EntityExpression _expression;
+		double _multiplier;
+		public static AddExpressionBoardValueAction GetPooled(
+			BaseBoardKey key,
+			EntityExpression expression,
+			double multiplier = 1)
+		{
+			var result = GetPooledInternal();
+			result._key = key;
+			result._expression = expression;
+			result._multiplier = multiplier;
+			return result;
+		}
+		protected override double GetValue(Entity entity)
+			=> _expression.GetValue(entity) * _multiplier;
+	}
+	public abstract class AbstractAddBoardValueAction<TSelf> : ProtectedPooledObject<TSelf>,
 		IGameActionCondition,
 		IGameActionFailure,
 		IGameActionSuccess
+		where TSelf : AbstractAddBoardValueAction<TSelf>, new()
 	{
+		protected BaseBoardKey _key;
+
+		protected abstract double GetValue(Entity entity);
+
 		public bool CanExecute(GameActionContext context)
 		{
 			if (!_key)
@@ -22,7 +75,7 @@ namespace BB
 		{
 			if (!_key
 				|| GetValue(context.Entity).GreaterThanOrEquals(0)
-				|| !context.Entity.Has(out GameMessageBuffer messageBuffer, out UiConfig config))
+				|| !context.Entity.Has(out UiConfig config))
 				return;
 
 			var data = new TextData
@@ -32,9 +85,8 @@ namespace BB
 				FontSize = config._gameMessageFontSize
 			};
 
-			messageBuffer.Add(data);
+			context.Messages.Add(data);
 		}
-
 		public void ExecuteSuccess(GameActionContext context)
 		{
 			if (!_key || !context.Entity.Has(out IBoard board))
@@ -42,23 +94,6 @@ namespace BB
 
 			_key.Add(board, GetValue(context.Entity));
 		}
-	}
-	public abstract class AbstractBoardValueAction<TSelf> : ProtectedPooledObject<TSelf>, IGameAction
-		where TSelf : AbstractBoardValueAction<TSelf>, new()
-	{
-		protected BaseBoardKey _key;
-		double _value;
-		EntityExpression _expression;
-		public static TSelf GetPooled(BaseBoardKey key, double value, EntityExpression expression = null)
-		{
-			var result = GetPooledInternal();
-			result._key = key;
-			result._value = value;
-			result._expression = expression;
-			return result;
-		}
-		protected double GetValue(Entity entity)
-			=> _value * _expression?.GetValue(entity) ?? 1;
 	}
 	[Serializable]
 	public sealed class SerializedBoardValueCost : IFactory<IGameAction>
@@ -68,7 +103,7 @@ namespace BB
 		public IGameAction Create()
 		{
 			var result = GameAction.GetPooled()
-				.Add(AddBoardValueAction.GetPooled(_key, -1, _expression));
+				.Add(AddExpressionBoardValueAction.GetPooled(_key, _expression, -1));
 			return result;
 		}
 		public double GetValue(Entity entity)
