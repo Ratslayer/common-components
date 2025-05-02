@@ -1,6 +1,4 @@
 ﻿using DG.Tweening;
-using DG.Tweening.Core;
-using DG.Tweening.Plugins.Options;
 namespace BB
 {
 	public interface ITweenCurve
