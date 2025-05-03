@@ -174,5 +174,11 @@ namespace BB
 
 		public bool IsDirty(IBoardKey key)
 			=> _dirtyKeys.Contains(key);
+
+		public void Set(IBoardKey key, double value)
+		{
+			var container = GetOrCreate(key);
+			container.Set(value);
+		}
 	}
 }

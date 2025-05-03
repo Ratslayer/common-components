@@ -13,6 +13,12 @@ namespace BB
 			change = board.GetChange(key);
 			return changed;
 		}
+		public static void Set(this IBoardKey key, IBoard board, double value)
+		{
+			if (key is null || board is null)
+				return;
+			board.Set(key, value);
+		}
 		public static AddBoardContext Add(this IBoardKey key, IBoard board, double value)
 		{
 			var context = new AddBoardContext(board, key, value);

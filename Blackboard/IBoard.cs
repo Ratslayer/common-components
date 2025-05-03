@@ -7,6 +7,7 @@ namespace BB
 		IConditionalBoardValues ConditionalValues { get; }
 		void Add(in AddBoardContext context);
 		double Get(in GetBoardContext context);
+		void Set(IBoardKey key, double value);
 		void AddProcessor(IBoardProcessor processor);
 		void RemoveProcessor(IBoardProcessor processor);
 		IEnumerable<IBoardKey> Keys { get; }

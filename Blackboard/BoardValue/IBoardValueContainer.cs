@@ -11,7 +11,7 @@
 		IBoardKey Key { get; }
 		double Get(in GetBoardContext context);
 		void Add(in AddBoardContext context);
-
+		void Set(double value);
 		double Value { get; }
 		double PreviousValue { get; }
 		void FlushPreviousValue();

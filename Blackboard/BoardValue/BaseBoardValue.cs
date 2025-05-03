@@ -29,5 +29,8 @@ namespace BB
 			=> Value += context._value;
 		public virtual double Get(in GetBoardContext context)
 			=> Value;
+
+		public void Set(double value)
+			=> Value = value;
 	}
 }
