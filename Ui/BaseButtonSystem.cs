@@ -1,4 +1,5 @@
-﻿using UnityEngine.UI;
+﻿using Cysharp.Threading.Tasks;
+using UnityEngine.UI;
 
 namespace BB
 {
@@ -11,5 +12,14 @@ namespace BB
 
 		[OnDespawn]
 		void OnDespawn() => Button.onClick.RemoveListener(OnButtonClick);
+
+		protected void ShowButton()
+		{
+			Button.gameObject.SetActive(true);
+		}
+		protected void HideButton()
+		{
+			Button.gameObject.SetActive(false);
+		}
 	}
 }

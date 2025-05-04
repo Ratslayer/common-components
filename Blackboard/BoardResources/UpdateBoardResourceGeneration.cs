@@ -36,7 +36,7 @@ namespace BB
 
 				if(!oldMaxValue.IsPositive())
 				{
-					resc.SetToMax(Board);
+					resc.SetToMaxValue(Board);
 					continue;
 				}
 

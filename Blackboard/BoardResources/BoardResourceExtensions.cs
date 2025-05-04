@@ -2,21 +2,33 @@
 {
 	public static class BoardResourceExtensions
 	{
-		public static void SetToMax(this IBoardResourceKey resc, IBoard board)
+		public static void SetToMaxValue(this IBoardKey resc, IBoard board)
 			 => resc.Add(board, 1e100);
-		public static void AddMaxAndFill(this IBoardResourceKey resc, IBoard board, double value)
+		public static void AddToMaxValue(this IBoardKey key, IBoard board, double value)
 		{
-			resc.MaxValueKey.Add(board, value);
-			resc.SetToMax(board);
+			if (key is IBoardKeyDetails d
+				&& d.HasMaxKey(out var max))
+				max.Add(board, value);
 		}
-		public static double GetFraction(this IBoardResourceKey resc, IBoard board)
+		public static void AddToMaxValueAndFill(this IBoardKey resc, IBoard board, double value)
+		{
+			resc.AddToMaxValue(board, value);
+			resc.SetToMaxValue(board);
+		}
+		public static bool IsAtMaxValue(this IBoardKey key, IBoard board)
+		{
+			var value = key.Get(board);
+			var maxValue = key.GetMaxValue(board);
+			return value.Approximately(maxValue);
+		}
+		public static double GetFraction(this IBoardKey resc, IBoard board)
 		{
 			if (resc is null)
 				return 0;
 
-			var maxValue = resc.MaxValueKey.Get(board);
+			var maxValue = resc.GetMaxValue(board);
 			if (maxValue.IsZero())
-				return 0;
+				return 1;
 
 			var value = resc.Get(board);
 			return value / maxValue;

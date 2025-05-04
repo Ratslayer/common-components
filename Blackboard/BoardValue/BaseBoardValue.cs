@@ -2,7 +2,8 @@
 
 namespace BB
 {
-	public abstract record BaseBoardValue(IBoardKey Key, IBoard Board) : IBoardValueContainer, IValue<double>
+	public abstract record BaseBoardValue(IBoardKey Key, IBoard Board) 
+		: IBoardValueContainer, IValue<double>
 	{
 		double _value;
 		public double Value

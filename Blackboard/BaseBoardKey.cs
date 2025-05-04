@@ -11,12 +11,12 @@ namespace BB
 			Const = 0,
 			Key = 1
 		}
-		[SerializeField, HorizontalGroup, HideLabel]
-		Type _type;
-		[SerializeField, HorizontalGroup, HideLabel, ShowIf(nameof(ShowValue))]
-		double _value;
-		[SerializeField, HorizontalGroup, HideLabel, ShowIf(nameof(ShowKey))]
-		BaseBoardKey _key;
+		[HorizontalGroup, HideLabel]
+		public Type _type;
+		[HorizontalGroup, HideLabel, ShowIf(nameof(ShowValue))]
+		public double _value;
+		[HorizontalGroup, HideLabel, ShowIf(nameof(ShowKey))]
+		public BaseBoardKey _key;
 		public double GetValue(IBoard board)
 			=> _type switch
 			{
@@ -29,7 +29,6 @@ namespace BB
 		bool ShowKey => _type == Type.Key;
 
 		public BaseBoardKey Key => ShowKey ? _key : null;
-
 	}
 	public abstract class BaseBoardKey
 		: AbstractKeyObject, IBoardKey, IBoardKeyDetails
@@ -51,6 +50,18 @@ namespace BB
 
 		public override double GetValue(Entity entity)
 			=> this.Get(entity);
+
+		public bool HasMaxKey(out IBoardKey key)
+		{
+			key = _max.Key;
+			return _max._type == BoardValueGetter.Type.Key;
+		}
+
+		public bool HasMinKey(out IBoardKey key)
+		{
+			key = _min.Key;
+			return _min._type == BoardValueGetter.Type.Key;
+		}
 	}
 	public abstract class AbstractKeyObject
 		: EntityValueGetterAsset, INameDesc

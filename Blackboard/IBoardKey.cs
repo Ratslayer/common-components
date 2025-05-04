@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace BB
+﻿namespace BB
 {
 	public interface IBoardKey
 	{
@@ -13,5 +11,7 @@ namespace BB
 	public interface IBoardKeyDetails
 	{
 		IBoardKeyColorScheme ColorScheme { get; }
+		bool HasMaxKey(out IBoardKey key);
+		bool HasMinKey(out IBoardKey key);
 	}
 }
