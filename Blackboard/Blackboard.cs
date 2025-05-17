@@ -134,7 +134,7 @@ namespace BB
 			}
 			else AddValue(context);
 
-			_dirtyKeys.Add(key);
+			_dirtyKeys.AddUnique(key);
 			this.SetDirtyAndFlushChanges();
 
 			void AddValue(in AddBoardContext context)
@@ -170,6 +170,7 @@ namespace BB
 		{
 			_processors.Clear();
 			_values.DisposeAndClear();
+			_dirtyKeys.Clear();
 		}
 
 		public bool IsDirty(IBoardKey key)

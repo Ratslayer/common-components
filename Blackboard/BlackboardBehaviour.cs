@@ -9,7 +9,7 @@ namespace BB
 		public override void Install(IDiContainer container)
 		{
 			base.Install(container);
-			BlackboardUtils.InstallBlackboard(container, _values);
+			BlackboardUtils.BindBlackboard(container, _values);
 		}
 	}
 }

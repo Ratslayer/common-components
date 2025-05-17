@@ -38,7 +38,6 @@
 			if (oldValue.Approximately(newValue))
 				return;
 			Changed.Publish(new(Board, ResourceKey, oldValue, newValue));
-			Board.SetDirtyAndFlushChanges();
 		}
 	}
 }

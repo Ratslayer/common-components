@@ -2,8 +2,8 @@
 using BB.Di;
 public static class BlackboardUtils
 {
-	public static void InstallBlackboard(
-		IDiContainer container,
+	public static void BindBlackboard(
+		this IDiContainer container,
 		IBoardValuesProvider initialValues = null)
 	{
 		container.System<IBoard, Blackboard>();

@@ -19,7 +19,11 @@ namespace BB
 		: BoardResourceProcessorSystem(Board)
 	{
 		readonly Dictionary<IBoardResourceKey, double> _lastMaxValues = new();
-
+		[OnDespawn]
+		void OnDespawn()
+		{
+			_lastMaxValues.Clear();
+		}
 		public override void Process(IBoard board)
 		{
 			foreach (var resc in Config._resources)
