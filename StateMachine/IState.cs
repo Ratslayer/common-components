@@ -18,7 +18,7 @@ namespace BB
 	{
 		IState CurrentState { get; }
 		Entity Entity { get; }
-		void EnterState(IState state);
+		EnteredStateDisposable EnterState(IState state);
 		void ExitState(IState state);
 		void AddStateEntity(Entity entity);
 	}
@@ -27,11 +27,20 @@ namespace BB
 		public IState CurrentState => _states.LastOrDefault();
 		readonly List<IState> _states = new();
 		readonly List<Entity> _stateEntities = new();
-		public void EnterState(IState state)
+		public EnteredStateDisposable EnterState(IState state)
 		{
+			state = state.NullIfDestroyedUnityEngineObject();
+			if (state is null)
+				return new();
+
+			if (state == CurrentState)
+				return new();
+
 			ExitCurrentState();
 			_states.Add(state);
 			EnterCurrentState();
+
+			return new(this, state);
 		}
 
 		public void ExitState(IState state)
@@ -85,8 +94,7 @@ namespace BB
 				|| !entity.Has(out IStateMachine machine))
 				return default;
 
-			machine.EnterState(state);
-			return new(machine, state);
+			return machine.EnterState(state);
 		}
 	}
 	public readonly struct EnteredStateDisposable : IDisposable
