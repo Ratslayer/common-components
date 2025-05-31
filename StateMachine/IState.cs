@@ -1,4 +1,5 @@
 ﻿using BB.Di;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -57,10 +58,10 @@ namespace BB
 		}
 		void ExitCurrentState()
 		{
+			_stateEntities.DespawnAndClear();
 			if (CurrentState is not IStateOnExit exit)
 				return;
 			exit.ExitState(this);
-			_stateEntities.DespawnAndClear();
 		}
 		void EnterCurrentState()
 		{
@@ -77,12 +78,30 @@ namespace BB
 				.Inject()
 				.Lazy();
 		}
-		public static void EnterState(this Entity entity, IState state)
+		public static EnteredStateDisposable EnterState(this Entity entity, IState state)
 		{
-			if (state is null || state is UnityEngine.Object obj && !obj)
-				return;
-			if (entity.Has(out IStateMachine machine))
-				machine.EnterState(state);
+			if (state is null
+				|| state is UnityEngine.Object obj && !obj
+				|| !entity.Has(out IStateMachine machine))
+				return default;
+
+			machine.EnterState(state);
+			return new(machine, state);
+		}
+	}
+	public readonly struct EnteredStateDisposable : IDisposable
+	{
+		readonly IStateMachine _machine;
+		readonly IState _state;
+		public EnteredStateDisposable(IStateMachine machine, IState state)
+		{
+			_machine = machine;
+			_state = state;
+		}
+
+		public void Dispose()
+		{
+			_machine?.ExitState(_state);
 		}
 	}
 
