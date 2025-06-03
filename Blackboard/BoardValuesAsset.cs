@@ -10,12 +10,12 @@ namespace BB
 		public void Add(in AddBoardContext context)
 			=> _values.Add(context);
 
-		public override void Apply(Entity target, IStateMachine machine)
+		public override void Apply(Entity target, IStateData data)
 		{
 			if (target.Has(out IBoard board))
 				_values.Add(new(board, null, 1));
 		}
-		public override void Unapply(Entity target, IStateMachine machine)
+		public override void Unapply(Entity target, IStateData data)
 		{
 			if (target.Has(out IBoard board))
 				_values.Add(new(board, null, -1));

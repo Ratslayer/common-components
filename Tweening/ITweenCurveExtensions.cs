@@ -1,4 +1,6 @@
-﻿using DG.Tweening;
+﻿using Cysharp.Threading.Tasks;
+using DG.Tweening;
+using System.Threading;
 using UnityEngine;
 namespace BB
 {
@@ -32,6 +34,9 @@ namespace BB
 				transform._transform.position + offset,
 				curve.Duration)
 			.Apply(curve);
+		public static UniTask MoveAdd(
+			this ITweenCurve curve, in TransformAdapter transform, Vector3 offset, CancellationToken ct)
+			=> curve.MoveAdd(transform, offset).ToUniTask(ct);
 		public static Tween Alpha(
 			this ITweenCurve curve, AlphaAdapter alphaProvider, float alpha)
 			=> DOTween.To(

@@ -1,5 +1,7 @@
-﻿using DG.Tweening;
+﻿using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using System;
+using System.Threading;
 using UnityEngine;
 namespace BB
 {
@@ -15,12 +17,19 @@ namespace BB
 	}
 	public static class TweenShakeExtensions
 	{
-		public static Tween ShakePos(this TweenShake tween, in TransformAdapter transform)
+		public static Tween ShakePos(
+			this TweenShake tween,
+			in TransformAdapter transform)
 		{
 			var t = transform._transform;
 			if (!t)
 				return null;
 			return t.DOShakePosition(tween._duration, tween._strength, tween._vibrato, tween._randomness);
 		}
+		public static UniTask ShakePos(
+			this TweenShake tween,
+			in TransformAdapter transform,
+			CancellationToken ct)
+			=> tween.ShakePos(transform).ToUniTask(ct);
 	}
 }

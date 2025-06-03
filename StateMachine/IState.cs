@@ -6,76 +6,155 @@ using System.Linq;
 namespace BB
 {
 	public interface IState { }
+	public interface IStateData : IDisposable
+	{
+		Entity Entity { get; }
+		void OnEnter();
+		void OnExit();
+		void AddEntity(Entity entity);
+	}
 	public interface IStateOnEnter : IState
 	{
-		void EnterState(IStateMachine machine);
+		void EnterState(IStateData data);
 	}
 	public interface IStateOnExit : IState
 	{
-		void ExitState(IStateMachine machine);
+		void ExitState(IStateData data);
 	}
 	public interface IStateMachine
 	{
-		IState CurrentState { get; }
 		Entity Entity { get; }
-		EnteredStateDisposable EnterState(IState state);
+		CountedPooledDisposable EnterState(IState state);
+		CountedPooledDisposable AppendState(IState state);
 		void ExitState(IState state);
-		void AddStateEntity(Entity entity);
 	}
 	internal record StackStateMachine : EntitySystem, IStateMachine
 	{
-		public IState CurrentState => _states.LastOrDefault();
-		readonly List<IState> _states = new();
-		readonly List<Entity> _stateEntities = new();
-		public EnteredStateDisposable EnterState(IState state)
+		readonly List<CountedPooledDisposable<StateData>> _states = new();
+		public CountedPooledDisposable EnterState(IState state)
+			=> EnterState(state, false);
+		public CountedPooledDisposable AppendState(IState state)
+			=> EnterState(state, true);
+		private CountedPooledDisposable<StateData> EnterState(IState state, bool append)
 		{
 			state = state.NullIfDestroyedUnityEngineObject();
 			if (state is null)
 				return new();
 
-			if (state == CurrentState)
-				return new();
+			if (!IsInActiveState(out var current))
+				return AddState();
 
-			ExitCurrentState();
-			_states.Add(state);
-			EnterCurrentState();
+			if (append)
+				return AppendState();
 
-			return new(this, state);
+			if (state != current?._state)
+				return AddState();
+
+			return new();
+
+			CountedPooledDisposable<StateData> AddState()
+			{
+				current?.OnExit();
+				var newState = StateData.GetPooled(this, state);
+				var result = newState.GetTypedToken();
+				_states.Add(result);
+				newState.OnEnter();
+				return result;
+			}
+			CountedPooledDisposable<StateData> AppendState()
+			{
+				var newState = StateData.GetPooled(this, state);
+				var result = newState.GetTypedToken();
+				current._appendedStates.Add(result);
+				newState._parentState = current;
+				newState.OnEnter();
+				return result;
+			}
 		}
 
 		public void ExitState(IState state)
 		{
-			if (CurrentState == state)
+			if (!IsInActiveState(out var current))
+				return;
+
+			state = state.NullIfDestroyedUnityEngineObject();
+			if (state is null || state == current._state)
 			{
-				ExitCurrentState();
+				current.OnExit();
 				_states.RemoveAt(_states.Count - 1);
-				EnterCurrentState();
+				if (IsInActiveState(out var newCurrent))
+					newCurrent.OnEnter();
 				return;
 			}
 
 			foreach (var i in -_states.Count)
-				if (_states[i] == state)
+				if (_states[i].Value._state == state)
 				{
 					_states.RemoveAt(i);
 					return;
 				}
 		}
+		bool IsInActiveState(out StateData state)
+		{
+			_states.RemoveDeadElements();
+			state = _states.LastOrDefault().Value;
+			return state is not null;
+		}
+	}
+	public sealed class StateData : CountedProtectedPooledObject<StateData>, IStateData
+	{
+		readonly List<Entity> _spawnedEntities = new();
+		public readonly List<CountedPooledDisposable<StateData>> _appendedStates = new();
+		public StateData _parentState;
+		public IState _state;
+		public IStateMachine _stateMachine;
+		bool _entered;
+		public Entity Entity => _stateMachine?.Entity ?? default;
+		public void AddEntity(Entity entity)
+			=> _spawnedEntities.Add(entity);
 
-		public void AddStateEntity(Entity entity)
+		public override void Dispose()
 		{
-			_stateEntities.Add(entity);
+			base.Dispose();
+			OnExit();
+			_appendedStates.DisposeAndClear();
+			_parentState?._appendedStates.Remove(GetTypedToken());
+			_parentState = null;
+			_stateMachine = null;
+			_state = null;
 		}
-		void ExitCurrentState()
+
+		public void OnEnter()
 		{
-			_stateEntities.DespawnAndClear();
-			if (CurrentState is not IStateOnExit exit)
+			if (_entered)
 				return;
-			exit.ExitState(this);
+			_entered = true;
+			if (_state is IStateOnEnter e)
+				e.EnterState(this);
+
+			_appendedStates.RemoveDeadElements();
+			foreach (var data in _appendedStates)
+				data.Value.OnEnter();
 		}
-		void EnterCurrentState()
+
+		public void OnExit()
 		{
-			if (CurrentState is IStateOnEnter enter)
-				enter.EnterState(this);
+			if (!_entered)
+				return;
+			_entered = false;
+			_appendedStates.RemoveDeadElements();
+			foreach (var data in _appendedStates.Inverse())
+				data.Value.OnExit();
+			if (_state is IStateOnExit e)
+				e.ExitState(this);
+			_spawnedEntities.DespawnAndClear();
+		}
+		public static StateData GetPooled(IStateMachine machine, IState state)
+		{
+			var data = GetCountedPooledInternal();
+			data._stateMachine = machine;
+			data._state = state;
+			return data;
 		}
 	}
 	public static class StateMachineExtensions
@@ -87,7 +166,7 @@ namespace BB
 				.Inject()
 				.Lazy();
 		}
-		public static EnteredStateDisposable EnterState(this Entity entity, IState state)
+		public static CountedPooledDisposable EnterState(this Entity entity, IState state)
 		{
 			if (state is null
 				|| state is UnityEngine.Object obj && !obj
