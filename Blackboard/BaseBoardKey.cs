@@ -69,7 +69,7 @@ namespace BB
 		[SerializeField]
 		string _key;
 		[SerializeField]
-		StringAsset _name, _description;
+		string _name, _description;
 
 		[SerializeField]
 		BoardKeyColorScheme _colorScheme;

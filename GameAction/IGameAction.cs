@@ -134,5 +134,8 @@ namespace BB
 			=> action.Add(AddConstBoardValueAction.GetPooled(key, value));
 		public static GameAction AddBoardValue(this GameAction action, BaseBoardKey key, BaseBoardKey otherKey, double multiplier = 1)
 			=> action.Add(AddOtherBoardValueAction.GetPooled(key, otherKey, multiplier));
+		public static GameAction Publish<TEvent>(this GameAction action, TEvent e, IEvent<TEvent> publisher = null)
+			=> action.Add(PublishEventAction<TEvent>.GetPooled(e, publisher));
 	}
+
 }

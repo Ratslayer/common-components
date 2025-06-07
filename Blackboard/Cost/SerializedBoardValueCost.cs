@@ -1,11 +1,25 @@
-﻿using Flee.PublicTypes;
-using System;
-using System.Linq.Expressions;
+﻿using System;
 using UnityEngine;
 
 namespace BB
 {
 	public sealed record GameMessageBuffer : ListVariable<GameMessageBuffer, TextData>;
+	public sealed class PublishEventAction<TEvent>
+		: ProtectedPooledObject<PublishEventAction<TEvent>>,
+		IGameActionSuccess
+	{
+		TEvent _event;
+		IEvent<TEvent> _publisher;
+		public void ExecuteSuccess(GameActionContext context)
+			=> _publisher?.Publish(_event);
+		public static PublishEventAction<TEvent> GetPooled(TEvent e, IEvent<TEvent> publisher = null)
+		{
+			var result = GetPooledInternal();
+			result._event = e;
+			result._publisher = publisher ?? World.Get<IEvent<TEvent>>();
+			return result;
+		}
+	}
 	public sealed class AddConstBoardValueAction : AbstractAddBoardValueAction<AddConstBoardValueAction>
 	{
 		double _value;
