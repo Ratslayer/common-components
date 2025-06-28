@@ -28,6 +28,12 @@ namespace BB
 				from.position = newPos;
 			}
 		}
+		public static UniTask MoveToTransform(
+			this ITweenCurve curve,
+			in TransformAdapter transform,
+			in TransformAdapter target,
+			CancellationToken ct)
+			=> curve.MoveToTransform(transform, target).ToUniTask(cancellationToken: ct);
 		public static Tween MoveAdd(
 			this ITweenCurve curve, in TransformAdapter transform, Vector3 offset)
 			=> transform._transform.DOMove(
@@ -37,6 +43,23 @@ namespace BB
 		public static UniTask MoveAdd(
 			this ITweenCurve curve, in TransformAdapter transform, Vector3 offset, CancellationToken ct)
 			=> curve.MoveAdd(transform, offset).ToUniTask(ct);
+		public static Tween MoveY(
+			this ITweenCurve curve, in TransformAdapter t, float target)
+			=> t._transform.DOMoveY(target, curve.Duration).Apply(curve);
+		public static UniTask MoveY(
+			this ITweenCurve curve, in TransformAdapter t, float target, CancellationToken ct)
+			=> curve.MoveY(t, target).ToUniTask(cancellationToken: ct);
+
+		public static Tween MoveXZ(
+			this ITweenCurve curve, TransformAdapter t, Vector3 target)
+			=> DOTween.To(
+				() => t._transform.position.Flat(),
+				v => t._transform.position = new(v.x, t._transform.position.y, v.z),
+				target,
+				curve.Duration).Apply(curve);
+		public static UniTask MoveXZ(
+			this ITweenCurve curve, TransformAdapter t, Vector3 target, CancellationToken ct)
+			=> curve.MoveXZ(t, target).ToUniTask(cancellationToken: ct);
 		public static Tween Alpha(
 			this ITweenCurve curve, AlphaAdapter alphaProvider, float alpha)
 			=> DOTween.To(
@@ -57,5 +80,14 @@ namespace BB
 				.DORotateQuaternion(rotation, curve.Duration)
 				.Apply(curve);
 		}
+
+		public static Tween Scale(this ITweenCurve curve, in TransformAdapter transform, float scale)
+			=> transform._transform.DOScale(scale, curve.Duration).Apply(curve);
+		public static UniTask Scale(
+			this ITweenCurve curve,
+			in TransformAdapter transform,
+			float scale,
+			CancellationToken ct)
+			=> curve.Scale(transform, scale).ToUniTask(cancellationToken: ct);
 	}
 }

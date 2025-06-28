@@ -14,16 +14,30 @@ namespace BB
 	{
 		public ExpressionVariable[] _variables;
 		public string _expression;
+		private IGenericExpression<double> _compiledExpression;
 		public double GetValue(Entity entity)
 		{
-			var context = new ExpressionContext();
+			if (_compiledExpression is null)
+				Recompile();
+
 			foreach (var variable in _variables)
 				if (variable._name.IsValid())
-					context.Variables[variable._name] = variable._value.GetValue(entity);
+					_compiledExpression.Context.Variables[variable._name]
+						= variable._value.GetValue(entity);
 
-			var expression = context.CompileGeneric<double>(_expression);
-			var result = expression.Evaluate();
+			var result = _compiledExpression.Evaluate();
 			return result;
+		}
+		[Button]
+		void Recompile()
+		{
+			var context = new ExpressionContext();
+
+			foreach (var variable in _variables)
+				if (variable._name.IsValid())
+					context.Variables[variable._name] = 0d;
+
+			_compiledExpression = context.CompileGeneric<double>(_expression);
 		}
 		[Button, HideInPlayMode]
 		void Test() => LogTestResult(World.Entity);
