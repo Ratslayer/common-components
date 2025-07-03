@@ -24,16 +24,16 @@ namespace BB
 	public interface IStateMachine
 	{
 		Entity Entity { get; }
-		CountedPooledDisposable EnterState(IState state);
-		CountedPooledDisposable AppendState(IState state);
+		DisposableToken EnterState(IState state);
+		DisposableToken AppendState(IState state);
 		void ExitState(IState state);
 	}
 	internal record StackStateMachine : EntitySystem, IStateMachine
 	{
 		readonly List<CountedPooledDisposable<StateData>> _states = new();
-		public CountedPooledDisposable EnterState(IState state)
+		public DisposableToken EnterState(IState state)
 			=> EnterState(state, false);
-		public CountedPooledDisposable AppendState(IState state)
+		public DisposableToken AppendState(IState state)
 			=> EnterState(state, true);
 		private CountedPooledDisposable<StateData> EnterState(IState state, bool append)
 		{
@@ -166,7 +166,7 @@ namespace BB
 				.Inject()
 				.Lazy();
 		}
-		public static CountedPooledDisposable EnterState(this Entity entity, IState state)
+		public static DisposableToken EnterState(this Entity entity, IState state)
 		{
 			if (state is null
 				|| state is UnityEngine.Object obj && !obj
