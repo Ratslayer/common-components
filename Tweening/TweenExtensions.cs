@@ -14,9 +14,15 @@ namespace BB
 			linkComponent.Bind(tween);
 			return tween;
 		}
-		public static Tween Apply(this Tween tween, ITweenCurve curve)
+		public static T SetEase<T>(this T tween, ITweenCurve curve)
+			where T : Tween
 		{
-			curve.Apply(tween);
+			if (curve.IsCustom)
+			{
+				tween.SetEase(curve.Curve);
+				return tween;
+			}
+			tween.SetEase(curve.Ease);
 			return tween;
 		}
 
@@ -28,17 +34,18 @@ namespace BB
 		public static Tween TweenAlpha(this CanvasGroup cg, float value, TweenCurve curve)
 			=> cg
 			.DOFade(value, curve.Duration)
-			.Apply(curve);
+			.SetEase(curve);
 		public static Tween TweenPos(
 			this Root root,
 			Vector3 position,
 			TweenCurve curve)
 			=> root.Transform
 			.DOMove(position, curve.Duration)
-			.Apply(curve);
+			.SetEase(curve);
 		public static Tween TweenFont(this TextMeshProUGUI tmp, float font, TweenCurve curve)
-			=> DOTween.To(() => tmp.fontSize, f => tmp.fontSize = f, font, curve.Duration)
-			.Apply(curve);
+			=> DOTween
+			.To(() => tmp.fontSize, f => tmp.fontSize = f, font, curve.Duration)
+			.SetEase(curve);
 		public static void Forget(this Tween _) { }
 	}
 }

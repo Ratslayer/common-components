@@ -7,6 +7,8 @@ namespace BB
 		public TweenCurve _curve = new();
 
 		public override Tween CreateTween(Transform transform, Vector3 target)
-			=> transform.DOScale(target, _curve).Apply(_curve);
+			=> transform
+			.DOScale(target, _curve.Duration)
+			.SetEase(_curve);
 	}
 }

@@ -20,8 +20,9 @@ namespace BB
 
 		[SerializeField]
 		BoardValuesAsset[] _assets = { };
-
-		public void Add(in AddBoardContext context)
+		public BuffDisposable Add(IBoard board)
+			=> Add(new AddBoardContext(board, null, 1));
+		public BuffDisposable Add(in AddBoardContext context)
 		{
 			using var _ = context._board.FlushOnDispose();
 
@@ -38,6 +39,8 @@ namespace BB
 			foreach (var asset in _assets)
 				if (asset)
 					asset.Add(context);
+
+			return BuffDisposable.GetPooled(context._board, this);
 
 			static void Add(
 				IEnumerable<ISerializedBoardValue> values,

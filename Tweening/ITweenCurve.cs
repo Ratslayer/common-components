@@ -1,9 +1,12 @@
 ﻿using DG.Tweening;
+using UnityEngine;
 namespace BB
 {
 	public interface ITweenCurve
 	{
-		void Apply(Tween tween);
 		float Duration { get; }
+		bool IsCustom { get; }
+		Ease Ease { get; }
+		AnimationCurve Curve { get; }
 	}
 }

@@ -30,12 +30,12 @@ namespace BB
 	}
 	internal record StackStateMachine : EntitySystem, IStateMachine
 	{
-		readonly List<CountedPooledDisposable<StateData>> _states = new();
+		readonly List<DisposableToken<StateData>> _states = new();
 		public DisposableToken EnterState(IState state)
 			=> EnterState(state, false);
 		public DisposableToken AppendState(IState state)
 			=> EnterState(state, true);
-		private CountedPooledDisposable<StateData> EnterState(IState state, bool append)
+		private DisposableToken<StateData> EnterState(IState state, bool append)
 		{
 			state = state.NullIfDestroyedUnityEngineObject();
 			if (state is null)
@@ -52,7 +52,7 @@ namespace BB
 
 			return new();
 
-			CountedPooledDisposable<StateData> AddState()
+			DisposableToken<StateData> AddState()
 			{
 				current?.OnExit();
 				var newState = StateData.GetPooled(this, state);
@@ -61,7 +61,7 @@ namespace BB
 				newState.OnEnter();
 				return result;
 			}
-			CountedPooledDisposable<StateData> AppendState()
+			DisposableToken<StateData> AppendState()
 			{
 				var newState = StateData.GetPooled(this, state);
 				var result = newState.GetTypedToken();
@@ -101,10 +101,10 @@ namespace BB
 			return state is not null;
 		}
 	}
-	public sealed class StateData : CountedProtectedPooledObject<StateData>, IStateData
+	public sealed class StateData : ProtectedPooledObject<StateData>, IStateData
 	{
 		readonly List<Entity> _spawnedEntities = new();
-		public readonly List<CountedPooledDisposable<StateData>> _appendedStates = new();
+		public readonly List<DisposableToken<StateData>> _appendedStates = new();
 		public StateData _parentState;
 		public IState _state;
 		public IStateMachine _stateMachine;
@@ -151,7 +151,7 @@ namespace BB
 		}
 		public static StateData GetPooled(IStateMachine machine, IState state)
 		{
-			var data = GetCountedPooledInternal();
+			var data = GetPooledInternal();
 			data._stateMachine = machine;
 			data._state = state;
 			return data;

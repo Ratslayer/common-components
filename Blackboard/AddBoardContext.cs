@@ -1,6 +1,4 @@
-﻿using UnityEngine.InputSystem;
-
-namespace BB
+﻿namespace BB
 {
 	public readonly struct AddBoardContext
 	{

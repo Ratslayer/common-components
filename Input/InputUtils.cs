@@ -11,14 +11,8 @@ namespace BB
 			container.Event<InputEvent>();
 			container.System<ProcessInputActions>();
 			container.Stack<InputActions>();
-			container.Stack<InputBlocked, bool>(false);
+			container.Stack<InputBlocked>();
 			container.Event<InputActionEvent>();
-		}
-		public static StackValuePushDisposable<bool> BlockPlayerInputTemp(bool block)
-		{
-			if (block && World.Has(out InputBlocked blocked))
-				return blocked.Push(true);
-			return default;
 		}
 	}
 }

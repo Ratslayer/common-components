@@ -6,15 +6,13 @@ using UnityEngine;
 namespace BB
 {
 	[Serializable]
-	public sealed class TweenShake
+	public sealed class TweenShake : BaseSerializedTween
 	{
 		public Vector3 _strength = new(0.1f, 0, 0.1f);
 		public float _randomness = 50;
 		public int _vibrato = 10;
-		public float _duration = 1;
-
-		public Vector3 Strength => _strength;
 	}
+
 	public static class TweenShakeExtensions
 	{
 		public static Tween ShakePos(
@@ -24,7 +22,22 @@ namespace BB
 			var t = transform._transform;
 			if (!t)
 				return null;
-			return t.DOShakePosition(tween._duration, tween._strength, tween._vibrato, tween._randomness);
+
+			var shake = t.DOShakePosition(
+				tween.Duration,
+				tween._strength,
+				tween._vibrato,
+				tween._randomness, 
+				fadeOut: false);
+
+			if (!tween.IsCustom && tween.Ease == Ease.Unset)
+				return shake;
+
+			var sequence = DOTween
+				.Sequence()
+				.Join(shake)
+				.SetEase(tween);
+			return sequence;
 		}
 		public static UniTask ShakePos(
 			this TweenShake tween,

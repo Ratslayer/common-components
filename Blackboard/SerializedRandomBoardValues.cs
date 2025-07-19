@@ -8,7 +8,7 @@ namespace BB
 		[SerializeField]
 		SerializedRandomBoardValue[] _values = { };
 
-		public void Add(in AddBoardContext context)
+		public BuffDisposable Add(in AddBoardContext context)
 		{
 			using var _ = context._board.FlushOnDispose();
 			foreach (var v in _values)
@@ -16,6 +16,7 @@ namespace BB
 					.WithKey(v._key)
 					.WithMultiplier(v._value.GetRandom())
 					.Add();
+			return BuffDisposable.GetPooled(context._board, this);
 		}
 	}
 	[Serializable]
