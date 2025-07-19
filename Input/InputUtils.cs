@@ -3,7 +3,7 @@ namespace BB
 {
 	public static class InputUtils
 	{
-		public static void InstallInput(IDiContainer container, InputConfig config)
+		public static void InstallInput(IDiContainer container, IInputConfig config)
 		{
 			container.Instance(config);
 			container.System<MousePointer>();
