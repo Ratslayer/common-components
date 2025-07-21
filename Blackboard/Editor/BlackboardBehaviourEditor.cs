@@ -17,7 +17,7 @@ namespace BB
 
 			var newKey = EditorGUILayout.ObjectField("Add new key", null, typeof(BaseBoardKey), false) as BaseBoardKey;
 			if (newKey)
-				board.InitKey(newKey);
+				board.Set(newKey, 0);
 
 			if (GUILayout.Button("Update Board"))
 				board.ForceFlushChanges();

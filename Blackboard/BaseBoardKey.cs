@@ -31,16 +31,13 @@ namespace BB
 		public BaseBoardKey Key => ShowKey ? _key : null;
 	}
 	public abstract class BaseBoardKey
-		: AbstractKeyObject, IBoardKey, IBoardKeyDetails
+		: AbstractKeyObject, IBoardKey, IBoardKeyWithBounds
 	{
 		public bool _addParentValues = true;
 		public BoardValueGetter _min = new(), _max = new();
+		public virtual BoardValueStackingMethod StackingMethod => BoardValueStackingMethod.Additive;
 
-		public virtual double AddValues(double v1, double v2)
-			=> v1 + v2;
-
-		public virtual IBoardValueContainer CreateValue(IBoard board)
-			=> new DefaultBoardValue(this, board);
+		public abstract BoardEventUsage ClampingUsage { get; }
 
 		public double GetMaxValue(IBoard board)
 			=> _max.GetValue(board);

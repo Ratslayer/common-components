@@ -1,24 +1,27 @@
-﻿namespace BB
+﻿using System.Collections.Generic;
+
+namespace BB
 {
-	public interface IBoardValue
+	public sealed class BoardValueContainer : IBoardValueContainer
 	{
-		IBoardKey Key { get; }
-		double Value { get; }
+		public IBoard Board { get; private set; }
+		public IBoardKey Key { get; private set; }
+		public double Value { get; set; }
+		public double PreviousValue { get; set; }
+		public Dictionary<IBoardValueCondition, double> _conditionalValues;
+		public BoardValueContainer(IBoard board, IBoardKey key)
+		{
+			Board = board;
+			Key = key;
+		}
+		public override string ToString()
+			=> $"{Value.Nicify()}; {PreviousValue.Nicify()}; {Key.Name}; {Board.Entity}";
 	}
 	public interface IBoardValueContainer
 	{
 		IBoard Board { get; }
 		IBoardKey Key { get; }
-		double Get(in GetBoardContext context);
-		void Add(in AddBoardContext context);
-		void Set(double value);
 		double Value { get; }
-		double PreviousValue { get; }
-		void FlushPreviousValue();
-	}
-	public static class IBoardValueContainerExtensions
-	{
-		public static double GetValue(this IBoardValueContainer container)
-			=> container?.Get(new(container.Key, container.Board)) ?? 0;
+		public double PreviousValue { get; }
 	}
 }

@@ -11,13 +11,8 @@ namespace BB
 		TagType[] _types = { };
 
 		public IReadOnlyList<TagType> Types => _types;
-		public override IBoardValueContainer CreateValue(IBoard board)
-		{
-			var result = base.CreateValue(board);
-			if (board.Entity.Has(out BoardTags tags))
-				tags.Add(result);
-			return result;
-		}
+
+		public override BoardEventUsage ClampingUsage => BoardEventUsage.Get;
 	}
 
 	public static class BoardTagExtensions
@@ -45,7 +40,7 @@ namespace BB
 					if (!tag.Types.Contains(type))
 						continue;
 
-					if (container.GetValue() >= 1)
+					if (container.Value >= 1)
 						tags.Add(tag);
 				}
 

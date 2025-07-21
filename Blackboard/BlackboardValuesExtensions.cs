@@ -1,17 +1,19 @@
-﻿using BB.Di;
-namespace BB
+﻿namespace BB
 {
 	public interface IBoardValuesProvider
 	{
-		BuffDisposable Add(in AddBoardContext context);
+		RemoveBoardValuesOnDispose Add(BoardContext context);
 	}
 	public static class IBoardValuesProviderExtensions
 	{
-		public static BuffDisposable Add(this IBoardValuesProvider provider, Entity entity)
+		public static RemoveBoardValuesOnDispose Add(this IBoardValuesProvider provider, Entity entity)
 		{
-			if (entity.Has(out IBoard board))
-				return provider.Add(new AddBoardContext(board, null, 1));
-			return null;
+			if (!entity.Has(out IBoard board))
+				return null;
+			var context = BoardContext.GetPooled(board);
+			var result = provider.Add(context);
+			context.Dispose();
+			return result;
 		}
 	}
 }

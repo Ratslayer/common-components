@@ -7,7 +7,9 @@
 		[OnSpawn]
 		void OnSpawn()
 		{
-			Values.Add(new(Board, null, 1));
+			BoardContext
+				.GetPooled(Board)
+				.AddAndDispose(Values);
 		}
 	}
 }

@@ -4,23 +4,23 @@ namespace BB
 {
 	public interface ISerializedBoardValue
 	{
-		void Add(in AddBoardContext context);
+		void Add(BoardContext context);
 	}
-	public abstract class AbstractSerializedBoardValue<KeyType> : ISerializedBoardValue, IBoardValue
+	public abstract class AbstractSerializedBoardValue<KeyType> : ISerializedBoardValue
 		where KeyType : BaseBoardKey
 	{
 		[SerializeField, Required, HorizontalGroup, HideLabel]
 		protected KeyType _key;
 		[SerializeField, HorizontalGroup, ShowIf(nameof(_key)), HideLabel]
 		double _value;
-		IBoardKey IBoardValue.Key => _key;
 		public KeyType Key => _key;
 		public double Value => _value;
-		public virtual void Add(in AddBoardContext context)
-			=> context
+		public virtual void Add(BoardContext context)
+			=> context.GetPooledCopy()
 			.WithKey(_key)
-			.WithMultiplier(_value)
-			.Add();
+			.WithValue(_value)
+			.AddAndDispose();
+
 		public static implicit operator bool(AbstractSerializedBoardValue<KeyType> value)
 			=> value.Key is not null && value.Value.NotZero();
 	}

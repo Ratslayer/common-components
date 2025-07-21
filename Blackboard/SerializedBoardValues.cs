@@ -7,7 +7,7 @@ namespace BB
 	public sealed class SerializedBoardValues : IBoardValuesProvider
 	{
 		[SerializeField]
-		SerializedStatValue[] _stats = { };
+		SerializedBoardValueWithConditions[] _stats = { };
 
 		[SerializeField]
 		SerializedResourceBoardValueWithStats[] _resources = { };
@@ -20,11 +20,16 @@ namespace BB
 
 		[SerializeField]
 		BoardValuesAsset[] _assets = { };
-		public BuffDisposable Add(IBoard board)
-			=> Add(new AddBoardContext(board, null, 1));
-		public BuffDisposable Add(in AddBoardContext context)
+		public RemoveBoardValuesOnDispose Add(IBoard board)
 		{
-			using var _ = context._board.FlushOnDispose();
+			var context = BoardContext.GetPooled(board);
+			var result = Add(context);
+			context.Dispose();
+			return result;
+		}
+		public RemoveBoardValuesOnDispose Add(BoardContext context)
+		{
+			using var _ = context.Board.FlushOnDispose();
 
 			Add(_stats, context);
 			Add(_resources, context);
@@ -32,19 +37,20 @@ namespace BB
 
 			foreach (var tag in _tags)
 				context
+					.GetPooledCopy()
 					.WithKey(tag)
 					.WithValue(1)
-					.Add();
+					.AddAndDispose();
 
 			foreach (var asset in _assets)
 				if (asset)
 					asset.Add(context);
 
-			return BuffDisposable.GetPooled(context._board, this);
+			return RemoveBoardValuesOnDispose.GetInversePooledFromContext(context, this);
 
 			static void Add(
 				IEnumerable<ISerializedBoardValue> values,
-				in AddBoardContext context)
+				BoardContext context)
 			{
 				foreach (var value in values)
 					value.Add(context);

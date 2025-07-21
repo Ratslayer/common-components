@@ -1,17 +1,46 @@
-﻿using BB.Di;
-using System;
+﻿using System;
 namespace BB
 {
 	public static class IBoardExtensions
 	{
-		public static bool IsDirty(
-			this IBoard board,
-			IBoardKey key,
-			out double change)
+		public static double Get(this IBoard board, IBoardKey key)
+			=> BoardContext
+			.GetPooled(board, key)
+			.GetAndDispose();
+		public static void Add(this IBoard board, IBoardKey key, double value)
+		=> BoardContext
+			.GetPooled(board, key)
+			.WithValue(value)
+			.AddAndDispose();
+		public static bool IsDirty(this IBoard board, IBoardKey key, out IBoardValueContainer container)
 		{
-			var changed = board.IsDirty(key);
-			change = board.GetChange(key);
-			return changed;
+			foreach (var c in board.DirtyContainers)
+			{
+				if (c.Key == key)
+				{
+					container = c;
+					return true;
+				}
+			}
+			container = null;
+			return false;
+		}
+		public static double GetChange(this IBoard board, IBoardKey key)
+		{
+			if (board.IsDirty(key, out var container))
+				return container.Value - container.PreviousValue;
+			return 0;
+		}
+		public static bool HasChanged(this IBoard board, IBoardKey key, out double value)
+		{
+			if (!board.IsDirty(key, out var container))
+			{
+				value = 0;
+				return false;
+			}
+
+			value = container.Value - container.PreviousValue;
+			return value.NotZero();
 		}
 		public static void Set(this IBoardKey key, IBoard board, double value)
 		{
@@ -19,12 +48,11 @@ namespace BB
 				return;
 			board.Set(key, value);
 		}
-		public static AddBoardContext Add(this IBoardKey key, IBoard board, double value)
-		{
-			var context = new AddBoardContext(board, key, value);
-			context.Add();
-			return context;
-		}
+		public static void Add(this IBoardKey key, IBoard board, double value)
+			=> BoardContext
+				.GetPooled(board, key)
+				.WithValue(value)
+				.AddAndDispose();
 		public static double Get(
 			this IBoardKey key,
 			Entity entity)
@@ -36,8 +64,9 @@ namespace BB
 		public static double Get(
 			this IBoardKey key,
 			IBoard board)
-			=> new GetBoardContext(key, board)
-			.Apply();
+			=> BoardContext
+			.GetPooled(board, key)
+			.GetAndDispose();
 		public static double GetMultiplier(
 			this IBoardKey key,
 			IBoard board)
@@ -66,10 +95,12 @@ namespace BB
 		{
 			if (key is null || board is null)
 				return false;
+			if (key is not IBoardKeyWithBounds bounds)
+				return true;
 			var currentValue = key.Get(board);
 			var finalValue = currentValue + value;
-			var min = key.GetMinValue(board);
-			var max = key.GetMaxValue(board);
+			var min = bounds.GetMinValue(board);
+			var max = bounds.GetMaxValue(board);
 			if (max.IsZero())
 				return finalValue.GreaterThanOrEquals(min);
 			return finalValue.GreaterThanOrEquals(min) && finalValue.LessThanOrEquals(max);

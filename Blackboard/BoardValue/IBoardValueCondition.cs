@@ -2,6 +2,6 @@
 {
 	public interface IBoardValueCondition
 	{
-		bool IsValid(in GetBoardContext context);
+		bool IsValid(BoardContext context);
 	}
 }

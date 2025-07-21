@@ -1,29 +1,31 @@
-﻿using UnityEngine.UIElements;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using BB.Di;
 namespace BB
 {
-	public sealed class BoardResource : BaseBoardKey, IBoardResourceKey
+	public sealed class BoardResource : BaseBoardKey, IBoardKeyWithMultipliers, IBoardKeyWithGeneration
 	{
 		[SerializeField]
 		BaseBoardKey _genValue;
 		[SerializeField]
 		BaseBoardKey[] _gainMultipliers;
 
-		public IBoardKey MaxValueKey => _max.Key;
-
-		public IEnumerable<IBoardKey> GainMultiplierKeys => _gainMultipliers;
-
 		public IBoardKey GenRateKey => _genValue;
 
-		public override IBoardValueContainer CreateValue(IBoard board)
+		public IReadOnlyCollection<IBoardKey> Multipliers => _gainMultipliers;
+
+		public BoardEventUsage MultiplierUsage => BoardEventUsage.Set;
+
+		public override BoardEventUsage ClampingUsage => BoardEventUsage.Set;
+
+		public double GetGenerationValue(IBoard board)
 		{
-			var resourceChanged = board.Entity.Require<IEvent<ResourceChangedEvent>>();
-			var result = new ResourceBoardValue(board, this, resourceChanged);
-			if (board.Entity.Has(out BoardResources resources))
-				resources.Add(this);
-			return result;
+			return _genValue.Get(board);
+		}
+
+		public bool HasGenerationKey(out IBoardKey key)
+		{
+			key = _genValue;
+			return _genValue;
 		}
 	}
 }

@@ -11,7 +11,7 @@ namespace BB.Serialized.Board.Conditions
 		[SerializeField, InlineProperty]
 		BoardValuePredicate _predicate = BoardValuePredicateType.Exists;
 
-		public bool IsValid(in GetBoardContext context)
+		public bool IsValid(BoardContext context)
 		{
 			if (!_key)
 				return true;
@@ -20,7 +20,7 @@ namespace BB.Serialized.Board.Conditions
 			var result = _predicate.Compare(value);
 			return result;
 		}
-		protected abstract double GetValue(in GetBoardContext context);
+		protected abstract double GetValue(BoardContext context);
 	}
 }
 namespace BB
