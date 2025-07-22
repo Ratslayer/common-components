@@ -93,12 +93,14 @@ namespace BB
 			if (_generationContainers is null)
 				return;
 			using (this.DisableAutoFlush())
+			{
 				foreach (var container in _generationContainers)
 				{
 					var genValue = ((IBoardKeyWithGeneration)container.Key).GetGenerationValue(this);
 					var value = genValue * seconds;
 					this.Add(container.Key, value);
 				}
+			}
 			this.AutoFlushChangesIfDirty();
 		}
 
@@ -138,9 +140,11 @@ namespace BB
 			if (key is null)
 				return 0;
 			if (context.ActiveKeys.Contains(key))
+			{
 				throw new GameException(
 					$"Circular dependency detected during {_action} {context.Key?.Name}. " +
 					$"{key.Name} is found multiple times.");
+			}
 			context.ActiveKeys.Add(key);
 			var container = GetOrCreate(key);
 			var value = container.Value;
