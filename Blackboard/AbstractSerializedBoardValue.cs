@@ -7,7 +7,7 @@ namespace BB
 		void Add(BoardContext context);
 	}
 	public abstract class AbstractSerializedBoardValue<KeyType> : ISerializedBoardValue
-		where KeyType : BaseBoardKey
+		where KeyType : BaseScriptableObject, IBoardKey
 	{
 		[SerializeField, Required, HorizontalGroup, HideLabel]
 		protected KeyType _key;

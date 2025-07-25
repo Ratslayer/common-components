@@ -1,7 +1,7 @@
-﻿namespace BB
-{
-	public interface IBoardKeyOnCreate
-	{
-		void OnCreate(IBoard board);
-	}
-}
+﻿//namespace BB
+//{
+//	public interface IBoardKeyOnCreate
+//	{
+//		void OnCreate(IBoard board);
+//	}
+//}
