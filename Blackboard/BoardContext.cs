@@ -6,8 +6,8 @@ namespace BB
 		public IBoardKey Key { get; private set; }
 		public IBoard Board { get; private set; }
 		public IBoard TargetBoard { get; private set; }
-		public List<IBoardKey> Tags { get; private set; } = new();
-		public List<IBoardKey> TargetTags { get; private set; } = new();
+		public List<object> Tags { get; private set; } = new();
+		public List<object> TargetTags { get; private set; } = new();
 		public List<IBoardKey> ActiveKeys { get; private set; } = new();
 		public double Value { get; private set; } = 1;
 		public static BoardContext GetPooled(IBoard board, IBoardKey key = null)
@@ -48,12 +48,12 @@ namespace BB
 			TargetBoard = board;
 			return this;
 		}
-		public BoardContext WithTag(IBoardKey tag)
+		public BoardContext WithTag(object tag)
 		{
 			Tags.Add(tag);
 			return this;
 		}
-		public BoardContext WithTags(IEnumerable<IBoardKey> tags)
+		public BoardContext WithTags(IEnumerable<object> tags)
 		{
 			Tags.AddRange(tags);
 			return this;
