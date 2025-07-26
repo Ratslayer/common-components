@@ -117,9 +117,14 @@ namespace BB
 			finalValue = AddValueInternal(key, container.Value, finalValue);
 			finalValue = ClampValue(context, finalValue, BoardEventUsage.Set);
 
-			var valueChanged = !finalValue.Approximately(container.Value);
+			var diff = finalValue - container.Value;
+			var valueChanged = diff.NotZero();
 			if (valueChanged && key is IBoardKeyWithOnAddEffect add)
+			{
+				var newContext = context.GetPooledCopy().WithValue(diff);
 				add.OnAdd(context);
+				newContext.Dispose();
+			}
 			context.ActiveKeys.RemoveLast();
 
 			if (!valueChanged)
