@@ -2,6 +2,6 @@
 {
 	public interface IBoardValuesProvider
 	{
-		RemoveBoardValuesOnDispose Add(BoardContext context);
+		void Add(BoardContext context);
 	}
 }

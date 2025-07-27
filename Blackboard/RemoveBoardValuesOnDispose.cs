@@ -10,7 +10,7 @@
 			result._provider = provider;
 			var inverseContext = context
 				.GetPooledCopy()
-				.WithValue(-1);
+				.WithValue(-context.Value);
 			result._context = inverseContext;
 			return result;
 		}
