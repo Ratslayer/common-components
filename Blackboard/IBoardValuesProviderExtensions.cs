@@ -7,9 +7,9 @@
 			if (!entity.Has(out IBoard board))
 				return null;
 			var context = BoardContext.GetPooled(board);
-			var result = provider.Add(context);
+			provider.Add(context);
 			context.Dispose();
-			return result;
+			return RemoveBoardValuesOnDispose.GetInversePooledFromContext(context, provider);
 		}
 	}
 }
