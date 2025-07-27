@@ -1,31 +1,31 @@
 ﻿using System.Collections.Generic;
 namespace BB
 {
-	public sealed class GameAction<ContextType> : PooledObject<GameAction<ContextType>>,
-		IGameActionCondition<ContextType>,
-		IGameActionSuccess<ContextType>,
-		IGameActionFailure<ContextType>
+	public sealed class GameAction : PooledObject<GameAction>,
+		IGameActionCondition,
+		IGameActionSuccess,
+		IGameActionFailure
 	{
-		readonly List<IGameAction<ContextType>> _components = new();
-		public bool CanExecute(ContextType context)
+		readonly List<IGameAction> _components = new();
+		public bool CanExecute(IGameActionContext context)
 		{
 			foreach (var c in _components)
-				if (c is IGameActionCondition<ContextType> condition
+				if (c is IGameActionCondition condition
 					&& !condition.CanExecute(context))
 					return false;
 			return true;
 		}
 
-		public void ExecuteSuccess(ContextType context)
+		public void ExecuteSuccess(IGameActionContext context)
 		{
 			foreach (var c in _components)
-				if (c is IGameActionSuccess<ContextType> success)
+				if (c is IGameActionSuccess success)
 					success.ExecuteSuccess(context);
 		}
-		public void ExecuteFailure(ContextType context)
+		public void ExecuteFailure(IGameActionContext context)
 		{
 			foreach (var c in _components)
-				if (c is IGameActionFailure<ContextType> failure)
+				if (c is IGameActionFailure failure)
 					failure.ExecuteFailure(context);
 		}
 
@@ -35,13 +35,13 @@ namespace BB
 			base.Dispose();
 		}
 
-		public GameAction<ContextType> Add(IGameAction<ContextType> component)
+		public GameAction Add(IGameAction component)
 		{
 			if (component is not null)
 				_components.Add(component);
 			return this;
 		}
-		public GameAction<ContextType> Add(IFactory<IGameAction<ContextType>> component)
+		public GameAction Add(IFactory<IGameAction> component)
 			=> Add(component?.Create());
 	}
 }

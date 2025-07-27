@@ -3,34 +3,34 @@ namespace BB
 {
 	public static class GameActionExtensions
 	{
-		public static bool TryExecute<ContextType>(
-			this IGameAction<ContextType> action,
-			ContextType context,
-			Action<ContextType> onEnd = null)
+		public static bool TryExecute(
+			this IGameAction action,
+			GameActionContext context,
+			Action<GameActionContext> onEnd = null)
 		{
 			if (action is null)
 				return false;
 
-			if (action is IGameActionCondition<ContextType> condition
+			if (action is IGameActionCondition condition
 				&& !condition.CanExecute(context))
 			{
-				if (action is IGameActionFailure<ContextType> failure)
+				if (action is IGameActionFailure failure)
 					failure.ExecuteFailure(context);
 				onEnd?.Invoke(context);
 				return false;
 			}
-			if (action is IGameActionSuccess<ContextType> success)
+			if (action is IGameActionSuccess success)
 				success.ExecuteSuccess(context);
 			onEnd?.Invoke(context);
 			return true;
 		}
 
-		public static void Execute<ContextType>(
-			this IGameAction<ContextType> action, 
-			ContextType context, 
-			Action<ContextType> onEnd = null)
+		public static void Execute(
+			this IGameAction action,
+			GameActionContext context, 
+			Action<GameActionContext> onEnd = null)
 		{
-			if (action is not IGameActionSuccess<ContextType> success)
+			if (action is not IGameActionSuccess success)
 				return;
 		
 			success.ExecuteSuccess(context);

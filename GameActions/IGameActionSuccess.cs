@@ -1,7 +1,7 @@
 ﻿namespace BB
 {
-	public interface IGameActionSuccess<in ContextType> : IGameAction<ContextType>
+	public interface IGameActionSuccess : IGameAction
 	{
-		void ExecuteSuccess(ContextType context);
+		void ExecuteSuccess(IGameActionContext context);
 	}
 }

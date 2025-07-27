@@ -1,8 +1,8 @@
 ﻿namespace BB
 {
-	public interface IGameActionCondition<in ContextType> : IGameAction<ContextType>
+	public interface IGameActionCondition : IGameAction
 	{
 
-		bool CanExecute(ContextType context);
+		bool CanExecute(IGameActionContext context);
 	}
 }

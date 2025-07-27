@@ -2,8 +2,8 @@
 
 namespace BB
 {
-	public interface IGameActionFailure<in ContextType> : IGameAction<ContextType>
+	public interface IGameActionFailure : IGameAction
 	{
-		void ExecuteFailure(ContextType context);
+		void ExecuteFailure(IGameActionContext context);
 	}
 }
