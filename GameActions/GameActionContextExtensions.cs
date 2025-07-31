@@ -23,14 +23,10 @@ namespace BB
 			=> action.Add(PublishEventAction<TEvent>.GetPooled(e, publisher));
 		private static void PublishMessage(GameActionContext context, Vector3 position)
 		{
-			if (!context.Entity.Has(out IEvent<ShowMovingHintEvent> showHint))
+			if (!context.Entity.Has(out IEvent<ShowHintEvent> showHint))
 				return;
 			foreach (var message in context.Messages)
-				showHint.Publish(new()
-				{
-					Position = position,
-					Data = message
-				});
+				showHint.Publish(new(message.Text, position));
 		}
 	}
 

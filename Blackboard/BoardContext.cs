@@ -84,5 +84,12 @@ namespace BB
 			provider.Add(this);
 			Dispose();
 		}
+		public RemoveBoardValuesOnDispose AddAndDisposeWithInverse(IBoardValuesProvider provider)
+		{
+			provider.Add(this);
+			var result = RemoveBoardValuesOnDispose.GetInversePooledFromContext(this, provider);
+			Dispose();
+			return result;
+		}
 	}
 }

@@ -3,15 +3,15 @@ namespace BB
 {
 	public readonly struct InputActionData
 	{
-		public readonly IInputActionDetails _details;
+		public readonly InputActionWrapperAsset _asset;
 		public readonly Action _onBegin;
 		public readonly Action _onEnd;
 		public InputActionData(
-			IInputActionDetails details,
+			InputActionWrapperAsset asset,
 			Action onBegin,
 			Action onEnd = null)
 		{
-			_details = details;
+			_asset = asset;
 			_onBegin = onBegin;
 			_onEnd = onEnd;
 		}

@@ -53,6 +53,16 @@ namespace BB
 				.GetPooled(board, key)
 				.WithValue(value)
 				.AddAndDispose();
+		public static IDisposable AddTemp(this IBoardKey key, Entity entity, double value)
+		{
+			var board = entity.Require<IBoard>();
+			return key.AddTemp(board, value);
+		}
+		public static IDisposable AddTemp(this IBoardKey key, IBoard board, double value)
+		{
+			key.Add(board, value);
+			return AddBoardValueOnDispose.GetPooled(board, key, -value);
+		}
 		public static double Get(
 			this IBoardKey key,
 			Entity entity)

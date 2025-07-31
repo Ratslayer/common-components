@@ -2,14 +2,17 @@
 {
 	public static class IBoardValuesProviderExtensions
 	{
-		public static RemoveBoardValuesOnDispose Add(this IBoardValuesProvider provider, Entity entity)
+		public static void Add(this IBoardValuesProvider provider, Entity entity, double value = 1)
 		{
-			if (!entity.Has(out IBoard board))
-				return null;
-			var context = BoardContext.GetPooled(board);
-			provider.Add(context);
-			context.Dispose();
-			return RemoveBoardValuesOnDispose.GetInversePooledFromContext(context, provider);
+			if (entity.Has(out IBoard board))
+				provider.Add(board, value);
+		}
+		public static void Add(this IBoardValuesProvider provider, IBoard board, double value = 1)
+		{
+			BoardContext
+			   .GetPooled(board)
+			   .WithValue(value)
+			   .AddAndDispose();
 		}
 	}
 }

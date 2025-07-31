@@ -2,7 +2,7 @@
 {
 	public sealed record InitBlackboard(
 		IBoard Board,
-		BoardValuesAsset Values) : EntitySystem
+		IBoardValuesProvider Values) : EntitySystem
 	{
 		[OnSpawn]
 		void OnSpawn()

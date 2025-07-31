@@ -18,7 +18,7 @@ namespace BB
 		public virtual void Add(BoardContext context)
 			=> context.GetPooledCopy()
 			.WithKey(_key)
-			.WithValue(_value)
+			.WithValue(_value * context.Value)
 			.AddAndDispose();
 
 		public static implicit operator bool(AbstractSerializedBoardValue<KeyType> value)

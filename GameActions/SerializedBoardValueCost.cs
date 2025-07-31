@@ -76,8 +76,8 @@ namespace BB
 			var data = new TextData
 			{
 				Text = $"Not enough {_key.Name}",
-				Color = key.ColorScheme?.TextColor ?? Color.black,
-				FontSize = config._gameMessageFontSize
+				Color =  Color.black,
+				FontSize = 12
 			};
 
 			context.Messages.Add(data);

@@ -6,4 +6,8 @@ namespace BB
 	{
 		void Apply(MaterialPropertyBlock mpb);
 	}
+	public interface IRendererEffect
+	{
+		void Apply(Renderer renderer);
+	}
 }
