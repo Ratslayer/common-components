@@ -36,6 +36,13 @@
 			result._context = inverseContext;
 			return result;
 		}
+		public static RemoveBoardValuesOnDispose GetPooled(IBoardValuesProvider provider,BoardContext context)
+		{
+			var result = GetPooledInternal();
+			result._provider = provider;
+			result._context = context;
+			return result;
+		}
 		public override void Dispose()
 		{
 			_provider.Add(_context);

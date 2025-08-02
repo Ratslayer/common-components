@@ -81,7 +81,7 @@ namespace BB
 		}
 		public void AddAndDispose(IBoardValuesProvider provider)
 		{
-			provider.Add(this);
+			provider?.Add(this);
 			Dispose();
 		}
 		public RemoveBoardValuesOnDispose AddAndDisposeWithInverse(IBoardValuesProvider provider)

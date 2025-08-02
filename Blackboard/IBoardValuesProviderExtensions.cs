@@ -1,4 +1,6 @@
-﻿namespace BB
+﻿using System;
+
+namespace BB
 {
 	public static class IBoardValuesProviderExtensions
 	{
@@ -12,7 +14,21 @@
 			BoardContext
 			   .GetPooled(board)
 			   .WithValue(value)
-			   .AddAndDispose();
+			   .AddAndDispose(provider);
+		}
+		public static IDisposable AddTemp(this IBoardValuesProvider provider, IBoard board, double value = 1)
+		{
+			provider.Add(board, value);
+			var context = BoardContext
+				.GetPooled(board)
+				.WithValue(-value);
+			return RemoveBoardValuesOnDispose.GetPooled(provider, context);
+		}
+		public static IDisposable AddTemp(this IBoardValuesProvider provider, Entity entity, double value = 1)
+		{
+			if (entity.Has(out IBoard board))
+				return provider.AddTemp(board, value);
+			return null;
 		}
 	}
 }
