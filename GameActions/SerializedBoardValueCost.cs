@@ -69,8 +69,7 @@ namespace BB
 		public void ExecuteFailure(IGameActionContext context)
 		{
 			if (_key is not BaseBoardKey key
-				|| GetValue(context.Entity).GreaterThanOrEquals(0)
-				|| !context.Entity.Has(out UiConfig config))
+				|| GetValue(context.Entity).GreaterThanOrEquals(0))
 				return;
 
 			var data = new TextData

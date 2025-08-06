@@ -1,6 +1,6 @@
 ﻿using UnityEngine.EventSystems;
 
-namespace BB
+namespace BB.Ui
 {
 	public abstract record BaseMultiClickButtonSystem(MultiClickButton Button)
 	{

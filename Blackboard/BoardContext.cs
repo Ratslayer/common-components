@@ -63,6 +63,11 @@ namespace BB
 			Value = multiplier;
 			return this;
 		}
+		public BoardContext TimesValue(double multiplier)
+		{
+			Value = Value * multiplier;
+			return this;
+		}
 		public BoardContext WithSwappedBoards()
 		{
 			(Board, TargetBoard) = (TargetBoard, Board);
@@ -91,5 +96,7 @@ namespace BB
 			Dispose();
 			return result;
 		}
+		public BoardContext GetInverseCopy()
+			=> GetPooledCopy().WithValue(-Value);
 	}
 }
