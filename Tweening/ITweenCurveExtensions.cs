@@ -100,12 +100,22 @@ namespace BB
 
 		public static Tween Alpha(this ITweenCurve curve, CanvasGroup group, float alpha)
 			=> group
-			.DOFade(alpha,curve.Duration)
+			.DOFade(alpha, curve.Duration)
 			.SetEase(curve);
 
 		public static UniTask Alpha(this ITweenCurve curve, CanvasGroup group, float alpha, CancellationToken ct)
 			=> curve
 			.Alpha(group, alpha)
+			.ToUniTask(cancellationToken: ct);
+
+		public static Tween MoveAnchored(this ITweenCurve curve, RectTransform t, Vector2 pos)
+			=> t
+			.DOAnchorPos(pos, curve.Duration)
+			.SetEase(curve);
+
+		public static UniTask MoveAnchored(this ITweenCurve curve, RectTransform t, Vector2 pos, CancellationToken ct)
+			=> curve
+			.MoveAnchored(t, pos)
 			.ToUniTask(cancellationToken: ct);
 	}
 }
