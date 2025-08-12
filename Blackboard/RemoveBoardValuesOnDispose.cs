@@ -45,7 +45,7 @@
 		}
 		public override void Dispose()
 		{
-			_provider.Add(_context);
+			_provider.AddBoardValues(_context);
 			_context.Dispose();
 			base.Dispose();
 		}

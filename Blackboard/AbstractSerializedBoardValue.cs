@@ -2,10 +2,6 @@
 using UnityEngine;
 namespace BB
 {
-	public interface ISerializedBoardValue
-	{
-		void Add(BoardContext context);
-	}
 	public abstract class AbstractSerializedBoardValue<KeyType> : ISerializedBoardValue
 		where KeyType : BaseScriptableObject, IBoardKey
 	{

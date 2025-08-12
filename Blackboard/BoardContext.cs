@@ -6,8 +6,6 @@ namespace BB
 		public IBoardKey Key { get; private set; }
 		public IBoard Board { get; private set; }
 		public IBoard TargetBoard { get; private set; }
-		public List<object> Tags { get; private set; } = new();
-		public List<object> TargetTags { get; private set; } = new();
 		public List<IBoardKey> ActiveKeys { get; private set; } = new();
 		public double Value { get; private set; } = 1;
 		public static BoardContext GetPooled(IBoard board, IBoardKey key = null)
@@ -22,8 +20,6 @@ namespace BB
 			Key = null;
 			Board = null;
 			TargetBoard = null;
-			Tags.Clear();
-			TargetTags.Clear();
 			ActiveKeys.Clear();
 			Value = 1;
 			base.Dispose();
@@ -33,8 +29,6 @@ namespace BB
 			var copy = GetPooled(Board);
 			copy.Key = Key;
 			copy.TargetBoard = Board;
-			copy.Tags.AddRange(TargetTags);
-			copy.TargetTags.AddRange(TargetTags);
 			copy.Value = Value;
 			return copy;
 		}
@@ -46,16 +40,6 @@ namespace BB
 		public BoardContext WithTarget(IBoard board)
 		{
 			TargetBoard = board;
-			return this;
-		}
-		public BoardContext WithTag(object tag)
-		{
-			Tags.Add(tag);
-			return this;
-		}
-		public BoardContext WithTags(IEnumerable<object> tags)
-		{
-			Tags.AddRange(tags);
 			return this;
 		}
 		public BoardContext WithValue(double multiplier)
@@ -75,9 +59,10 @@ namespace BB
 		}
 		public void AddAndDispose()
 		{
-			Board.Add(this);
+			Add();
 			Dispose();
 		}
+		public void Add() => Board.Add(this);
 		public double GetAndDispose()
 		{
 			var result = Board.Get(this);
@@ -86,12 +71,12 @@ namespace BB
 		}
 		public void AddAndDispose(IBoardValuesProvider provider)
 		{
-			provider?.Add(this);
+			provider?.AddBoardValues(this);
 			Dispose();
 		}
 		public RemoveBoardValuesOnDispose AddAndDisposeWithInverse(IBoardValuesProvider provider)
 		{
-			provider.Add(this);
+			provider.AddBoardValues(this);
 			var result = RemoveBoardValuesOnDispose.GetInversePooledFromContext(this, provider);
 			Dispose();
 			return result;

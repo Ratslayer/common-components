@@ -2,6 +2,6 @@
 {
 	public interface IBoardValuesProvider
 	{
-		void Add(BoardContext context);
+		void AddBoardValues(BoardContext context);
 	}
 }
