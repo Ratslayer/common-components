@@ -108,7 +108,7 @@ namespace BB
 		{
 			var key = context.Key;
 			_action = "Add";
-			context.ActiveKeys.Add(context.Key);
+			context.ActiveKeys.Add(key);
 
 			var container = GetOrCreate(key);
 
@@ -151,22 +151,39 @@ namespace BB
 					$"{key.Name} is found multiple times.");
 			}
 			context.ActiveKeys.Add(key);
-			var container = GetOrCreate(key);
-			var value = container.Value;
-			//add conditional values
-			if (container._conditionalValues is not null)
-			{
-				foreach (var (condition, v) in container._conditionalValues)
-					if (condition?.IsValid(context) is true)
-						value = AddValueInternal(key, value, v);
-			}
+			var value = GetValueRecursive(key, this, context);
 			value *= context.Value;
 			value = ApplyMultipliers(context, value, BoardEventUsage.Get);
 			value = ClampValue(context, value, BoardEventUsage.Get);
 			context.ActiveKeys.RemoveLast();
 			return value;
 		}
-		private double AddValueInternal(IBoardKey key, double v1, double v2)
+		private static double GetValueRecursive(IBoardKey key, Blackboard board, BoardContext context)
+		{
+			var container = board.GetOrCreate(key);
+			var value = container.Value;
+			//add conditional values
+			if (container._conditionalValues is not null)
+			{
+				foreach (var (condition, v) in container._conditionalValues)
+				{
+					var contextCopy = context.GetPooledCopy();
+					if (condition?.IsValid(contextCopy) is true)
+						value = AddValueInternal(key, value, v);
+					contextCopy.Dispose();
+				}
+			}
+			if (board._parent is Blackboard parent)
+			{
+				var parentContext = context
+					.GetPooledCopy(parent);
+				var parentValue = GetValueRecursive(key, parent, parentContext);
+				value = AddValueInternal(key, value, parentValue);
+				parentContext.Dispose();
+			}
+			return value;
+		}
+		private static double AddValueInternal(IBoardKey key, double v1, double v2)
 		{
 			return key.StackingMethod switch
 			{
@@ -184,7 +201,9 @@ namespace BB
 			var result = value;
 			foreach (var multiplier in km.Multipliers)
 			{
-				var multContext = context.GetPooledCopy().WithKey(multiplier);
+				var multContext = context
+					.GetPooledCopy()
+					.WithKey(multiplier);
 				var multValue = GetInternal(multContext);
 				multContext.Dispose();
 				result *= multValue;

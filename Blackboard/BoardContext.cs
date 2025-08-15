@@ -8,6 +8,7 @@ namespace BB
 		public IBoard TargetBoard { get; private set; }
 		public List<IBoardKey> ActiveKeys { get; private set; } = new();
 		public double Value { get; private set; } = 1;
+		public string DebugName { get; private set; }
 		public static BoardContext GetPooled(IBoard board, IBoardKey key = null)
 		{
 			var result = GetPooledInternal();
@@ -17,18 +18,27 @@ namespace BB
 		}
 		public override void Dispose()
 		{
+			if (!string.IsNullOrWhiteSpace(DebugName))
+				Log.Info($"Disposing BoardContext {DebugName}");
+			DebugName = null;
+			ActiveKeys.Clear();
 			Key = null;
 			Board = null;
 			TargetBoard = null;
-			ActiveKeys.Clear();
 			Value = 1;
 			base.Dispose();
 		}
-		public BoardContext GetPooledCopy()
+		public BoardContext WithDebugName(string name)
 		{
-			var copy = GetPooled(Board);
+			DebugName = name;
+			return this;
+		}
+		public BoardContext GetPooledCopy(IBoard board = null)
+		{
+			board ??= Board;
+			var copy = GetPooled(board);
 			copy.Key = Key;
-			copy.TargetBoard = Board;
+			copy.TargetBoard = TargetBoard;
 			copy.Value = Value;
 			return copy;
 		}
