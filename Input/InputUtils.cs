@@ -11,7 +11,7 @@ namespace BB
 			container.Event<InputEvent>();
 			container.System<ProcessInputActions>();
 			container.Stack<InputActions>();
-			container.Stack<InputBlocked>();
+			container.Stack<PlayerInputBlocked>();
 			container.Event<InputActionEvent>();
 		}
 	}
