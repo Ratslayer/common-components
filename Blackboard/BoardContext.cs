@@ -4,6 +4,7 @@ namespace BB
 	public sealed class BoardContext : ProtectedPooledObject<BoardContext>
 	{
 		public IBoardKey Key { get; private set; }
+		public IBoard StartingBoard { get; private set; }
 		public IBoard Board { get; private set; }
 		public IBoard TargetBoard { get; private set; }
 		public List<IBoardKey> ActiveKeys { get; private set; } = new();
@@ -14,6 +15,7 @@ namespace BB
 			var result = GetPooledInternal();
 			result.Key = key;
 			result.Board = board;
+			result.StartingBoard = board;
 			return result;
 		}
 		public override void Dispose()
@@ -38,6 +40,7 @@ namespace BB
 			board ??= Board;
 			var copy = GetPooled(board);
 			copy.Key = Key;
+			copy.StartingBoard = StartingBoard;
 			copy.TargetBoard = TargetBoard;
 			copy.Value = Value;
 			return copy;

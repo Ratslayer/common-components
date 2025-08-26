@@ -14,7 +14,7 @@ namespace BB.Board.Serialization
 			if (!_key)
 				return false;
 			var value = context
-				.GetPooledCopy()
+				.GetPooledCopy(context.StartingBoard)
 				.WithKey(_key)
 				.GetAndDispose();
 			return value.IsPositive();
@@ -29,7 +29,7 @@ namespace BB.Board.Serialization
 			if (!_key)
 				return false;
 			var value = context
-				.GetPooledCopy()
+				.GetPooledCopy(context.StartingBoard)
 				.WithSwappedBoards()
 				.WithKey(_key)
 				.GetAndDispose();
