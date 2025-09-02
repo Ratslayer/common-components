@@ -6,7 +6,7 @@ namespace BB
 		public static void InstallInput(IDiContainer container, IInputConfig config)
 		{
 			container.Instance(config);
-			container.System<MousePointer>();
+			container.System<IPointer, MousePointer>();
 			container.System<UnityInput>();
 			container.Event<InputEvent>();
 			container.System<ProcessInputActions>();

@@ -1,13 +1,6 @@
-﻿using BB.Ui;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.InputSystem;
+﻿using System.Collections.Generic;
 namespace BB
 {
-	public sealed record MousePointer
-	{
-		public Vector3 Position => Mouse.current.position.value;
-	}
 	public sealed record ProcessInputActions(InputActions Actions)
 	{
 		readonly List<InputActionData> _pressedActions = new();
