@@ -18,6 +18,8 @@ namespace BB
 			result.StartingBoard = board;
 			return result;
 		}
+		public static BoardContext GetPooled(Entity entity)
+			=> GetPooled(entity.Require<IBoard>());
 		public override void Dispose()
 		{
 			if (!string.IsNullOrWhiteSpace(DebugName))
