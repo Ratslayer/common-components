@@ -7,12 +7,14 @@ namespace BB
 		public Vector3 Position => Has(out Root root) ? root.Position : Vector3.zero;
 	}
 	public abstract record SubscribeToEntityVariableEventSystem<TVariable, TEvent>(TVariable Var)
-		where TVariable: EntityVariable<TVariable>
+		: EntitySystem
+		where TVariable : EntityVariable<TVariable>
 	{
 		protected abstract void OnVariableEvent(TEvent e);
 		[OnSpawn]
 		void OnSpawn()
 		{
+
 			OnEventSubscribe(default);
 			Var._event.Subscribe(OnEventSubscribe);
 		}
@@ -27,8 +29,11 @@ namespace BB
 		{
 			if (Var.PreviousValue.Has(out IEvent<TEvent> e))
 				e.Unsubscribe(OnVariableEvent);
-			if(Var.Value.Has(out e))
+			if (Var.Value.Has(out e))
 				e.Subscribe(OnVariableEvent);
+			//для тех событий которые являеются своими же источниками
+			if(Entity.Has(out TEvent eventSource))
+				OnVariableEvent(eventSource);
 		}
 	}
 }
