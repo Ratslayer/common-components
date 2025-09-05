@@ -85,6 +85,14 @@ namespace BB
 			return result;
 		}
 		public double Get() => Board.Get(this);
+		public double Get(IBoardKey replacementKey)
+		{
+			var tempKey = Key;
+			Key = replacementKey;
+			var result = Get();
+			Key = tempKey;
+			return result;
+		}
 		public void AddAndDispose(IBoardValuesProvider provider)
 		{
 			provider?.AddBoardValues(this);
