@@ -84,19 +84,37 @@ namespace BB
 			Dispose();
 			return result;
 		}
+		public double Get() => Board.Get(this);
 		public void AddAndDispose(IBoardValuesProvider provider)
 		{
 			provider?.AddBoardValues(this);
 			Dispose();
 		}
-		public RemoveBoardValuesOnDispose AddAndDisposeWithInverse(IBoardValuesProvider provider)
+		public BoardContext GetInverseCopy()
+			=> GetPooledCopy().WithValue(-Value);
+		public AddBoardContextOnDispose AddTempAndDispose()
 		{
-			provider.AddBoardValues(this);
-			var result = RemoveBoardValuesOnDispose.GetInversePooledFromContext(this, provider);
+			var result = AddBoardContextOnDispose.GetPooled(GetInverseCopy());
+			Add();
 			Dispose();
 			return result;
 		}
-		public BoardContext GetInverseCopy()
-			=> GetPooledCopy().WithValue(-Value);
+	}
+	public sealed class AddBoardContextOnDispose : ProtectedPooledObject<AddBoardContextOnDispose>
+	{
+		BoardContext _context;
+		public static AddBoardContextOnDispose GetPooled(BoardContext context)
+		{
+			var result = GetPooledInternal();
+			result._context = context;
+			return result;
+		}
+		public override void Dispose()
+		{
+			_context.Add();
+			_context.Dispose();
+			_context = null;
+			base.Dispose();
+		}
 	}
 }

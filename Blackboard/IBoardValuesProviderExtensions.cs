@@ -22,7 +22,10 @@ namespace BB
 			var context = BoardContext
 				.GetPooled(board)
 				.WithValue(-value);
-			return RemoveBoardValuesOnDispose.GetPooled(provider, context);
+			return ApplyBoardValueProvidersOnDispose
+				.GetPooled()
+				.WithContext(context)
+				.WithProvider(provider);
 		}
 		public static IDisposable AddTemp(this IBoardValuesProvider provider, Entity entity, double value = 1)
 		{
