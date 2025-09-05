@@ -28,6 +28,9 @@ namespace BB.Board.Serialization
 		{
 			if (!_key)
 				return false;
+			if (context.TargetBoard is null)
+				return false;
+
 			var value = context
 				.GetPooledCopy(context.StartingBoard)
 				.WithSwappedBoards()
