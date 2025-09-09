@@ -12,10 +12,12 @@ namespace BB
 		public string GetName(InputActionWrapperAsset e)
 			=> _actionSubscriptions.TryGetValue(s => s.Event == e, out var sub) 
 			? sub.InputName : "[NO INPUT]";
+
 		[OnCreate]
 		private void InitInputAsset()
 		{
-			foreach (var action in Config.Actions)
+			var actions = Config.GetAllActions();
+			foreach (var action in actions)
 				if (action)
 					_actionSubscriptions.Add(
 						new(this, Config.InputAsset[action._inputActionName], action, InputPublisher));

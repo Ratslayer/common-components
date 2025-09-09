@@ -1,5 +1,4 @@
-﻿using BB.Di;
-using UnityEngine;
+﻿using UnityEngine;
 namespace BB
 {
 	public readonly struct TransformAdapter

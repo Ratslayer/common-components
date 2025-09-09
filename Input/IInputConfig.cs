@@ -4,6 +4,6 @@ namespace BB
 	public interface IInputConfig
 	{
 		UnityEngine.InputSystem.InputActionAsset InputAsset { get; }
-		IReadOnlyCollection<InputActionWrapperAsset> Actions { get; }
+		IReadOnlyCollection<InputActionWrapperAsset> GetAllActions();
 	}
 }

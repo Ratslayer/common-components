@@ -6,13 +6,22 @@ namespace BB
 		public static void InstallInput(IDiContainer container, IInputConfig config)
 		{
 			container.Instance(config);
+
+			container.Event<InputEvent>();
+			container.Event<MovePlayerInputEvent>();
+			container.Event<TurnPlayerInputEvent>();
+			container.Event<InputActionEvent>();
+
+			container.System<GameInputSystem>();
 			container.System<IPointer, MousePointer>();
 			container.System<UnityInput>();
-			container.Event<InputEvent>();
 			container.System<ProcessInputActions>();
+
+			container.Var<CurrentPlayerActions>();
+
 			container.Stack<InputActions>();
 			container.Stack<PlayerInputBlocked>();
-			container.Event<InputActionEvent>();
+			container.Stack<PlayerMovementBlocked>();
 		}
 	}
 }

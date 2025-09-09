@@ -7,7 +7,7 @@ namespace BB
 	public static class ITweenCurveExtensions
 	{
 		public static Tween MoveTo(
-			this ITweenCurve curve, in TransformAdapter transform, Vector3 position)
+			this ITweenCurve curve, in TransformAdapter transform, in Vector3Adapter position)
 			=> transform._transform
 			.DOMove(position, curve.Duration)
 			.SetEase(curve);
