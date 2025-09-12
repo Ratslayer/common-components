@@ -11,6 +11,12 @@ namespace BB
 			=> transform._transform
 			.DOMove(position, curve.Duration)
 			.SetEase(curve);
+		public static UniTask MoveTo(
+			this ITweenCurve curve,
+			in TransformAdapter transform,
+			in Vector3Adapter position,
+			CancellationToken ct)
+				=> curve.MoveTo(transform, position).WithCancellation(ct);
 		public static Tween MoveToTransform(
 			this ITweenCurve curve, in TransformAdapter transform, in TransformAdapter target)
 		{
