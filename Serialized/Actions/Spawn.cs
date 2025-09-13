@@ -8,6 +8,7 @@ namespace BB.Serialized.Actions
 	{
 		public GameObject _prefab;
 		public Transform _location;
+		public bool _parentToLocation;
 		public void Invoke(in SerializedSceneActionContext context)
 		{
 			if (!Validator.GetPooled(context.Entity)
@@ -15,7 +16,9 @@ namespace BB.Serialized.Actions
 				.IsAssigned(_location, nameof(_location))
 				.ValidateAndDispose())
 				return;
-			_prefab.SpawnEntity(_location);
+			if (_parentToLocation)
+				_prefab.SpawnEntity(_location);
+			else _prefab.SpawnEntity(new(_location.position, _location.rotation));
 		}
 	}
 }

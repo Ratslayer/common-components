@@ -32,7 +32,7 @@ namespace BB
 			if (Var.Value.Has(out e))
 				e.Subscribe(OnVariableEvent);
 			//для тех событий которые являеются своими же источниками
-			if(Entity.Has(out TEvent eventSource))
+			if(Var.Value.Has(out TEvent eventSource))
 				OnVariableEvent(eventSource);
 		}
 	}
