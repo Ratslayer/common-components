@@ -9,7 +9,7 @@ namespace BB.Serialized.Actions
 		public GameObject _prefab;
 		public Transform _location;
 		public bool _parentToLocation;
-		public void Invoke(in SerializedSceneActionContext context)
+		public void Invoke(in SerializedActionContext context)
 		{
 			if (!Validator.GetPooled(context.Entity)
 				.IsAssigned(_prefab, nameof(_prefab))

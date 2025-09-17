@@ -5,54 +5,40 @@ using UnityEngine;
 namespace BB.Serialized.Actions
 {
 	[Serializable]
-	public sealed class SerializedActions
-	{
-		[SerializeField]
-		SerializedTriggers _triggers = new();
-		[SerializeReference]
-		ISerializedAction[] _actions = { };
-		[SerializeReference]
-		ISerializedActionCondition[] _conditions = { };
-		[SerializeReference]
-		ISerializedAction[] _failedActions = { };
+    public sealed class SerializedActions
+    {
+        [SerializeReference]
+        ISerializedActionCondition[] _conditions = { };
+        [SerializeReference]
+        ISerializedAction[] _successfulActions = { };
+        [SerializeReference]
+        ISerializedAction[] _failedActions = { };
+        public void Invoke(SerializedActionContext context)
+        {
+            InvokeAsync().Forget();
 
-		public IDisposable Subscribe(Entity entity)
-		{
-			var subscription = _triggers.CreateSubscription(new()
-			{
-				Entity = entity,
-				Action = () => Invoke().Forget()
-			});
+            async UniTaskVoid InvokeAsync()
+            {
+                var success = true;
+                foreach (var condition in _conditions)
+                    if (condition?.CanInvoke(context) is false)
+                    {
+                        success = false;
+                        break;
+                    }
 
-			subscription.Subscribe();
-
-			return subscription;
-
-			async UniTaskVoid Invoke()
-			{
-				var success = true;
-				foreach (var condition in _conditions)
-					if (condition?.CanInvoke(new() { Entity = entity }) is false)
-					{
-						success = false;
-						break;
-					}
-				var context = new SerializedSceneActionContext
-				{
-					Entity = entity
-				};
-				var actions = success ? _actions : _failedActions;
-				foreach (var action in actions)
-					if (action is ISerializedActionSync sync)
-						sync.Invoke(context);
-					else if (action is ISerializedActionAsync async)
-					{
-						var task = async.Invoke(context);
-						if (async.WaitForExecution)
-							await task;
-						else task.Forget();
-					}
-			}
-		}
-	}
+                var actions = success ? _successfulActions : _failedActions;
+                foreach (var action in actions)
+                    if (action is ISerializedActionSync sync)
+                        sync.Invoke(context);
+                    else if (action is ISerializedActionAsync async)
+                    {
+                        var task = async.Invoke(context);
+                        if (async.WaitForExecution)
+                            await task;
+                        else task.Forget();
+                    }
+            }
+        }
+    }
 }

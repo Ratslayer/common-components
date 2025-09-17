@@ -6,7 +6,7 @@ namespace BB
 {
 	public sealed class ActionBehaviour : EntityBehaviour
 	{
-		public SerializedActions _actions = new();
+		public SerializedActionsWithTriggers _actions = new();
 		IDisposable _disposable;
 		[OnSpawn]
 		void OnSpawn() 
