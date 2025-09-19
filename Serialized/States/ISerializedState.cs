@@ -44,7 +44,8 @@ namespace BB.Serialized.States
                     async.ExitState(context).Forget();
         }
     }
+
 }
-namespace BB
+namespace BB.Serialized.Actions
 {
 }
