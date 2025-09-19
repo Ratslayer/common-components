@@ -16,7 +16,7 @@ namespace BB
     {
         [SerializeReference]
         ISerializedStateAction[] _stateActions = { };
-        [SerializeField] SerializedActions _onEnter = new(), _onExit = new();
+        [SerializeField] SerializedActions[] _onEnter = { }, _onExit = { };
         [SerializeField] SerializedActionsWithTriggers[] _subscriptions = { };
         readonly List<IDisposable> _disposables = new();
         public void Enter(in StateContext context)
@@ -25,13 +25,15 @@ namespace BB
             foreach (var action in _subscriptions)
                 _disposables.Add(action.Subscribe(context.Entity));
             _stateActions.Invoke(new() { Entity = context.Entity }).Forget();
-            _onEnter.Invoke(new() { Entity = context.Entity });
+            foreach (var action in _onEnter)
+                action.Invoke(new() { Entity = context.Entity });
         }
         public void Exit(in StateContext context)
         {
             DisposeAll();
             _stateActions.Exit(new() { Entity = context.Entity });
-            _onExit.Invoke(new() { Entity = context.Entity });
+            foreach (var action in _onExit)
+                action.Invoke(new() { Entity = context.Entity });
         }
         void DisposeAll()
         {

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace BB.Serialized.Actions
 {
-	[Serializable]
+    [Serializable]
     public sealed class EnterState : ISerializedActionSync
     {
         public StateMachineBehaviour _machine;
@@ -21,11 +21,8 @@ namespace BB.Serialized.Actions
                 return;
             _machine.EnterState(_state);
         }
-        List<(string, StateBehaviour)> States
-            => _machine ? _machine._states
-            .Select(s => s ? (s.name, s) : ("", null))
-            .ToList()
-            : new();
+        StateBehaviour[] States
+            => _machine ? _machine._states : new StateBehaviour[] { };
 
     }
 }
