@@ -22,18 +22,16 @@ namespace BB.Serialized.States
     }
     public static class SerializedActionExtensions
     {
-        public static async UniTask Invoke(this ISerializedAction[] actions, SerializedActionContext context)
+        public static async UniTask Invoke<TAction>(this TAction[] actions, SerializedActionContext context)
+            where TAction : ISerializedAction
         {
             foreach (var action in actions)
-                if (action is ISerializedActionSync sync)
-                    sync.Invoke(context);
-                else if (action is ISerializedActionAsync async)
-                {
-                    var task = async.Invoke(context);
-                    if (async.WaitForExecution)
-                        await task;
-                    else task.Forget();
-                }
+            {
+                var task = action.Invoke(context);
+                if (action.WaitForExecution)
+                    await task;
+                else task.Forget();
+            }
         }
         public static void Exit(this ISerializedStateAction[] actions, SerializedActionContext context)
         {

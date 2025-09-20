@@ -4,20 +4,20 @@ using UnityEngine;
 namespace BB.Serialized.Actions
 {
 	[Serializable]
-    public sealed class MoveTransform : ISerializedActionSync
+    public sealed class MoveTransform : SerializedActionSync
     {
         public Transform _target;
         public Transform _position;
-        public void Invoke(in SerializedActionContext context)
-        {
-            if (!Validator.GetPooled()
-                .WithEntity(context.Entity)
-                .IsAssigned(_target, nameof(_target))
-                .IsAssigned(_position, nameof(_position))
-                .ValidateAndDispose())
-                return;
-
+		protected override void InvokeSync(SerializedActionContext context)
+		{
             _target.SetPositionAndRotation(_position.position, _position.rotation);
+        }
+		protected override void SetupValidator(Validator validator, SerializedActionContext context)
+		{
+            validator
+                .IsAssigned(_target, nameof(_target))
+                .IsAssigned(_position, nameof(_position));
+
         }
     }
 }

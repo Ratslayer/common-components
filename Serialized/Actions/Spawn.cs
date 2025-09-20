@@ -4,21 +4,22 @@ using UnityEngine;
 namespace BB.Serialized.Actions
 {
 	[Serializable]
-	public sealed class Spawn : ISerializedActionSync
+	public sealed class Spawn : SerializedActionSync
 	{
 		public GameObject _prefab;
 		public Transform _location;
 		public bool _parentToLocation;
-		public void Invoke(in SerializedActionContext context)
+		protected override void InvokeSync(SerializedActionContext context)
 		{
-			if (!Validator.GetPooled(context.Entity)
+            if (_parentToLocation)
+                _prefab.SpawnEntity(_location);
+            else _prefab.SpawnEntity(new(_location.position, _location.rotation));
+        }
+		protected override void SetupValidator(Validator validator, SerializedActionContext context)
+		{
+			validator
 				.IsAssigned(_prefab, nameof(_prefab))
-				.IsAssigned(_location, nameof(_location))
-				.ValidateAndDispose())
-				return;
-			if (_parentToLocation)
-				_prefab.SpawnEntity(_location);
-			else _prefab.SpawnEntity(new(_location.position, _location.rotation));
-		}
+				.IsAssigned(_location, nameof(_location));
+        }
 	}
 }

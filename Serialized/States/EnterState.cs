@@ -6,23 +6,23 @@ using System.Linq;
 namespace BB.Serialized.Actions
 {
     [Serializable]
-    public sealed class EnterState : ISerializedActionSync
+    public sealed class EnterState : SerializedActionSync
     {
         public StateMachineBehaviour _machine;
         [ValueDropdown(nameof(States))]
         public StateBehaviour _state;
-        public void Invoke(in SerializedActionContext context)
+        protected override void InvokeSync(SerializedActionContext context)
         {
-            if (!Validator.GetPooled()
-                .WithEntity(context.Entity)
-                .IsAssigned(_machine, nameof(_machine))
-                .IsAssigned(_state, nameof(_state))
-                .ValidateAndDispose())
-                return;
             _machine.EnterState(_state);
         }
-        StateBehaviour[] States
-            => _machine ? _machine._states : new StateBehaviour[] { };
+        protected override void SetupValidator(Validator validator, SerializedActionContext context)
+        {
+            validator
+                .IsAssigned(_machine, nameof(_machine))
+                .IsAssigned(_state, nameof(_state));
 
+        }
+        StateBehaviour[] States
+            => _machine ? _machine._states : null;
     }
 }

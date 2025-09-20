@@ -3,10 +3,10 @@
 namespace BB.Serialized.Actions
 {
     [Serializable]
-    public sealed class DespawnSelf : ISerializedActionSync
+    public sealed class DespawnSelf : SerializedActionSync
     {
-        public void Invoke(in SerializedActionContext context)
-        {
+		protected override void InvokeSync(SerializedActionContext context)
+		{
             context.Entity.Despawn();
         }
     }

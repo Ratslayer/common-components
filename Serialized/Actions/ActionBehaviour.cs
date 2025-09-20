@@ -1,5 +1,5 @@
 ﻿using BB.Di;
-using BB.Serialized.Actions;
+using BB.Serialized;
 using System;
 
 namespace BB
