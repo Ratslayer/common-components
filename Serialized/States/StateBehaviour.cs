@@ -6,20 +6,18 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace BB
+namespace BB.States
 {
-    public readonly struct StateContext
+    [Serializable]
+    public sealed class SerializedState : IState
     {
-        public StateMachineBehaviour Machine { get; init; }
-        public Entity Entity { get; init; }
-    }
-    public sealed class StateBehaviour : BaseBehaviour
-    {
+        public string _name;
         [SerializeReference]
         ISerializedStateAction[] _stateActions = { };
         [SerializeField] SerializedActions _onEnter = new(), _onExit = new();
         [SerializeField] SerializedActionsWithTriggers[] _subscriptions = { };
         readonly List<IDisposable> _disposables = new();
+        public string Name => _name;
         public void Enter(in StateContext context)
         {
             DisposeAll();
@@ -31,12 +29,20 @@ namespace BB
         public void Exit(in StateContext context)
         {
             DisposeAll();
-            _stateActions.Exit(new() { Entity = context.Entity });
+            _stateActions.Exit(new() { Entity = context.Entity }).Forget();
             _onExit.Invoke(new() { Entity = context.Entity });
         }
         void DisposeAll()
         {
             _disposables.DisposeAndClear();
+        }
+    }
+    public sealed class StateBehaviour : BaseBehaviour, IStateProvider
+    {
+        public SerializedState _state = new();
+        public IEnumerable<IState> GetStates()
+        {
+            yield return _state;
         }
     }
 }

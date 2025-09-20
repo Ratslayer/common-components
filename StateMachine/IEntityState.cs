@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace BB
 {
-	public interface IState { }
+	public interface IEntityState { }
 	public interface IStateData : IDisposable
 	{
 		Entity Entity { get; }
@@ -13,29 +13,29 @@ namespace BB
 		void OnExit();
 		void AddEntity(Entity entity);
 	}
-	public interface IStateOnEnter : IState
+	public interface IEntityStateOnEnter : IEntityState
 	{
 		void EnterState(IStateData data);
 	}
-	public interface IStateOnExit : IState
+	public interface IEntityStateOnExit : IEntityState
 	{
 		void ExitState(IStateData data);
 	}
-	public interface IStateMachine
+	public interface IEntityStateMachine
 	{
 		Entity Entity { get; }
-		DisposableToken EnterState(IState state);
-		DisposableToken AppendState(IState state);
-		void ExitState(IState state);
+		DisposableToken EnterState(IEntityState state);
+		DisposableToken AppendState(IEntityState state);
+		void ExitState(IEntityState state);
 	}
-	internal record StackStateMachine : EntitySystem, IStateMachine
+	internal record StackStateMachine : EntitySystem, IEntityStateMachine
 	{
 		readonly List<DisposableToken<StateData>> _states = new();
-		public DisposableToken EnterState(IState state)
+		public DisposableToken EnterState(IEntityState state)
 			=> EnterState(state, false);
-		public DisposableToken AppendState(IState state)
+		public DisposableToken AppendState(IEntityState state)
 			=> EnterState(state, true);
-		private DisposableToken<StateData> EnterState(IState state, bool append)
+		private DisposableToken<StateData> EnterState(IEntityState state, bool append)
 		{
 			state = state.NullIfDestroyedUnityEngineObject();
 			if (state is null)
@@ -72,7 +72,7 @@ namespace BB
 			}
 		}
 
-		public void ExitState(IState state)
+		public void ExitState(IEntityState state)
 		{
 			if (!IsInActiveState(out var current))
 				return;
@@ -106,8 +106,8 @@ namespace BB
 		readonly List<Entity> _spawnedEntities = new();
 		public readonly List<DisposableToken<StateData>> _appendedStates = new();
 		public StateData _parentState;
-		public IState _state;
-		public IStateMachine _stateMachine;
+		public IEntityState _state;
+		public IEntityStateMachine _stateMachine;
 		bool _entered;
 		public Entity Entity => _stateMachine?.Entity ?? default;
 		public void AddEntity(Entity entity)
@@ -129,7 +129,7 @@ namespace BB
 			if (_entered)
 				return;
 			_entered = true;
-			if (_state is IStateOnEnter e)
+			if (_state is IEntityStateOnEnter e)
 				e.EnterState(this);
 
 			_appendedStates.RemoveDeadElements();
@@ -145,11 +145,11 @@ namespace BB
 			_appendedStates.RemoveDeadElements();
 			foreach (var data in _appendedStates.Inverse())
 				data.Value.OnExit();
-			if (_state is IStateOnExit e)
+			if (_state is IEntityStateOnExit e)
 				e.ExitState(this);
 			_spawnedEntities.DespawnAndClear();
 		}
-		public static StateData GetPooled(IStateMachine machine, IState state)
+		public static StateData GetPooled(IEntityStateMachine machine, IEntityState state)
 		{
 			var data = GetPooledInternal();
 			data._stateMachine = machine;
@@ -162,15 +162,15 @@ namespace BB
 		public static void BindStateMachine(this IDiContainer container)
 		{
 			container
-				.Construct<IStateMachine, StackStateMachine>()
+				.Construct<IEntityStateMachine, StackStateMachine>()
 				.Inject()
 				.Lazy();
 		}
-		public static DisposableToken EnterState(this Entity entity, IState state)
+		public static DisposableToken EnterState(this Entity entity, IEntityState state)
 		{
 			if (state is null
 				|| state is UnityEngine.Object obj && !obj
-				|| !entity.Has(out IStateMachine machine))
+				|| !entity.Has(out IEntityStateMachine machine))
 				return default;
 
 			return machine.EnterState(state);
@@ -178,9 +178,9 @@ namespace BB
 	}
 	public readonly struct EnteredStateDisposable : IDisposable
 	{
-		readonly IStateMachine _machine;
-		readonly IState _state;
-		public EnteredStateDisposable(IStateMachine machine, IState state)
+		readonly IEntityStateMachine _machine;
+		readonly IEntityState _state;
+		public EnteredStateDisposable(IEntityStateMachine machine, IEntityState state)
 		{
 			_machine = machine;
 			_state = state;

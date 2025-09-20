@@ -1,35 +1,57 @@
 ﻿using BB.Di;
 using Sirenix.OdinInspector;
-namespace BB
+using System.Collections.Generic;
+using System.Linq;
+namespace BB.States
 {
-    public sealed class StateMachineBehaviour : EntityBehaviour
+    public interface IStateProvider
     {
-        public StateBehaviour _startingState;
-        public StateBehaviour[] _states;
-        StateBehaviour _currentState;
+        IEnumerable<IState> GetStates();
+    }
+    public sealed class StateMachineBehaviour : EntityBehaviour, IStateMachine, IStateProvider
+    {
+        [ValueDropdown(nameof(GetStateNames))]
+        public string _startingStateName;
+        public SerializedState[] _states = { };
+        IState _currentState;
+        readonly List<IState> _runtimeStates = new();
         [OnSpawn]
-        void OnSpawn() => EnterState(_startingState);
-        [OnDespawn]
-        void OnDespawn() => EnterState(null);
-        public void EnterState(StateBehaviour state)
+        void OnSpawn()
         {
-            if (_currentState)
-                _currentState.Exit(new()
-                {
-                    Machine = this,
-                    Entity = Entity
-                });
-            _currentState = state;
-            if (_currentState)
-                _currentState.Enter(new()
-                {
-                    Machine = this,
-                    Entity = Entity
-                });
+            _runtimeStates.SetRange(GetAllStates());
+            EnterState(_startingStateName);
         }
+        [OnDespawn]
+        void OnDespawn() => EnterState(default(IState));
+        public void EnterState(IState state)
+        {
+            _currentState?.Exit(new()
+            {
+                Machine = this,
+                Entity = Entity
+            });
+            _currentState = state;
+            _currentState?.Enter(new()
+            {
+                Machine = this,
+                Entity = Entity
+            });
+        }
+        public void EnterState(string name)
+        {
+            if (_runtimeStates.TryGetValue(s => s.Name == name, out var state))
+                EnterState(state);
+        }
+        public List<string> GetStateNames()
+            => GetAllStates()
+            .Select(x => x.Name)
+            .ToList();
+        List<IState> GetAllStates()
+            => GetComponentsInChildren<IStateProvider>()
+            .SelectMany(x => x.GetStates())
+            .Where(x => !string.IsNullOrWhiteSpace(x.Name))
+            .ToList();
 
-        [Button]
-        void SetStatesToChildren()
-            => _states = GetComponentsInChildren<StateBehaviour>();
+        public IEnumerable<IState> GetStates() => _states;
     }
 }

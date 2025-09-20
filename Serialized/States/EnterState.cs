@@ -1,8 +1,7 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using BB.States;
 using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 namespace BB.Serialized.Actions
 {
     [Serializable]
@@ -10,7 +9,7 @@ namespace BB.Serialized.Actions
     {
         public StateMachineBehaviour _machine;
         [ValueDropdown(nameof(States))]
-        public StateBehaviour _state;
+        public string _state;
         protected override void InvokeSync(SerializedActionContext context)
         {
             _machine.EnterState(_state);
@@ -19,10 +18,9 @@ namespace BB.Serialized.Actions
         {
             validator
                 .IsAssigned(_machine, nameof(_machine))
-                .IsAssigned(_state, nameof(_state));
+                .NotEmpty(_state, nameof(_state));
 
         }
-        StateBehaviour[] States
-            => _machine ? _machine._states : null;
+        List<string> States => _machine ? _machine.GetStateNames() : null;
     }
 }
