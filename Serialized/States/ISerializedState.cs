@@ -11,14 +11,7 @@ namespace BB.Serialized.States
     }
     public interface ISerializedStateAction : ISerializedAction
     {
-    }
-    public interface ISerializedStateExitActionSync : ISerializedStateAction
-    {
-        void ExitState(in SerializedActionContext context);
-    }
-    public interface ISerializedStateExitActionAsync : ISerializedStateAction
-    {
-        UniTask ExitState(in SerializedActionContext context);
+        UniTask InvokeExit(SerializedActionContext context);
     }
     public static class SerializedActionExtensions
     {
@@ -33,17 +26,72 @@ namespace BB.Serialized.States
                 else task.Forget();
             }
         }
-        public static void Exit(this ISerializedStateAction[] actions, SerializedActionContext context)
+        public static async UniTask Exit<TAction>(this TAction[] actions, SerializedActionContext context)
+            where TAction : ISerializedStateAction
         {
             foreach (var action in actions)
-                if (action is ISerializedStateExitActionSync sync)
-                    sync.ExitState(context);
-                else if (action is ISerializedStateExitActionAsync async)
-                    async.ExitState(context).Forget();
+            {
+                var task = action.InvokeExit(context);
+                if (action.WaitForExecution)
+                    await task;
+                else task.Forget();
+            }
         }
     }
+    public abstract class SerializedStateAction : SerializedAction, ISerializedStateAction
+    {
+        public abstract UniTask InvokeExit(SerializedActionContext context);
+    }
+    public abstract class SerializedStateActionSync : SerializedStateAction
+    {
+		public override bool WaitForExecution => false;
+		public override UniTask Invoke(SerializedActionContext context)
+		{
+            if (IsValid(context))
+                InvokeSync(context);
+            return UniTask.CompletedTask;
+        }
+		public override UniTask InvokeExit(SerializedActionContext context)
+		{
+            if (IsValid(context))
+                InvokeExitSync(context);
+            return UniTask.CompletedTask;
+        }
+        protected abstract void InvokeSync(SerializedActionContext context);
+        protected abstract void InvokeExitSync(SerializedActionContext context);
+    }
+    public abstract class SerializedStateActionAsync : SerializedStateAction
+    {
+        public bool _waitForExecution;
+        public override bool WaitForExecution => _waitForExecution;
+        public override UniTask Invoke(SerializedActionContext context)
+        {
+            if (!IsValid(context))
+                return UniTask.CompletedTask;
 
+            var task = InvokeAsync(context);
+            if (WaitForExecution)
+                return task;
+
+            task.Forget();
+            return UniTask.CompletedTask;
+        }
+        public override UniTask InvokeExit(SerializedActionContext context)
+        {
+            if (!IsValid(context))
+                return UniTask.CompletedTask;
+
+            var task = InvokeExitAsync(context);
+            if (WaitForExecution)
+                return task;
+
+            task.Forget();
+            return UniTask.CompletedTask;
+        }
+        protected abstract UniTask InvokeAsync(SerializedActionContext context);
+        protected abstract UniTask InvokeExitAsync(SerializedActionContext context);
+    }
 }
-namespace BB.Serialized.Actions
+namespace BB.Serialized.States
 {
 }
