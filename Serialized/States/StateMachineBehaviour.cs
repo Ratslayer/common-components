@@ -25,17 +25,19 @@ namespace BB.States
         void OnDespawn() => EnterState(default(IState));
         public void EnterState(IState state)
         {
-            _currentState?.Exit(new()
-            {
-                Machine = this,
-                Entity = Entity
-            });
+            if (_currentState is IStateExit exit)
+                exit.Exit(new()
+                {
+                    Machine = this,
+                    Entity = Entity
+                });
             _currentState = state;
-            _currentState?.Enter(new()
-            {
-                Machine = this,
-                Entity = Entity
-            });
+            if (_currentState is IStateEnter enter)
+                enter.Enter(new()
+                {
+                    Machine = this,
+                    Entity = Entity
+                });
         }
         public void EnterState(string name)
         {
