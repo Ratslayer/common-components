@@ -3,14 +3,15 @@ using BB.Serialized.Actions;
 using BB.Serialized.States;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using static BB.PlayerTriggerVolumeActions;
 namespace BB
 {
 	[RequireComponent(typeof(TriggerVolumeBehaviour))]
-    public sealed class PlayerTriggerVolumeActions : EntityBehaviour
+    public sealed class PlayerTriggerVolumeActions : EntityBehaviour<TriggerSystem>
     {
-        public ISerializedStateAction[] _onEnterExit = { };
-        public ISerializedAction[] _onEnter = { }, _onExit = { };
-        sealed record TriggerSystem(
+        [SerializeReference] ISerializedStateAction[] _onEnterExit = { };
+        [SerializeReference] ISerializedAction[] _onEnter = { }, _onExit = { };
+        public sealed record TriggerSystem(
             PlayerTriggerVolumeActions Behaviour,
             Player Player) : EntitySystem
         {

@@ -6,7 +6,18 @@ namespace BB
 {
 	public static class ITweenCurveExtensions
 	{
-		public static Tween MoveTo(
+        public static Tween LocalMoveTo(
+            this ITweenCurve curve, in TransformAdapter transform, in Vector3Adapter position)
+            => transform._transform
+            .DOLocalMove(position, curve.Duration)
+            .SetEase(curve);
+        public static UniTask LocalMoveTo(
+            this ITweenCurve curve,
+            in TransformAdapter transform,
+            in Vector3Adapter position,
+            CancellationToken ct)
+                => curve.LocalMoveTo(transform, position).WithCancellation(ct);
+        public static Tween MoveTo(
 			this ITweenCurve curve, in TransformAdapter transform, in Vector3Adapter position)
 			=> transform._transform
 			.DOMove(position, curve.Duration)
