@@ -6,7 +6,7 @@ using UnityEngine;
 using static BB.PlayerTriggerVolumeActions;
 namespace BB
 {
-	[RequireComponent(typeof(TriggerVolumeBehaviour))]
+    [RequireComponent(typeof(TriggerVolumeBehaviour))]
     public sealed class PlayerTriggerVolumeActions : EntityBehaviour<TriggerSystem>
     {
         [SerializeReference] ISerializedStateAction[] _onEnterExit = { };
