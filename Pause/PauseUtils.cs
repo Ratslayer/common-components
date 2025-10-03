@@ -6,7 +6,7 @@ namespace BB
 	{
 		public static void BindPauseDependencies(IDiContainer container)
 		{
-			container.Stack<Paused>();
+			container.Var<Paused>();
 			container.System<PauseOnStackChange>();
 		}
 	}

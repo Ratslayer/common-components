@@ -19,9 +19,9 @@ namespace BB
 
 			container.Var<CurrentPlayerActions>();
 
-			container.Stack<InputActions>();
-			container.Stack<PlayerInputBlocked>();
-			container.Stack<PlayerMovementBlocked>();
+			container.Var<InputActions>();
+			container.Var<PlayerInputBlocked>();
+			container.Var<PlayerMovementBlocked>();
 		}
 	}
 }

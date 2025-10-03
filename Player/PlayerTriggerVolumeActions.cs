@@ -1,4 +1,5 @@
 ﻿using BB.Di;
+using BB.Serialized;
 using BB.Serialized.Actions;
 using BB.Serialized.States;
 using Cysharp.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace BB
     public sealed class PlayerTriggerVolumeActions : EntityBehaviour<TriggerSystem>
     {
         [SerializeReference] ISerializedStateAction[] _onEnterExit = { };
-        [SerializeReference] ISerializedAction[] _onEnter = { }, _onExit = { };
+        [SerializeReference] ISerializedSceneAction[] _onEnter = { }, _onExit = { };
         public sealed record TriggerSystem(
             PlayerTriggerVolumeActions Behaviour,
             Player Player) : EntitySystem

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace BB.Serialized.Actions
 {
     [Serializable]
-    public sealed class EnterState : SerializedActionSync
+    public sealed class EnterState : SerializedActionSync, ISerializedSceneAction
     {
         public StateMachineBehaviour _machine;
         [ValueDropdown(nameof(States))]
