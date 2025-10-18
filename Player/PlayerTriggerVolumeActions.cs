@@ -1,8 +1,6 @@
 ﻿using BB.Di;
 using BB.Serialized;
-using BB.Serialized.Actions;
 using BB.Serialized.States;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using static BB.PlayerTriggerVolumeActions;
 namespace BB
@@ -10,8 +8,7 @@ namespace BB
     [RequireComponent(typeof(TriggerVolumeBehaviour))]
     public sealed class PlayerTriggerVolumeActions : EntityBehaviour<TriggerSystem>
     {
-        [SerializeReference] ISerializedStateAction[] _onEnterExit = { };
-        [SerializeReference] ISerializedSceneAction[] _onEnter = { }, _onExit = { };
+        public SerializedSceneStateActions _actions = new();
         public sealed record TriggerSystem(
             PlayerTriggerVolumeActions Behaviour,
             Player Player) : EntitySystem
@@ -25,8 +22,7 @@ namespace BB
                 {
                     Entity = Entity
                 };
-                Behaviour._onEnterExit.Invoke(context).Forget();
-                Behaviour._onEnter.Invoke(context).Forget();
+                Behaviour._actions.Enter(context);
             }
             [OnEvent]
             void OnExit(TriggerVolumeExitEvent e)
@@ -37,8 +33,7 @@ namespace BB
                 {
                     Entity = Entity
                 };
-                Behaviour._onEnterExit.Exit(context).Forget();
-                Behaviour._onExit.Invoke(context).Forget();
+                Behaviour._actions.Exit(context);
             }
         }
     }
