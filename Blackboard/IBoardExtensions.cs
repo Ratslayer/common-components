@@ -71,6 +71,8 @@ namespace BB
 				return key.Get(board);
 			return 0;
 		}
+		public static double Get(this IBoardKey key, BoardContext context)
+			=> context.Get(key);
 		public static double Get(
 			this IBoardKey key,
 			IBoard board)

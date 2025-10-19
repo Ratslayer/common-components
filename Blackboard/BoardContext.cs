@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.Design;
 namespace BB
 {
 	public sealed class BoardContext : ProtectedPooledObject<BoardContext>
@@ -78,6 +79,13 @@ namespace BB
 			Dispose();
 		}
 		public void Add() => Board.Add(this);
+		public void Add(IBoardKey key)
+		{
+			var tempKey = Key;
+			Key = key;
+			Add();
+			Key = tempKey;
+		}
 		public double GetAndDispose()
 		{
 			var result = Board.Get(this);

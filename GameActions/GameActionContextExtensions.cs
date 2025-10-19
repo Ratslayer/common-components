@@ -21,7 +21,7 @@ namespace BB
             => action.Add(AddOtherBoardValueAction.GetPooled(key, otherKey, multiplier));
         public static GameAction Publish<TEvent>(this GameAction action, TEvent e, IEvent<TEvent> publisher = null)
             => action.Add(PublishEventAction<TEvent>.GetPooled(e, publisher));
-        private static void PublishMessage(GameActionContext context, PositionAdapter position)
+        private static void PublishMessage(GameActionContext context, PositionWithSpace position)
         {
             if (!context.Entity.Has(out IEvent<ShowHintEvent> showHint))
                 return;
