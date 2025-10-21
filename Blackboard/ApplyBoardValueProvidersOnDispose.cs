@@ -27,27 +27,22 @@ namespace BB
 	public sealed class ApplyBoardValueProvidersOnDispose : PooledObject<ApplyBoardValueProvidersOnDispose>
 	{
 		readonly List<IBoardValuesProvider> _providers = new();
-		BoardContext _context;
+        AddBoardContext _context;
 		public override void Dispose()
 		{
 			foreach (var provider in _providers)
-				provider.AddBoardValues(_context);
+				provider.Add(_context);
 			_providers.DisposeAndClear();
-			_context.Dispose();
-			_context = null;
+			_context = default;
 			base.Dispose();
 		}
 
-		public ApplyBoardValueProvidersOnDispose WithContext(BoardContext context)
+		public ApplyBoardValueProvidersOnDispose WithContext(in AddBoardContext context)
 		{
-			_context = context.GetPooledCopy();
+			_context = context;
 			return this;
 		}
-		public ApplyBoardValueProvidersOnDispose WithInverseContext(BoardContext context)
-		{
-			_context = context.GetInverseCopy();
-			return this;
-		}
+		
 		public ApplyBoardValueProvidersOnDispose WithProvider(IBoardValuesProvider provider)
 		{
 			_providers.Add(provider);

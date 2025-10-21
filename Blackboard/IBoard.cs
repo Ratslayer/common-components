@@ -4,8 +4,8 @@ namespace BB
 	public interface IBoard : IAutoFlushable
 	{
 		Entity Entity { get; }
-		void Add(BoardContext context);
-		double Get(BoardContext context);
+		void Add(in AddBoardContext context);
+		double Get(in GetBoardContext context);
 		void Set(IBoardKey key, double value);
 		void Add(IBoardKey key, IBoardValueCondition condition, double value);
 		void AddProcessor(IBoardProcessor processor);

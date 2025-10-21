@@ -2,6 +2,6 @@
 {
 	public interface ISerializedBoardValue
 	{
-		void Add(BoardContext context);
+		void Add(in AddBoardContext context);
 	}
 }

@@ -4,12 +4,12 @@ namespace BB
 {
 	public interface IBoardValuesProvider
 	{
-		void AddBoardValues(BoardContext context);
+		void Add(in AddBoardContext context);
 		bool CanAdd(in CanAddBoardValuesContext context);
 	}
 	public readonly struct CanAddBoardValuesContext
 	{
-		public BoardContext BoardContext { get; init; }
+		public AddBoardContext BoardContext { get; init; }
 		public List<IBoardKey> ErrorKeys { get; init; }
 		public double? Multiplier { get; init; }
 	}

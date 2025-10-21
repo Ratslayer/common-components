@@ -1,15 +1,13 @@
 ﻿namespace BB
 {
-	public sealed record InitBlackboard(
-		IBoard Board,
-		IBoardValuesProvider Values) : EntitySystem
-	{
-		[OnSpawn]
-		void OnSpawn()
-		{
-			BoardContext
-				.GetPooled(Board)
-				.AddAndDispose(Values);
-		}
-	}
+    public sealed record InitBlackboard(
+        IBoard Board,
+        IBoardValuesProvider Values) : EntitySystem
+    {
+        [OnSpawn]
+        void OnSpawn()
+        {
+            Values.Add(new() { Board = Board });
+        }
+    }
 }

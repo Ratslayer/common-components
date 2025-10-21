@@ -12,20 +12,22 @@ namespace BB
         }
         public static void Add(this IBoardValuesProvider provider, IBoard board, double value = 1)
         {
-            BoardContext
-               .GetPooled(board)
-               .WithValue(value)
-               .AddAndDispose(provider);
+            provider.Add(new()
+            {
+                Board = board,
+                Value = value
+            });
         }
         public static IDisposable AddTemp(this IBoardValuesProvider provider, IBoard board, double value = 1)
         {
             provider.Add(board, value);
-            var context = BoardContext
-                .GetPooled(board)
-                .WithValue(-value);
             return ApplyBoardValueProvidersOnDispose
                 .GetPooled()
-                .WithContext(context)
+                .WithContext(new AddBoardContext
+                {
+                    Board = board,
+                    Value = -value
+                })
                 .WithProvider(provider);
         }
         public static IDisposable AddTemp(this IBoardValuesProvider provider, Entity entity, double value = 1)

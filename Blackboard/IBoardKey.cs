@@ -30,7 +30,7 @@ namespace BB
 	}
 	public interface IBoardKeyWithOnAddEffect : IBoardKey
 	{
-		void OnAdd(BoardContext context);
+		void OnAdd(in AddBoardContext context);
 	}
 	public interface IBoardKeyWithMultipliers : IBoardKey
 	{

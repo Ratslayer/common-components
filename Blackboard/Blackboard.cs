@@ -1,229 +1,201 @@
 ﻿using System.Collections.Generic;
 namespace BB
 {
-	public sealed record Blackboard(IEvent<IBoard> Changed)
-		: EntitySystem, IBoard
-	{
-		[InjectFromParent]
-		readonly IBoard _parent;
-		readonly Dictionary<IBoardKey, BoardValueContainer> _values = new();
-		readonly List<IBoardProcessor> _processors = new();
-		readonly List<BoardValueContainer> _dirtyContainers = new();
+    public sealed record Blackboard(IEvent<IBoard> Changed)
+        : EntitySystem, IBoard
+    {
+        [InjectFromParent]
+        readonly IBoard _parent;
+        readonly Dictionary<IBoardKey, BoardValueContainer> _values = new();
+        readonly List<IBoardProcessor> _processors = new();
+        readonly List<BoardValueContainer> _dirtyContainers = new();
 
-		public bool AutoFlushDisabled { get; set; }
-		public IReadOnlyCollection<IBoardKey> Keys => _values.Keys;
-		public IReadOnlyCollection<IBoardValueContainer> DirtyContainers => _dirtyContainers;
-		string _action;
-		List<IBoardValueContainer> _generationContainers;
-		public void InitKey(IBoardKey key)
-		{
-			GetOrCreate(key);
-			this.SetDirtyAndAutoFlushChanges();
-		}
-		public void AddProcessor(IBoardProcessor processor)
-		{
-			_processors.Add(processor);
-			_processors.SortByPriority();
-		}
-		public void RemoveProcessor(IBoardProcessor processor) => _processors.Remove(processor);
-		private BoardValueContainer GetOrCreate(IBoardKey key)
-		{
-			if (key is null)
-				return null;
+        public bool AutoFlushDisabled { get; set; }
+        public IReadOnlyCollection<IBoardKey> Keys => _values.Keys;
+        public IReadOnlyCollection<IBoardValueContainer> DirtyContainers => _dirtyContainers;
+        string _action;
+        List<IBoardValueContainer> _generationContainers;
+        public void InitKey(IBoardKey key)
+        {
+            GetOrCreate(key);
+            this.SetDirtyAndAutoFlushChanges();
+        }
+        public void AddProcessor(IBoardProcessor processor)
+        {
+            _processors.Add(processor);
+            _processors.SortByPriority();
+        }
+        public void RemoveProcessor(IBoardProcessor processor) => _processors.Remove(processor);
+        private BoardValueContainer GetOrCreate(IBoardKey key)
+        {
+            if (key is null)
+                return null;
 
-			if (!_values.TryGetValue(key, out var container))
-			{
-				container = new(this, key);
-				if (key is IBoardKeyWithGeneration)
-				{
-					_generationContainers ??= new();
-					_generationContainers.Add(container);
-				}
-				_values.Add(key, container);
-			}
+            if (!_values.TryGetValue(key, out var container))
+            {
+                container = new(this, key);
+                if (key is IBoardKeyWithGeneration)
+                {
+                    _generationContainers ??= new();
+                    _generationContainers.Add(container);
+                }
+                _values.Add(key, container);
+            }
 
-			return container;
-		}
+            return container;
+        }
 
-		public void ForceFlushChanges()
-		{
-			if (_dirtyContainers.Count == 0)
-				return;
+        public void ForceFlushChanges()
+        {
+            if (_dirtyContainers.Count == 0)
+                return;
 
-			using var _ = this.DisableAutoFlush();
+            using var _ = this.DisableAutoFlush();
 
-			foreach (var processor in _processors)
-				processor.Process(this);
+            foreach (var processor in _processors)
+                processor.Process(this);
 
-			Changed.Publish(this);
+            Changed.Publish(this);
 
-			foreach (var container in _dirtyContainers)
-				container.PreviousValue = container.Value;
+            foreach (var container in _dirtyContainers)
+                container.PreviousValue = container.Value;
 
-			_dirtyContainers.Clear();
-		}
+            _dirtyContainers.Clear();
+        }
 
-		[OnDespawn]
-		void OnDespawn()
-		{
-			_processors.Clear();
-			_values.DisposeAndClear();
-			_dirtyContainers.Clear();
-		}
+        [OnDespawn]
+        void OnDespawn()
+        {
+            _processors.Clear();
+            _values.DisposeAndClear();
+            _dirtyContainers.Clear();
+        }
 
-		public void Set(IBoardKey key, double value)
-		{
-			var container = GetOrCreate(key);
-			container.PreviousValue = container.Value;
-			container.Value = value;
-			container._conditionalValues?.Clear();
-		}
+        public void Set(IBoardKey key, double value)
+        {
+            var container = GetOrCreate(key);
+            container.PreviousValue = container.Value;
+            container.Value = value;
+            container._conditionalValues?.Clear();
+        }
 
-		public void Add(IBoardKey key, IBoardValueCondition condition, double value)
-		{
-			var container = GetOrCreate(key);
-			container._conditionalValues ??= new();
-			if (container._conditionalValues.TryGetValue(condition, out var currentValue))
-				value += currentValue;
-			container._conditionalValues[condition] = value;
-		}
+        public void Add(IBoardKey key, IBoardValueCondition condition, double value)
+        {
+            var container = GetOrCreate(key);
+            container._conditionalValues ??= new();
+            if (container._conditionalValues.TryGetValue(condition, out var currentValue))
+                value += currentValue;
+            container._conditionalValues[condition] = value;
+        }
 
-		public void UpdateGeneration(float seconds)
-		{
-			if (_generationContainers is null)
-				return;
-			using (this.DisableAutoFlush())
-			{
-				foreach (var container in _generationContainers)
-				{
-					var genValue = ((IBoardKeyWithGeneration)container.Key).GetGenerationValue(this);
-					var value = genValue * seconds;
-					this.Add(container.Key, value);
-				}
-			}
-			this.AutoFlushChangesIfDirty();
-		}
+        public void UpdateGeneration(float seconds)
+        {
+            if (_generationContainers is null)
+                return;
+            using (this.DisableAutoFlush())
+            {
+                foreach (var container in _generationContainers)
+                {
+                    var genValue = ((IBoardKeyWithGeneration)container.Key).GetGenerationValue(this);
+                    var value = genValue * seconds;
+                    container.Key.Add(this, value);
+                }
+            }
+            this.AutoFlushChangesIfDirty();
+        }
 
-		public void Add(BoardContext context)
-		{
-			var key = context.Key;
-			_action = "Add";
-			context.ActiveKeys.Add(key);
+        public void Add(in AddBoardContext context)
+        {
+            var key = context.Key;
 
-			var container = GetOrCreate(key);
+            var container = GetOrCreate(key);
 
-			var finalValue = context.Value;
-			finalValue = ApplyMultipliers(context, finalValue, BoardEventUsage.Set);
-			finalValue = AddValueInternal(key, container.Value, finalValue);
-			finalValue = ClampValue(context, finalValue, BoardEventUsage.Set);
+            var getContext = new GetBoardContext
+            {
+                Board = this,
+                Key = key
+            };
+            var finalValue = context.GetValue();
+            finalValue = ApplyMultipliers(getContext, finalValue, BoardEventUsage.Set);
+            finalValue = key.Stack(container.Value, finalValue);
+            finalValue = ClampValue(getContext, finalValue, BoardEventUsage.Set);
 
-			var diff = finalValue - container.Value;
-			var valueChanged = diff.NotZero();
-			if (valueChanged && key is IBoardKeyWithOnAddEffect add)
-			{
-				var newContext = context.GetPooledCopy().WithValue(diff);
-				add.OnAdd(context);
-				newContext.Dispose();
-			}
-			context.ActiveKeys.RemoveLast();
+            var diff = finalValue - container.Value;
+            var valueChanged = diff.NotZero();
+            if (valueChanged && key is IBoardKeyWithOnAddEffect add)
+                add.OnAdd(context.WithValue(diff));
 
-			if (!valueChanged)
-				return;
-			container.Value = finalValue;
-			_dirtyContainers.AddUnique(container);
-			this.SetDirtyAndAutoFlushChanges();
-		}
+            if (!valueChanged)
+                return;
+            container.Value = finalValue;
+            _dirtyContainers.AddUnique(container);
+            this.SetDirtyAndAutoFlushChanges();
+        }
 
-		public double Get(BoardContext context)
-		{
-			_action = "Get";
-			return GetInternal(context);
-		}
-		private double GetInternal(BoardContext context)
-		{
-			var key = context.Key;
-			if (key is null)
-				return 0;
-			if (context.ActiveKeys.Contains(key))
-			{
-				throw new GameException(
-					$"Circular dependency detected during {_action} {context.Key?.Name}. " +
-					$"{key.Name} is found multiple times.");
-			}
-			context.ActiveKeys.Add(key);
-			var value = GetValueRecursive(key, this, context);
-			value *= context.Value;
-			value = ApplyMultipliers(context, value, BoardEventUsage.Get);
-			value = ClampValue(context, value, BoardEventUsage.Get);
-			context.ActiveKeys.RemoveLast();
-			return value;
-		}
-		private static double GetValueRecursive(IBoardKey key, Blackboard board, BoardContext context)
-		{
-			var container = board.GetOrCreate(key);
-			var value = container.Value;
-			//add conditional values
-			if (container._conditionalValues is not null)
-			{
-				foreach (var (condition, v) in container._conditionalValues)
-				{
-					var contextCopy = context.GetPooledCopy();
-					if (condition?.IsValid(contextCopy) is true)
-						value = AddValueInternal(key, value, v);
-					contextCopy.Dispose();
-				}
-			}
-			if (board._parent is Blackboard parent)
-			{
-				var parentContext = context
-					.GetPooledCopy(parent);
-				var parentValue = GetValueRecursive(key, parent, parentContext);
-				value = AddValueInternal(key, value, parentValue);
-				parentContext.Dispose();
-			}
-			return value;
-		}
-		private static double AddValueInternal(IBoardKey key, double v1, double v2)
-		{
-			return key.StackingMethod switch
-			{
-				BoardValueStackingMethod.Multiplicative => (1 + v1) * (1 + v2) - 1,
-				_ => v1 + v2
-			};
-		}
-		private double ApplyMultipliers(BoardContext context, double value, BoardEventUsage usage)
-		{
-			if (context.Key is not IBoardKeyWithMultipliers km)
-				return value;
-			if (!km.MultiplierUsage.HasFlag(usage))
-				return value;
+        public double Get(in GetBoardContext context)
+        {
+            var key = context.Key;
+            if (key is null)
+                return 0;
+            var value = GetValueRecursive(context, this);
+            value *= context.Multiplier ?? 1;
+            value = ApplyMultipliers(context, value, BoardEventUsage.Get);
+            value = ClampValue(context, value, BoardEventUsage.Get);
+            return value;
+        }
+        private static double GetValueRecursive(in GetBoardContext context, IBoard startingBoard)
+        {
+            var board = (Blackboard)context.Board;
+            var key = context.Key;
+            var container = board.GetOrCreate(context.Key);
+            var value = container.Value;
+            //add conditional values
+            if (container._conditionalValues is not null)
+            {
+                var conditionalContext = context.WithBoard(startingBoard);
+                foreach (var (condition, v) in container._conditionalValues)
+                {
+                    if (condition?.IsValid(conditionalContext) is true)
+                        value = key.Stack(value, v);
+                }
+            }
+            if (board._parent is IBoard parent)
+            {
+                var parentValue = GetValueRecursive(context.WithBoard(parent), startingBoard);
+                value = key.Stack(value, parentValue);
+            }
+            return value;
+        }
 
-			var result = value;
-			foreach (var multiplier in km.Multipliers)
-			{
-				var multContext = context
-					.GetPooledCopy()
-					.WithKey(multiplier);
-				var multValue = GetInternal(multContext);
-				multContext.Dispose();
-				result *= multValue;
-			}
-			return result;
-		}
-		private double ClampValue(BoardContext context, double value, BoardEventUsage usage)
-		{
-			if (context.Key is not IBoardKeyWithBounds bounds)
-				return value;
-			if (!bounds.ClampingUsage.HasFlag(usage))
-				return value;
+        private double ApplyMultipliers(GetBoardContext context, double value, BoardEventUsage usage)
+        {
+            if (context.Key is not IBoardKeyWithMultipliers km)
+                return value;
+            if (!km.MultiplierUsage.HasFlag(usage))
+                return value;
 
-			var min = bounds.GetMinValue(context.Board);
-			var max = bounds.GetMaxValue(context.Board);
-			if (min.IsZero() && max.IsZero())
-				return value;
+            var result = value;
+            foreach (var multiplier in km.Multipliers)
+            {
+                var multValue = Get(context.WithKey(multiplier));
+                result *= multValue;
+            }
+            return result;
+        }
+        private double ClampValue(GetBoardContext context, double value, BoardEventUsage usage)
+        {
+            if (context.Key is not IBoardKeyWithBounds bounds)
+                return value;
+            if (!bounds.ClampingUsage.HasFlag(usage))
+                return value;
 
-			var result = value.Clamp(min, max);
-			return result;
-		}
-	}
+            var min = bounds.GetMinValue(context.Board);
+            var max = bounds.GetMaxValue(context.Board);
+            if (min.IsZero() && max.IsZero())
+                return value;
+
+            var result = value.Clamp(min, max);
+            return result;
+        }
+    }
 }

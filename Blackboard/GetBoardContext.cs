@@ -1,26 +1,50 @@
-﻿//using System.Collections.Generic;
-
-//namespace BB
-//{
-//	public readonly struct GetBoardContext
-//	{
-//		public readonly IBoardKey _key;
-//		public readonly IBoard _board, _targetBoard;
-//		public readonly IList<BaseBoardKey> _tags;
-//		public GetBoardContext(
-//			IBoardKey key,
-//			IBoard board,
-//			IBoard targetBoard = null,
-//			IList<BaseBoardKey> tags = null)
-//		{
-//			_key = key;
-//			_board = board;
-//			_targetBoard = targetBoard;
-//			_tags = tags;
-//		}
-
-//		public static implicit operator bool(GetBoardContext context)
-//			=> context._key is not null
-//			&& context._board is not null;
-//	}
-//}
+﻿using System;
+namespace BB
+{
+	public readonly struct GetBoardContext
+    {
+        public IBoardKey Key { get; init; }
+        public IBoard Board { get; init; }
+        public IBoard TargetBoard { get; init; }
+        public double? Multiplier { get; init; }
+        public static GetBoardContext FromEntity(in Entity entity)
+            => new()
+            {
+                Board = entity.Get<IBoard>()
+            };
+        public GetBoardContext WithKey(IBoardKey key)
+            => new()
+            {
+                Key = key,
+                Board = Board,
+                TargetBoard = TargetBoard,
+                Multiplier = Multiplier
+            };
+        public GetBoardContext WithBoard(IBoard board)
+            => new()
+            {
+                Key = Key,
+                Board = board,
+                TargetBoard = TargetBoard,
+                Multiplier = Multiplier
+            };
+        public GetBoardContext WithSwappedBoards()
+            => new()
+            {
+                Key = Key,
+                Board = TargetBoard,
+                TargetBoard = Board,
+                Multiplier = Multiplier
+            };
+        public AddBoardContext ToAddContext()
+            => new()
+            {
+                Key = Key,
+                Board = Board,
+                Value = 1
+            };
+        public double Get() => Board.Get(this);
+        public int GetInt() => (int)Math.Floor(Get() + double.Epsilon);
+        public bool GetBool() => Get() > double.Epsilon;
+    }
+}
