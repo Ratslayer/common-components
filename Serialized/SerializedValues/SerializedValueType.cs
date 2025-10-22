@@ -1,9 +1,10 @@
 ﻿namespace BB
 {
-	public enum SerializedValueType
-	{
-		Const = 0,
-		Random = 1,
-		Asset = 2
-	}
+    public enum SerializedValueType
+    {
+        Const = 0,
+        Random = 1,
+        Asset = 2,
+        Board = 3
+    }
 }

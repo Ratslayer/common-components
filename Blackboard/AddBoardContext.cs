@@ -10,7 +10,7 @@ namespace BB
             => new()
             {
                 Board = entity.Get<IBoard>(),
-                Value = 1
+                Value = 1,
             };
         public AddBoardContext WithKey(IBoardKey key)
             => new()

@@ -2,39 +2,28 @@
 
 namespace BB.Board.Serialization
 {
-	public interface ISerializedBoardValueCondition : IBoardValueCondition
-	{
-	}
-	[Serializable]
-	public sealed class HasBoardValue : ISerializedBoardValueCondition
-	{
-		public BaseBoardKey _key;
-		public bool IsValid(in GetBoardContext context)
-		{
-			if (!_key)
-				return false;
-			var value = context
-				.WithKey(_key)
-				.Get();
-			return value.IsPositive();
-		}
-	}
-	[Serializable]
-	public sealed class TargetHasBoardValue : ISerializedBoardValueCondition
-	{
-		public BaseBoardKey _key;
-		public bool IsValid(in GetBoardContext context)
-		{
-			if (!_key)
-				return false;
-			if (context.TargetBoard is null)
-				return false;
+    public interface ISerializedBoardValueCondition : ISerializedBoardValueModifier, IBoardValueCondition
+    {
+    }
+    public interface ISerializedBoardValueMultiplier
+    {
+        double GetMultiplier(in GetBoardContext context);
+    }
+    [Serializable]
+    public sealed class ExpressionMultiplier : ISerializedBoardValueMultiplier
+    {
+        public EntityExpression _expression = new();
 
-			var value = context
-				.WithSwappedBoards()
-				.WithKey(_key)
-				.Get();
-			return value.IsPositive();
-		}
+        public double GetMultiplier(in GetBoardContext context)
+            => _expression.GetValue(context.Entity);
 	}
+
+    [Serializable]
+    public sealed class BoardValueMultiplier : ISerializedBoardValueMultiplier
+    {
+        public BoardValueGetter _getter = new();
+
+        public double GetMultiplier(in GetBoardContext context)
+            => _getter.GetValue(context);
+    }
 }

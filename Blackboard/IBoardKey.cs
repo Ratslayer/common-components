@@ -22,8 +22,8 @@ namespace BB
 	}
 	public interface IBoardKeyWithBounds : IBoardKey
 	{
-		double GetMinValue(IBoard board);
-		double GetMaxValue(IBoard board);
+		double GetMinValue(in GetBoardContext board);
+		double GetMaxValue(in GetBoardContext board);
 		bool HasMaxKey(out IBoardKey key);
 		bool HasMinKey(out IBoardKey key);
 		BoardEventUsage ClampingUsage { get; }
@@ -39,7 +39,7 @@ namespace BB
 	}
 	public interface IBoardKeyWithGeneration : IBoardKey
 	{
-		double GetGenerationValue(IBoard board);
+		double GetGenerationValue(in GetBoardContext context);
 		bool HasGenerationKey(out IBoardKey key);
 	}
 	public interface IBoardKeyValue

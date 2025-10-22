@@ -81,10 +81,11 @@ namespace BB
                 return false;
             if (key is not IBoardKeyWithBounds bounds)
                 return true;
-            var currentValue = key.Get(board);
+            var getContext = new GetBoardContext { Board = board };
+            var currentValue = getContext.WithKey(key).Get();
             var finalValue = currentValue + value;
-            var min = bounds.GetMinValue(board);
-            var max = bounds.GetMaxValue(board);
+            var min = bounds.GetMinValue(getContext);
+            var max = bounds.GetMaxValue(getContext);
             if (max.IsZero())
                 return finalValue.GreaterThanOrEquals(min);
             return finalValue.GreaterThanOrEquals(min) && finalValue.LessThanOrEquals(max);

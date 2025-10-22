@@ -94,9 +94,10 @@ namespace BB
                 return;
             using (this.DisableAutoFlush())
             {
+                var context = new GetBoardContext { Board = this };
                 foreach (var container in _generationContainers)
                 {
-                    var genValue = ((IBoardKeyWithGeneration)container.Key).GetGenerationValue(this);
+                    var genValue = ((IBoardKeyWithGeneration)container.Key).GetGenerationValue(context);
                     var value = genValue * seconds;
                     container.Key.Add(this, value);
                 }
@@ -182,15 +183,15 @@ namespace BB
             }
             return result;
         }
-        private double ClampValue(GetBoardContext context, double value, BoardEventUsage usage)
+        private double ClampValue(in GetBoardContext context, double value, BoardEventUsage usage)
         {
             if (context.Key is not IBoardKeyWithBounds bounds)
                 return value;
             if (!bounds.ClampingUsage.HasFlag(usage))
                 return value;
-
-            var min = bounds.GetMinValue(context.Board);
-            var max = bounds.GetMaxValue(context.Board);
+            
+            var min = bounds.GetMinValue(context);
+            var max = bounds.GetMaxValue(context);
             if (min.IsZero() && max.IsZero())
                 return value;
 
