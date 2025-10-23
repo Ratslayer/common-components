@@ -1,4 +1,6 @@
-﻿namespace BB
+﻿using UnityEngine;
+
+namespace BB
 {
     public sealed record InitBlackboard(
         IBoard Board,
@@ -9,18 +11,16 @@
         {
             Values.Add(new() { Board = Board });
         }
-        [OnPostSpawn]
+    }
+    public sealed record InitResources(IBoard Board)
+    {
+        [OnPostSpawn, OnEvent(typeof(BeforeGameStartEvent))]
         void OnPostSpawn()
         {
             foreach (var key in Board.Keys)
                 if (key is IResourceBoardKey resource
                     && resource.SetToMaxOnSpawn)
-                    new AddBoardContext
-                    {
-                        Board = Board,
-                        Key = key,
-                        Value = 1e100
-                    }.Add();
+                    resource.SetToMax(Board);
         }
     }
 }

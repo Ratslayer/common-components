@@ -1,11 +1,16 @@
 ﻿using System;
 namespace BB
 {
-	public readonly struct AddBoardContext
+    public readonly struct AddBoardContext
     {
         public IBoardKey Key { get; init; }
         public IBoard Board { get; init; }
         public double? Value { get; init; }
+        public Entity Entity
+        {
+            get => Board.Entity;
+            init => Board = value.Get<IBoard>();
+        }
         public static AddBoardContext FromEntity(in Entity entity)
             => new()
             {

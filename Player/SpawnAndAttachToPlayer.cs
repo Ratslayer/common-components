@@ -19,7 +19,7 @@ namespace BB
     {
         [Inject]
         protected Player _player;
-        IDisposable _disposable;
+        DisposableToken _disposable;
         [OnEnable]
         void OnEnable()
         {
@@ -30,8 +30,8 @@ namespace BB
         [OnDisable]
         void OnDisable()
         {
-            _disposable?.Dispose();
-            _disposable = null;
+            _disposable.Dispose();
+            _disposable = default;
         }
         protected abstract void OnEvent(TEvent e);
     }

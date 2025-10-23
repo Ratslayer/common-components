@@ -30,14 +30,14 @@ namespace BB.Serialized.States
     {
         [SerializeReference]
         TSerializedAction[] _actions = { };
-        IDisposable _subscription;
+        DisposableToken _subscription;
         protected override void InvokeSync(SerializedActionContext context)
         {
             _subscription = context.Entity.TempSubscribe<TEvent>(e => OnEvent(e, context));
         }
         protected override void InvokeExitSync(SerializedActionContext context)
         {
-            _subscription?.Dispose();
+            _subscription.Dispose();
         }
         protected virtual void OnEvent(TEvent e, SerializedActionContext context)
         {

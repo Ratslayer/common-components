@@ -3,6 +3,15 @@ namespace BB
 {
     public static class IBoardExtensions
     {
+        public static void SetToMax(this IBoardKeyWithBounds key, IBoard board)
+        {
+            new AddBoardContext
+            {
+                Board = board,
+                Key = key,
+                Value = 1e100
+            }.Add();
+        }
         public static double Stack(this IBoardKey key, double v1, double v2)
             => key.StackingMethod switch
             {
