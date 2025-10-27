@@ -2,7 +2,7 @@
 namespace BB
 {
     public sealed record Blackboard(IEvent<IBoard> Changed)
-        : EntitySystem, IBoard
+        : EntitySystem, IBoard, ISerializableComponent
     {
         [InjectFromParent]
         readonly IBoard _parent;
@@ -13,6 +13,7 @@ namespace BB
         public bool AutoFlushDisabled { get; set; }
         public IReadOnlyCollection<IBoardKey> Keys => _values.Keys;
         public IReadOnlyCollection<IBoardValueContainer> DirtyContainers => _dirtyContainers;
+        public IReadOnlyCollection<IBoardValueContainer> Containers => _values.Values;
         string _action;
         List<IBoardValueContainer> _generationContainers;
         public void InitKey(IBoardKey key)
@@ -189,7 +190,7 @@ namespace BB
                 return value;
             if (!bounds.ClampingUsage.HasFlag(usage))
                 return value;
-            
+
             var min = bounds.GetMinValue(context);
             var max = bounds.GetMaxValue(context);
             if (min.IsZero() && max.IsZero())
@@ -198,5 +199,8 @@ namespace BB
             var result = value.Clamp(min, max);
             return result;
         }
+
+        public IEntityComponentSerializer GetSerializer()
+            => BoardSerializerV1.Default;
     }
 }

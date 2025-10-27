@@ -11,7 +11,8 @@ namespace BB
 		void AddProcessor(IBoardProcessor processor);
 		void RemoveProcessor(IBoardProcessor processor);
 		IReadOnlyCollection<IBoardKey> Keys { get; }
-		IReadOnlyCollection<IBoardValueContainer> DirtyContainers { get; }
+		IReadOnlyCollection<IBoardValueContainer> Containers { get; }
+        IReadOnlyCollection<IBoardValueContainer> DirtyContainers { get; }
 		void UpdateGeneration(float seconds);
 	}
 }
