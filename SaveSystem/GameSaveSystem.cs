@@ -1,6 +1,9 @@
 ﻿using BB.Di;
 using Cysharp.Threading.Tasks;
+using Sirenix.Utilities;
+using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 using UnityEngine.SceneManagement;
 
 namespace BB
@@ -117,13 +120,14 @@ namespace BB
                 {
                     EntityPath = serializedPath,
                     FactoryName = factoryName,
-                    SaveData = components,
+                    SaveDatas = components,
                 };
             }
         }
 
         public async UniTask LoadGame(LoadGameContext e)
         {
+            InitSerializers();
             var path = GetSavePath(e.FilePath);
 
             var saveData = await FileSystem.Read<GameSaveData>(new()
@@ -135,8 +139,14 @@ namespace BB
             ApplySaveData(World.GetGameEntity(), saveData.Game);
             foreach (var sceneData in saveData.SceneSaveDatas)
             {
-                var scene = SceneManager.GetSceneByName(sceneData.SceneName);
-                if (!scene.isLoaded)
+                var sceneIsLoaded = sceneData.SceneName == "DontDestroyOnLoad";
+                if (!sceneIsLoaded)
+                {
+                    var scene = SceneManager.GetSceneByName(sceneData.SceneName);
+                    sceneIsLoaded = scene.isLoaded;
+                }
+
+                if (!sceneIsLoaded)
                     continue;
 
                 foreach (var data in sceneData.EntitySaveDatas)
@@ -149,8 +159,53 @@ namespace BB
         }
         void ApplySaveData(Entity entity, EntitySaveData saveData)
         {
+            if (saveData.SaveDatas.IsNullOrEmpty())
+                return;
 
+            foreach (var compData in saveData.SaveDatas)
+            {
+                var serializer = GetComponentSerializer(compData.SerializerName);
+                if(serializer is null)
+                    continue;
+
+                serializer.Apply(entity, compData.SerializedData);
+            }
         }
+        IEntityComponentSerializer GetComponentSerializer(string name)
+        {
+            if (_serializers.TryGetValue(name, out var componentSerializer))
+                return componentSerializer;
+
+            Log.Error($"{name} serializer type not found. " +
+                    $"Skipping component.");
+            return null;
+        }
+        void InitSerializers()
+        {
+            if (_serializers is not null)
+                return;
+
+            _serializers = new();
+            foreach(var type in GetType().Assembly.GetTypes())
+            {
+                if (!typeof(IEntityComponentSerializer).IsAssignableFrom(type))
+                    continue;
+
+                if (type.IsAbstract)
+                    continue;
+
+                if (!type.HasDefaultConstructor())
+                {
+                    Log.Error($"{type.Name} serializer does not have a default constructor. " +
+                        $"Skipping component.");
+                    continue;
+                }
+
+                var serializer = (IEntityComponentSerializer)Activator.CreateInstance(type);
+                _serializers.Add(type.Name, serializer);
+            }
+        }
+        Dictionary<string, IEntityComponentSerializer> _serializers;
         string GetSavePath(string path) => $"Saves/{path}";
         readonly struct TempEntitySaveData
         {
@@ -174,7 +229,7 @@ namespace BB
     {
         public string EntityPath { get; init; }
         public string FactoryName { get; init; }
-        public List<EntityComponentSaveData> SaveData { get; init; }
+        public List<EntityComponentSaveData> SaveDatas { get; init; }
     }
     public sealed class EntityComponentSaveData
     {
@@ -184,7 +239,7 @@ namespace BB
     public interface IEntityComponentSerializer
     {
         object Serialize(object target);
-        void Apply(object target, object serializedData);
+        void Apply(Entity entity, object serializedData);
     }
     public interface ISerializableComponent
     {

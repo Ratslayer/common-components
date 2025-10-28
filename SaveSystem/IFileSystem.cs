@@ -15,7 +15,7 @@ namespace BB
     {
         public Task<T> Read<T>(ReadFileContext context)
         {
-            var path = context.Path;
+            var path = $"{Application.persistentDataPath}/{context.Path}";
             try
             {
                 return ReadFromPath(path);
@@ -30,7 +30,7 @@ namespace BB
             static async Task<T> ReadFromPath(string path)
             {
                 var text = await File.ReadAllTextAsync(path);
-                var result = JsonUtility.FromJson<T>(text);
+                var result = JsonConvert.DeserializeObject<T>(text);
                 return result;
             }
         }
