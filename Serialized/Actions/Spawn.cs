@@ -11,18 +11,16 @@ namespace BB.Serialized.Actions
         public bool _parentToLocation;
         protected override void InvokeSync(SerializedActionContext context)
         {
-            if (_parentToLocation)
-                _prefab.SpawnEntity(new()
+            new EntitySpawnContext3D
+            {
+                Installer = _prefab,
+                Transform = new()
                 {
                     Position = _location.position,
                     Rotation = _location.rotation,
-                    Parent = _location
-                });
-            else _prefab.SpawnEntity(new()
-            {
-                Position = _location.position,
-                Rotation = _location.rotation
-            });
+                    Parent = _parentToLocation ? _location : null
+                }
+            }.Spawn();
         }
         protected override void SetupValidator(Validator validator, SerializedActionContext context)
         {
