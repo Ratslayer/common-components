@@ -16,7 +16,7 @@ namespace BB
             public double Value;
         }
 
-        protected override void Apply(IBoard target, BoardSaveData data)
+        protected override void ApplyAfterSpawn(IBoard target, BoardSaveData data)
         {
 
         }

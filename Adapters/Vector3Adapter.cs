@@ -15,5 +15,7 @@ namespace BB
 			=> new(go.transform.position);
 		public static implicit operator Vector3Adapter(Root root)
 			=> new(root.Position);
-	}
+        public static implicit operator Vector3Adapter(Entity entity)
+            => new(entity.Require<Root>());
+    }
 }
