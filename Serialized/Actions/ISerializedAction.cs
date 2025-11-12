@@ -1,10 +1,12 @@
 ﻿using Cysharp.Threading.Tasks;
+using System.Threading;
 
 namespace BB.Serialized
 {
     public readonly struct SerializedActionContext
     {
         public Entity Entity { get; init; }
+        public CancellationToken CancellationToken { get; init; }
     }
 }
 namespace BB.Serialized.Actions

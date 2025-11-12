@@ -8,14 +8,18 @@ namespace BB.Serialized.Actions
     public abstract class SerializedActions<TAction> where TAction : ISerializedAction
     {
         [SerializeReference] TAction[] _actions = { };
-        public void Invoke(SerializedActionContext context)
-        {
-            _actions.Invoke(context).Forget();
-        }
+        public void Invoke(in SerializedActionContext context)
+            => InvokeAsync(context).Forget();
+        public UniTask InvokeAsync(in SerializedActionContext context)
+            => _actions.Invoke(context);
     }
 
     [Serializable]
     public sealed class SerializedActions : SerializedActions<ISerializedAction>
+    {
+    }
+    [Serializable]
+    public sealed class SerializedAssetActions : SerializedActions<ISerializedAssetAction>
     {
     }
     public abstract class SerializedActionSync : SerializedAction

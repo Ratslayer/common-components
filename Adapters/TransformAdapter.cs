@@ -14,7 +14,9 @@ namespace BB
         public static implicit operator TransformAdapter(Root root)
             => new(root.Transform);
         public static implicit operator TransformAdapter(Entity entity)
-            => new(entity.Root);
+            => new(entity.Transform);
+        public static implicit operator TransformAdapter(Variable<Entity> v)
+           => new(v.Value.Transform);
         public static implicit operator bool(TransformAdapter adapter)
             => adapter._transform;
     }
