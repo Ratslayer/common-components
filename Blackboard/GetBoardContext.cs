@@ -57,7 +57,12 @@ namespace BB
                 Board = Board,
                 Value = 1
             };
-        public double Get() => Board.Get(this);
+        public double Get()
+        {
+            if(Board is not null)
+                return Board.Get(this);
+            throw new ArgumentException("Board is null");
+        }
         public int GetInt() => (int)Math.Floor(Get() + double.Epsilon);
         public bool GetBool() => Get() > double.Epsilon;
     }
