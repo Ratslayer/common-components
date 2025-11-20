@@ -8,6 +8,7 @@ namespace BB
 			container.Instance(config);
 
 			container.Event<InputEvent>();
+			container.Event<MouseMovedEvent>();
 			container.Event<MovePlayerInputEvent>();
 			container.Event<TurnPlayerInputEvent>();
 			container.Event<InputActionEvent>();
