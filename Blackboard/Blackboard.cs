@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 namespace BB
 {
-    public sealed record Blackboard(IEvent<IBoard> Changed)
+    public sealed class Blackboard
         : EntitySystem, IBoard, ISerializableComponent
     {
+        [Inject] IEvent<IBoard> _changed;
         [InjectFromParent]
         readonly IBoard _parent;
         readonly Dictionary<IBoardKey, BoardValueContainer> _values = new();
@@ -56,7 +57,7 @@ namespace BB
             foreach (var processor in _processors)
                 processor.Process(this);
 
-            Changed.Publish(this);
+            _changed.Publish(this);
 
             foreach (var container in _dirtyContainers)
                 container.PreviousValue = container.Value;
@@ -64,7 +65,7 @@ namespace BB
             _dirtyContainers.Clear();
         }
 
-        [OnDespawn]
+        [OnEvent(typeof(EntityDespawnedEvent))]
         void OnDespawn()
         {
             _processors.Clear();

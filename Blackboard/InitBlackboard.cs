@@ -1,20 +1,20 @@
-﻿using UnityEngine;
-
-namespace BB
+﻿namespace BB
 {
-    public sealed record InitBlackboard(
-        IBoard Board,
-        IBoardValuesProvider Values) : EntitySystem
+    public sealed class InitBlackboard : EntitySystem
     {
-        [OnSpawn]
-        void OnSpawn()
+        [Inject] IBoard _board;
+        [Inject] IBoardValuesProvider _values;
+        [OnEvent]
+        void OnSpawn(EntitySpawnedEvent _)
         {
-            Values.Add(new() { Board = Board });
+            _values.Add(new() { Board = _board });
         }
     }
-    public sealed record InitResources(IBoard Board)
+    public sealed record InitResources()
     {
-        [OnPostSpawn, OnEvent(typeof(BeforeGameStartEvent))]
+        [Inject]
+        IBoard Board;
+        [OnEvent(typeof(PostEntitySpawnedEvent),typeof(BeforeGameStartEvent))]
         void OnPostSpawn()
         {
             foreach (var key in Board.Keys)

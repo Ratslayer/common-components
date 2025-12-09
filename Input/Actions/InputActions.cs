@@ -2,5 +2,5 @@
 using BB.Di;
 namespace BB
 {
-	public sealed record InputActions : StackValue<InputActions, List<InputActionData>>;
+	public sealed class InputActions : StackValue<InputActions, List<InputActionData>> { }
 }

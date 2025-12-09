@@ -60,7 +60,7 @@ namespace BB
         {
             base.OnInspectorGUI();
             if (!Application.isPlaying
-                || !Target.Has(out IBoard board))
+                || !Target.Entity.Has(out IBoard board))
                 return;
 
             EditorBoardUtils.DrawBoard(board);

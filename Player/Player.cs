@@ -2,38 +2,60 @@
 using UnityEngine;
 namespace BB
 {
-	public sealed record Player : EntityVariable<Player>
-	{
-		public Vector3 Position => Has(out Root root) ? root.Position : Vector3.zero;
-	}
-	public abstract record SubscribeToEntityVariableEventSystem<TVariable, TEvent>(TVariable Var)
-		: EntitySystem
-		where TVariable : EntityVariable<TVariable>
-	{
-		protected abstract void OnVariableEvent(TEvent e);
-		[OnSpawn]
-		void OnSpawn()
-		{
+    public sealed class Player : EntityVariable<Player>
+    {
+        public Vector3 Position => Has(out Root root) ? root.Position : Vector3.zero;
+    }
+    public abstract class SubscribeToEntityVariableEventSystem<TVariable, TEvent>
+        : EntitySystem, IEventHandler<TEvent>
+        where TVariable : EntityVariable<TVariable>
+    {
+        [Inject] TVariable _var;
+        public TVariable Var => _var;
+        readonly EventHandler _handler = new();
+        [OnEvent(typeof(EntitySpawnedEvent))]
+        void OnSpawn()
+        {
+            _handler._subscription = this;
+            OnEvent(Var.Get<TEvent>());
+            _var._event.Subscribe(_handler);
+        }
+        [OnEvent(typeof(EntityDespawnedEvent))]
+        void OnDespawn()
+        {
+            if (_var.Value.Has(out IEvent<TEvent> e))
+                e.Unsubscribe(this);
+            _var._event.Unsubscribe(_handler);
+        }
 
-			OnEventSubscribe(default);
-			Var._event.Subscribe(OnEventSubscribe);
-		}
-		[OnDespawn]
-		void OnDespawn()
+        public void OnEvent(TVariable msg)
+        {
+            if (_var.PreviousValue.Has(out IEvent<TEvent> e))
+                e.Unsubscribe(this);
+            if (_var.Value.Has(out e))
+                e.Subscribe(this);
+            //для тех событий которые являеются своими же источниками
+            if (_var.Value.Has(out TEvent eventSource))
+                OnEvent(eventSource);
+        }
+
+        public abstract void OnEvent(TEvent msg);
+
+		sealed class EventHandler
+			: IEventHandler<TVariable>
 		{
-			if (Var.Value.Has(out IEvent<TEvent> e))
-				e.Unsubscribe(OnVariableEvent);
-			Var._event.Unsubscribe(OnEventSubscribe);
-		}
-		void OnEventSubscribe(TVariable _)
-		{
-			if (Var.PreviousValue.Has(out IEvent<TEvent> e))
-				e.Unsubscribe(OnVariableEvent);
-			if (Var.Value.Has(out e))
-				e.Subscribe(OnVariableEvent);
-			//для тех событий которые являеются своими же источниками
-			if(Var.Value.Has(out TEvent eventSource))
-				OnVariableEvent(eventSource);
+            public SubscribeToEntityVariableEventSystem<TVariable, TEvent> _subscription;
+
+            public void OnEvent(TVariable msg)
+			{
+                if (_subscription._var.PreviousValue.Has(out IEvent<TEvent> e))
+                    e.Unsubscribe(_subscription);
+                if (_subscription._var.Value.Has(out e))
+                    e.Subscribe(_subscription);
+                //для тех событий которые являеются своими же источниками
+                if (_subscription._var.Value.Has(out TEvent eventSource))
+                    _subscription.OnEvent(eventSource);
+            }
 		}
 	}
 }

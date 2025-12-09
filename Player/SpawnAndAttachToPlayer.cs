@@ -1,33 +1,32 @@
 ﻿using BB.Di;
-using System;
-
 namespace BB
 {
-    public sealed record AttachToPlayerOnEnable(Player Player) : EntitySystem
-    {
-        [OnEnable, OnEvent(typeof(Player))]
-        void OnEnable() => Entity.AttachTo(Player);
-    }
-    public sealed record SpawnAndAttachToPlayer(
-        IEntityInstaller Installer,
-        Player Player) : EntitySystem
-    {
-        [OnSpawn, OnEvent(typeof(Player))]
-        void Attach() => Installer.SpawnAndAttachTo(Player);
-    }
-    public abstract record BaseAttachEventToPlayer<TEvent> : EntitySystem
+    //public sealed class AttachToPlayerOnEnable : EntitySystem
+    //{
+    //    [Inject] Player _player;
+    //    [OnEvent(typeof(EntityEnabledEvent), typeof(Player))]
+    //    void OnEnable() => Entity.AttachTo(_player);
+    //}
+    //public sealed class SpawnAndAttachToPlayer : EntitySystem
+    //{
+    //    [Inject] IEntityInstaller _installer;
+    //    [Inject] Player _player;
+    //    [OnEvent(typeof(EntitySpawnedEvent), typeof(Player))]
+    //    void Attach() => _installer.SpawnAndAttachTo(_player);
+    //}
+    public abstract class BaseAttachEventToPlayer<TEvent> : EntitySystem
     {
         [Inject]
         protected Player _player;
         DisposableToken _disposable;
-        [OnEnable]
+        [OnEvent(typeof(EntityEnabledEvent))]
         void OnEnable()
         {
             _disposable = _player.Value.TempSubscribe<TEvent>(OnEvent);
             if (_player.Value.Has(out TEvent e))
                 OnEvent(e);
         }
-        [OnDisable]
+        [OnEvent(typeof(EntityDisabledEvent))]
         void OnDisable()
         {
             _disposable.Dispose();

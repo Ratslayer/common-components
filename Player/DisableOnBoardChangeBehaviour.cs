@@ -11,8 +11,10 @@ namespace BB
 			base.Install(container);
             container.System<DisableSystem>();
 		}
-        sealed record DisableSystem(IBoard Board)
+        sealed record DisableSystem()
         {
+            [Inject]
+            IBoard Board;
             [OnEvent]
             void OnEvent(IBoard board)
             {

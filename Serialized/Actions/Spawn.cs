@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BB.Di;
+using System;
 using UnityEngine;
 
 namespace BB.Serialized.Actions
@@ -6,21 +7,21 @@ namespace BB.Serialized.Actions
     [Serializable]
     public sealed class Spawn : SerializedActionSync, ISerializedSceneAction
     {
-        public GameObject _prefab;
+        public EntityGameObject3D _prefab;
         public Transform _location;
         public bool _parentToLocation;
         protected override void InvokeSync(SerializedActionContext context)
         {
-            new EntitySpawnContext3D
+            Entity.Spawn(new SpawnEntityFromPrefab3DContext
             {
-                Installer = _prefab,
+                Prefab = _prefab,
                 Transform = new()
                 {
                     Position = _location.position,
                     Rotation = _location.rotation,
                     Parent = _parentToLocation ? _location : null
                 }
-            }.Spawn();
+            });
         }
         protected override void SetupValidator(Validator validator, SerializedActionContext context)
         {

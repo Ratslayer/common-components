@@ -10,16 +10,17 @@ namespace BB
         public Vector2 Delta { get; init; }
     }
     public sealed record UnityInput(
-        IInputConfig Config,
-        IEvent<MouseMovedEvent> MouseMoved,
-        IEvent<InputEvent> InputPublisher) : IDisposable
+        ) : IDisposable
     {
+        [Inject] IInputConfig Config;
+        [Inject] IEvent<MouseMovedEvent> MouseMoved;
+        [Inject] IEvent<InputEvent> InputPublisher;
         readonly List<InputActionSubscription> _actionSubscriptions = new();
         public string GetName(InputActionWrapperAsset e)
             => _actionSubscriptions.TryGetValue(s => s.Event == e, out var sub)
             ? sub.InputName : "[NO INPUT]";
 
-        [OnCreate]
+        [OnEvent(typeof(EntityCreatedEvent))]
         private void InitInputAsset()
         {
             var actions = Config.GetAllActions();
@@ -38,9 +39,9 @@ namespace BB
                 subscription.Unsubscribe();
             Config.InputAsset["Mouse"].performed -= MouseMove;
         }
-        [OnSpawn]
+        [OnEvent(typeof(EntitySpawnedEvent))]
         void Enable() => Config.InputAsset.Enable();
-        [OnDespawn]
+        [OnEvent(typeof(EntityDespawnedEvent))]
         void Disable() => Config.InputAsset.Disable();
         void MouseMove(CallbackContext context)
         {

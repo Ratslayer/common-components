@@ -28,7 +28,7 @@ namespace BB
 		DisposableToken AppendState(IEntityState state);
 		void ExitState(IEntityState state);
 	}
-	internal record StackStateMachine : EntitySystem, IEntityStateMachine
+	internal class StackStateMachine : EntitySystem, IEntityStateMachine
 	{
 		readonly List<DisposableToken<StateData>> _states = new();
 		public DisposableToken EnterState(IEntityState state)
@@ -157,25 +157,25 @@ namespace BB
 			return data;
 		}
 	}
-	public static class StateMachineExtensions
-	{
-		public static void BindStateMachine(this IDiContainer container)
-		{
-			container
-				.Construct<IEntityStateMachine, StackStateMachine>()
-				.Inject()
-				.Lazy();
-		}
-		public static DisposableToken EnterState(this Entity entity, IEntityState state)
-		{
-			if (state is null
-				|| state is UnityEngine.Object obj && !obj
-				|| !entity.Has(out IEntityStateMachine machine))
-				return default;
+	//public static class StateMachineExtensions
+	//{
+	//	public static void BindStateMachine(this IDiContainer container)
+	//	{
+	//		container
+	//			.Construct<IEntityStateMachine, StackStateMachine>()
+	//			.Inject()
+	//			.Lazy();
+	//	}
+	//	public static DisposableToken EnterState(this Entity entity, IEntityState state)
+	//	{
+	//		if (state is null
+	//			|| state is UnityEngine.Object obj && !obj
+	//			|| !entity.Has(out IEntityStateMachine machine))
+	//			return default;
 
-			return machine.EnterState(state);
-		}
-	}
+	//		return machine.EnterState(state);
+	//	}
+	//}
 	public readonly struct EnteredStateDisposable : IDisposable
 	{
 		readonly IEntityStateMachine _machine;

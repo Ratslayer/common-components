@@ -2,5 +2,5 @@
 
 namespace BB
 {
-	public sealed record Paused : BoolStackValue<Paused>;
+	public sealed class Paused : BoolStackValue<Paused> { }
 }

@@ -1,5 +1,7 @@
 ﻿namespace BB
 {
-	public sealed record PauseOnSpawn(Paused Paused)
-		: PushValueOnSpawn<Paused, bool>(Paused, true);
+    public sealed class PauseOnSpawn : PushValueOnSpawn<Paused, bool>
+    {
+        public override bool Value => true;
+    }
 }

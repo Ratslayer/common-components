@@ -8,7 +8,7 @@ namespace BB
     {
         public SerializedActionsWithTriggers[] _actions = { };
         IDisposable _disposable;
-        [OnSpawn]
+        [OnEvent(typeof(EntitySpawnedEvent))]
         void OnSpawn()
         {
             var bag = DisposableBag.GetPooled();
@@ -16,7 +16,7 @@ namespace BB
                 bag.AddDisposable(action.Subscribe(Entity));
             _disposable = bag;
         }
-        [OnDespawn]
+        [OnEvent(typeof(EntityDespawnedEvent))]
         void OnDespawn() => _disposable?.Dispose();
     }
 }

@@ -14,7 +14,7 @@ namespace BB.Ui
 		{
 		}
 
-		[OnSpawn]
+		[OnEvent(typeof(EntitySpawnedEvent))]
 		void OnSpawn()
 		{
 			Button.OnPointerClick += OnButtonClick;
@@ -22,7 +22,7 @@ namespace BB.Ui
 			Button.OnPointerUp += OnButtonUp;
 		}
 
-		[OnDespawn]
+		[OnEvent(typeof(EntityDespawnedEvent))]
 		void OnDespawn()
 		{
 			Button.OnPointerClick -= OnButtonClick;

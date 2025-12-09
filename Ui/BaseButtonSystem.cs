@@ -6,10 +6,10 @@ namespace BB
 	{
 		protected abstract void OnButtonClick();
 
-		[OnSpawn]
+		[OnEvent(typeof(EntitySpawnedEvent))]
 		void OnSpawn() => Button.onClick.AddListener(OnButtonClick);
 
-		[OnDespawn]
+		[OnEvent(typeof(EntityDespawnedEvent))]
 		void OnDespawn() => Button.onClick.RemoveListener(OnButtonClick);
 
 		protected void ShowButton()

@@ -6,34 +6,39 @@ using static BB.PlayerTriggerVolumeActions;
 namespace BB
 {
     [RequireComponent(typeof(TriggerVolumeBehaviour))]
-    public sealed class PlayerTriggerVolumeActions : EntityBehaviour<TriggerSystem>
+    public sealed class PlayerTriggerVolumeActions : EntityBehaviour
     {
         public SerializedSceneStateActions _actions = new();
-        public sealed record TriggerSystem(
-            PlayerTriggerVolumeActions Behaviour,
-            Player Player) : EntitySystem
+        public override void Install(IDiContainer container)
         {
+            base.Install(container);
+            container.System<TriggerSystem>();
+        }
+        sealed class TriggerSystem : EntitySystem
+        {
+            [Inject] PlayerTriggerVolumeActions _behaviour;
+            [Inject] Player _player;
             [OnEvent]
             void OnEnter(TriggerVolumeEnterEvent e)
             {
-                if (e._entity != Player)
+                if (e._entity != _player)
                     return;
                 var context = new SerializedActionContext
                 {
                     Entity = Entity
                 };
-                Behaviour._actions.Enter(context);
+                _behaviour._actions.Enter(context);
             }
             [OnEvent]
             void OnExit(TriggerVolumeExitEvent e)
             {
-                if (e._entity != Player)
+                if (e._entity != _player)
                     return;
                 var context = new SerializedActionContext
                 {
                     Entity = Entity
                 };
-                Behaviour._actions.Exit(context);
+                _behaviour._actions.Exit(context);
             }
         }
     }

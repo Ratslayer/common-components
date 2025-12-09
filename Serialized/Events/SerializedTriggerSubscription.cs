@@ -22,13 +22,13 @@ namespace BB.Serialized.Events
 		public void Subscribe()
 		{
 			foreach (var sub in _subscriptions)
-				_entity._ref?.AddTemporarySubscription(sub);
+				sub.Subscribe(_entity._ref);
 		}
 		public override void Dispose()
 		{
-			foreach (var sub in _subscriptions)
-				_entity._ref?.RemoveTemporarySubscription(sub);
-			_subscriptions.DisposeAndClear();
+            foreach (var sub in _subscriptions)
+                sub.Unsubscribe(_entity._ref);
+            _subscriptions.DisposeAndClear();
 			base.Dispose();
 		}
 	}

@@ -1,7 +1,7 @@
 ﻿using DG.Tweening;
 namespace BB
 {
-	public abstract record TweenVariable<TSelf> : Variable<TSelf, Tween>
+	public abstract class TweenVariable<TSelf> : Variable<TSelf, Tween>
 		where TSelf : TweenVariable<TSelf>
 	{
 	}

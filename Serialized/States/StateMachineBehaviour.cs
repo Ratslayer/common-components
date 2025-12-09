@@ -15,13 +15,13 @@ namespace BB.States
         public SerializedState[] _states = { };
         IState _currentState;
         readonly List<IState> _runtimeStates = new();
-        [OnSpawn]
+        [OnEvent(typeof(EntitySpawnedEvent))]
         void OnSpawn()
         {
             _runtimeStates.SetRange(GetAllStates());
             EnterState(_startingStateName);
         }
-        [OnDespawn]
+        [OnEvent(typeof(EntityDespawnedEvent))]
         void OnDespawn() => EnterState(default(IState));
         public void EnterState(IState state)
         {
