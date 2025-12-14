@@ -10,7 +10,8 @@ namespace BB
             container.Event<IBoard>();
 
             if (context.InitialValues is not null)
-                container.System<InitBlackboard>(context.InitialValues);
+                container.SystemWithArgs<InitBlackboard, InitBlackboard>(
+                    (typeof(IBoardValuesProvider), context.InitialValues));
             if (context.FillResources)
                 container.System<InitResources>();
         }
