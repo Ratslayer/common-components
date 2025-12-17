@@ -2,7 +2,6 @@
 using BB.Serialized;
 using BB.Serialized.States;
 using UnityEngine;
-using static BB.PlayerTriggerVolumeActions;
 namespace BB
 {
     [RequireComponent(typeof(TriggerVolumeBehaviour))]
