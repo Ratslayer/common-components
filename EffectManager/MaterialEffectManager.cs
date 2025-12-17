@@ -37,8 +37,8 @@ namespace BB
 			_dirtyContainers.AddUnique(container);
 		}
 
-		[OnLateUpdate]
-		void OnLateUpdate(UpdateTime _)
+		[OnEvent]
+		void OnLateUpdate(LateUpdateEvent _)
 		{
 			if (_dirtyContainers.Count == 0)
 				return;
