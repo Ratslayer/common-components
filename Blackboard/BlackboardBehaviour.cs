@@ -2,7 +2,7 @@
 using BB.Di;
 namespace BB
 {
-    public sealed class BlackboardBehaviour : EntityBehaviour
+    public sealed class BlackboardBehaviour : EntityBehaviour3D
     {
         [SerializeField]
         BoardValuesAsset _values;

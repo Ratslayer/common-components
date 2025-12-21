@@ -33,7 +33,7 @@ namespace BB.Serialized.States
         DisposableToken _subscription;
         protected override void InvokeSync(SerializedActionContext context)
         {
-            _subscription = context.Entity.TempSubscribe<TEvent>(e => OnEvent(e, context));
+            _subscription = context.Entity.Subscribe<TEvent>(e => OnEvent(e, context));
         }
         protected override void InvokeExitSync(SerializedActionContext context)
         {

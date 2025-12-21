@@ -22,7 +22,7 @@ namespace BB
         [OnEvent(typeof(EntityEnabledEvent))]
         void OnEnable()
         {
-            _disposable = _player.Value.TempSubscribe<TEvent>(OnEvent);
+            _disposable = _player.Value.Subscribe<TEvent>(OnEvent);
             if (_player.Value.Has(out TEvent e))
                 OnEvent(e);
         }

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace BB
 {
     [RequireComponent(typeof(TriggerVolumeBehaviour))]
-    public sealed class PlayerTriggerVolumeActions : EntityBehaviour
+    public sealed class PlayerTriggerVolumeActions : EntityBehaviour3D
     {
         public SerializedSceneStateActions _actions = new();
         public override void Install(IDiContainer container)

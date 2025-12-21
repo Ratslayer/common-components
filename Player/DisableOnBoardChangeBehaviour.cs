@@ -1,7 +1,7 @@
 ﻿using BB.Di;
 namespace BB
 {
-    public sealed class DisableOnBoardChangeBehaviour : EntityBehaviour
+    public sealed class DisableOnBoardChangeBehaviour : EntityBehaviour3D
     {
         public BaseBoardKey _key;
         LogicalOperation _operation;

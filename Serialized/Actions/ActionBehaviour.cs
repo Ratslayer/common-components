@@ -4,7 +4,7 @@ using System;
 
 namespace BB
 {
-    public sealed class ActionBehaviour : EntityBehaviour
+    public sealed class ActionBehaviour : EntityBehaviour3D
     {
         public SerializedActionsWithTriggers[] _actions = { };
         IDisposable _disposable;
