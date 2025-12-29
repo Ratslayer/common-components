@@ -9,12 +9,12 @@ namespace BB
     {
         public Vector2 Delta { get; init; }
     }
-    public sealed record UnityInput(
-        ) : IDisposable
+    public sealed class UnityInput : IDisposable
     {
-        [Inject] IInputConfig Config;
-        [Inject] IEvent<MouseMovedEvent> MouseMoved;
-        [Inject] IEvent<InputEvent> InputPublisher;
+        [Inject] IInputConfig _inputConfig;
+        [Inject] IEvent<MouseMovedEvent> _mouseMoved;
+        [Inject] IEvent<InputEvent> _inputPublisher;
+
         readonly List<InputActionSubscription> _actionSubscriptions = new();
         public string GetName(InputActionWrapperAsset e)
             => _actionSubscriptions.TryGetValue(s => s.Event == e, out var sub)
@@ -23,30 +23,31 @@ namespace BB
         [OnEvent(typeof(EntityCreatedEvent))]
         private void InitInputAsset()
         {
-            var actions = Config.GetAllActions();
+            var actions = _inputConfig.GetAllActions();
             foreach (var action in actions)
                 if (action)
                     _actionSubscriptions.Add(
-                        new(this, Config.InputAsset[action._inputActionName], action, InputPublisher));
+                        new(this, _inputConfig.InputAsset[action._inputActionName], action, _inputPublisher));
             foreach (var subscription in _actionSubscriptions)
                 subscription.Subscribe();
 
-            Config.InputAsset["Mouse"].performed += MouseMove;
+            _inputConfig.InputAsset["Mouse"].performed += MouseMove;
         }
         public void Dispose()
         {
             foreach (var subscription in _actionSubscriptions)
                 subscription.Unsubscribe();
-            Config.InputAsset["Mouse"].performed -= MouseMove;
+            _inputConfig.InputAsset["Mouse"].performed -= MouseMove;
         }
         [OnEvent(typeof(EntitySpawnedEvent))]
-        void Enable() => Config.InputAsset.Enable();
+        void Enable() => _inputConfig.InputAsset.Enable();
+
         [OnEvent(typeof(EntityDespawnedEvent))]
-        void Disable() => Config.InputAsset.Disable();
+        void Disable() => _inputConfig.InputAsset.Disable();
         void MouseMove(CallbackContext context)
         {
             var delta = context.ReadValue<Vector2>();
-            MouseMoved.Publish(new() { Delta = delta });
+            _mouseMoved.Publish(new() { Delta = delta });
         }
         sealed record InputActionSubscription(
             UnityInput Input,

@@ -21,8 +21,7 @@ namespace BB
 			container.Var<CurrentPlayerActions>();
 
 			container.Var<InputActions>();
-			container.Var<PlayerInputBlocked>();
-			container.Var<PlayerMovementBlocked>();
+			
 		}
 	}
 }
