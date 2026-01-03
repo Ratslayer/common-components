@@ -11,6 +11,7 @@ namespace BB
         where TVariable : EntityVariable<TVariable>
     {
         [Inject] TVariable _var;
+        [Inject] IEvent<TVariable> _event;
         public TVariable Var => _var;
         readonly EventHandler _handler = new();
         [OnEvent(typeof(EntitySpawnedEvent))]
@@ -18,14 +19,14 @@ namespace BB
         {
             _handler._subscription = this;
             OnEvent(Var.Get<TEvent>());
-            _var._event.Subscribe(_handler);
+            _event.Subscribe(_handler);
         }
         [OnEvent(typeof(EntityDespawnedEvent))]
         void OnDespawn()
         {
             if (_var.Value.Has(out IEvent<TEvent> e))
                 e.Unsubscribe(this);
-            _var._event.Unsubscribe(_handler);
+            _event.Unsubscribe(_handler);
         }
 
         public void OnEvent(TVariable msg)
