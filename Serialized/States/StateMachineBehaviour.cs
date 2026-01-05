@@ -8,7 +8,7 @@ namespace BB.States
     {
         IEnumerable<IState> GetStates();
     }
-    public sealed class StateMachineBehaviour : EntityBehaviour3D, IStateMachine, IStateProvider
+    public sealed class StateMachineBehaviour : EntityComponent3D, IStateMachine, IStateProvider
     {
         [ValueDropdown(nameof(GetStateNames))]
         public string _startingStateName;
