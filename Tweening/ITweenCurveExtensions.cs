@@ -104,7 +104,31 @@ namespace BB
                 .DORotateQuaternion(rotation, curve.Duration)
                 .SetEase(curve);
         }
-
+        public static UniTask RotateForward(
+            this ITweenCurve curve,
+            in TransformAdapter transform,
+            Vector3 dir,
+            CancellationToken ct)
+            => curve.RotateForward(transform, dir).ToUniTask(cancellationToken: ct);
+        public static Tween RotateX(
+            this ITweenCurve curve,
+            in TransformAdapter transform,
+            float rotation)
+        {
+            var t = transform._transform;
+            return DOTween.To(
+                () => t.eulerAngles.x.ClampAngle(),
+                v => t.eulerAngles = t.eulerAngles.SetX(v),
+                rotation,
+                curve.Duration)
+                .SetEase(curve);
+        }
+        public static UniTask RotateX(
+           this ITweenCurve curve,
+           in TransformAdapter transform,
+           float rotation,
+           CancellationToken ct)
+            => curve.RotateX(transform, rotation).ToUniTask(cancellationToken: ct);
         public static Tween Scale(this ITweenCurve curve, in TransformAdapter transform, float scale)
             => transform._transform
             .DOScale(scale, curve.Duration)

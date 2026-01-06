@@ -1,10 +1,10 @@
 ﻿using DG.Tweening;
 
-public readonly struct TweenCancelationToken
+public readonly struct TweenCancellationToken
 {
 	readonly Tween _tween;
 	readonly ulong _id;
-	public TweenCancelationToken(Tween tween)
+	public TweenCancellationToken(Tween tween)
 	{
 		_tween = tween;
 		_id = PooledIdsUtils.AddToPool(_tween);

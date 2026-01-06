@@ -12,8 +12,8 @@ namespace BB
             => new(gameObject.transform);
         public static implicit operator TransformAdapter(Component component)
             => new(component.transform);
-        public static implicit operator TransformAdapter(Root root)
-            => new(root.Transform);
+        public static implicit operator TransformAdapter(BaseRoot root)
+            => new(root.GameObject.transform);
         public static implicit operator TransformAdapter(Entity entity)
             => new(entity.Transform);
         public static implicit operator TransformAdapter(Variable<Entity> v)

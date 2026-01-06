@@ -26,7 +26,7 @@ namespace BB
 			return tween;
 		}
 
-		public static TweenCancelationToken GetToken(this Tween tween) => new(tween);
+		public static TweenCancellationToken GetToken(this Tween tween) => new(tween);
 		public static Tween OnEnd(this Tween tween, TweenCallback action)
 			=> tween
 			.OnKill(action)
