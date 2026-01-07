@@ -37,7 +37,7 @@ namespace BB.States
             _disposables.DisposeAndClear();
         }
     }
-    public sealed class StateBehaviour : BaseBehaviour, IStateProvider
+    public sealed class StateBehaviour : BaseComponent, IStateProvider
     {
         public SerializedState _state = new();
         public IEnumerable<IState> GetStates()
