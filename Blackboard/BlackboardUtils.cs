@@ -6,7 +6,7 @@ namespace BB
     {
         public static void BindBlackboard(this IDiContainer container, in BlackboardInstallContext context)
         {
-            container.System<IBoard, Blackboard>();
+            container.Service<IBoard, Blackboard>();
             container.Event<IBoard>();
 
             if (context.InitialValues is not null)

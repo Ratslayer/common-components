@@ -6,7 +6,7 @@ namespace BB
 		public static void BindEffectManagers(
 			this IDiContainer container)
 		{
-			container.System<IMaterialEffectManager, MaterialEffectManager>();
+			container.Service<IMaterialEffectManager, MaterialEffectManager>();
 		}
 	}
 }

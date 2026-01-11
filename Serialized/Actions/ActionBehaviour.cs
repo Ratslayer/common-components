@@ -13,7 +13,7 @@ namespace BB
         {
             var bag = DisposableBag.GetPooled();
             foreach (var action in _actions)
-                bag.AddDisposable(action.Subscribe(Entity));
+                bag.Add(action.Subscribe(Entity));
             _disposable = bag;
         }
         [OnEvent(typeof(EntityDespawnedEvent))]

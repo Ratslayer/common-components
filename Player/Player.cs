@@ -20,12 +20,12 @@ namespace BB
             _handler._subscription = this;
             OnEvent(Var.Get<TEvent>());
             _event.Subscribe(_handler);
+            _handler.Subscribe(Var);
         }
         [OnEvent(typeof(EntityDespawnedEvent))]
         void OnDespawn()
         {
-            if (_var.Value.Has(out IEvent<TEvent> e))
-                e.Unsubscribe(this);
+            _handler.Unsubscribe(Var);
             _event.Unsubscribe(_handler);
         }
 
@@ -35,7 +35,7 @@ namespace BB
                 e.Unsubscribe(this);
             if (_var.Value.Has(out e))
                 e.Subscribe(this);
-            //для тех событий которые являеются своими же источниками
+            //for those events that are self sourced, we trigger OnEvent immediately
             if (_var.Value.Has(out TEvent eventSource))
                 OnEvent(eventSource);
         }
@@ -49,13 +49,21 @@ namespace BB
 
             public void OnEvent(TVariable msg)
 			{
-                if (_subscription._var.PreviousValue.Has(out IEvent<TEvent> e))
-                    e.Unsubscribe(_subscription);
-                if (_subscription._var.Value.Has(out e))
-                    e.Subscribe(_subscription);
+                Unsubscribe(_subscription._var.PreviousValue);
+                Subscribe(_subscription._var.Value);
                 //для тех событий которые являеются своими же источниками
                 if (_subscription._var.Value.Has(out TEvent eventSource))
                     _subscription.OnEvent(eventSource);
+            }
+            public void Subscribe(Entity entity)
+            {
+                if(entity.Has(out IEvent<TEvent> e))
+                    e.Subscribe(_subscription);
+            }
+            public void Unsubscribe(Entity entity)
+            {
+                if (entity.Has(out IEvent<TEvent> e))
+                    e.Unsubscribe(_subscription);
             }
 		}
 	}

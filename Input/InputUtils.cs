@@ -14,7 +14,7 @@ namespace BB
 			container.Event<InputActionEvent>();
 
 			container.System<GameInputSystem>();
-			container.System<IPointer, MousePointer>();
+			container.Service<IPointer, MousePointer>();
 			container.System<UnityInput>();
 			container.System<ProcessInputActions>();
 
