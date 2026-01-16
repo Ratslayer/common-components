@@ -4,26 +4,77 @@ using System;
 using UnityEngine;
 namespace BB
 {
-	public abstract class BaseSerializedTween : ITweenCurve
-	{
-		[SerializeField, HorizontalGroup(50), HideLabel]
-		float _duration = 1f;
-		[ShowIf(nameof(_custom))]
-		[SerializeField, HorizontalGroup, HideLabel]
-		AnimationCurve _curve = new();
-		[HideIf(nameof(_custom))]
-		[SerializeField, HorizontalGroup, HideLabel]
-		Ease _ease;
-		[SerializeField, HorizontalGroup(17), HideLabel]
-		bool _custom;
+    public sealed class TweenValue
+    {
+        public float Value { get; private set; }
+        public float BlendValue(float from, float to)
+            => MathUtils.MapToRange(Value, from, to);
+        public Vector3 BlendValueV3(float from, float to)
+            => BlendValue(from, to) * Vector3.one;
+        TweenToken _tween;
+        public TweenValue Start(float target, ITweenCurve curve)
+        {
+            _tween.Cancel();
+            if (curve is null)
+                return this;
 
-		public float Duration => _duration;
-		public bool IsCustom=> _custom;
-		public Ease Ease => _ease;
-		public AnimationCurve Curve => _curve;
-	}
-	[Serializable, InlineProperty]
-	public sealed class TweenCurve : BaseSerializedTween
-	{
-	}
+            _tween = curve switch
+            {
+                TweenCurve c => DOTween
+                    .To(() => Value, v => Value = v, target, curve.Duration)
+                    .SetEase(curve.Ease)
+                    .GetToken(),
+                TweenPunch p => DOTween
+                    .Punch(
+                        () => Value * Vector3.one,
+                        v => Value = v.x,
+                        target * Vector3.one,
+                        p.Duration,
+                        p._vibrato,
+                        p._elasticity)
+                    .SetEase(curve.Ease)
+                    .GetToken(),
+                TweenShake s => DOTween
+                    .Shake(
+                        () => Value * Vector3.one,
+                        v => Value = v.x,
+                        s.Duration,
+                        s._strength,
+                        s._vibrato,
+                        s._randomness)
+                    .SetEase(curve.Ease)
+                    .GetToken(),
+                _ => throw new NotImplementedException()
+            };
+            return this;
+        }
+        public TweenValue Reset()
+        {
+            Value = 0;
+            return this;
+        }
+    }
+    public abstract class BaseSerializedTween : ITweenCurve
+    {
+        [SerializeField, HorizontalGroup(50), HideLabel]
+        float _duration = 1f;
+        [ShowIf(nameof(_custom))]
+        [SerializeField, HorizontalGroup, HideLabel]
+        AnimationCurve _curve = new();
+        [HideIf(nameof(_custom))]
+        [SerializeField, HorizontalGroup, HideLabel]
+        Ease _ease;
+        [SerializeField, HorizontalGroup(17), HideLabel]
+        bool _custom;
+
+        public float Duration => _duration;
+        public bool IsCustom => _custom;
+        public Ease Ease => _ease;
+        public AnimationCurve Curve => _curve;
+
+    }
+    [Serializable, InlineProperty]
+    public sealed class TweenCurve : BaseSerializedTween
+    {
+    }
 }

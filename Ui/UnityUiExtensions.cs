@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BB.Di;
+using System;
 using UnityEngine.UI;
 
 namespace BB
@@ -7,8 +8,16 @@ namespace BB
 	{
 		public static void SetOnClick(this Button button, Action action)
 		{
-			button.onClick.RemoveAllListeners();
+			button.ClearOnClick();
 			button.onClick.AddListener(() => action());
 		}
+		public static void ClearOnClick(this Button button)
+            => button.onClick.RemoveAllListeners();
+        public static void BindAllPointerEvents(this IDiContainer container)
+		{
+			container.Event<PointerEnterEvent>();
+			container.Event<PointerExitEvent>();
+			container.Event<PointerClickEvent>();
+        }
 	}
 }

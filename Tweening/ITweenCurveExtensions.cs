@@ -170,5 +170,17 @@ namespace BB
             .SetEase(curve);
         public static UniTask Fov(this ITweenCurve curve, CinemachineVirtualCamera camera, float fov, CancellationToken ct)
             => curve.Fov(camera, fov).ToUniTask(cancellationToken: ct);
+
+        public static Tween RestrictToTarget(this Tween tween, object target = null)
+        {
+            var previousTarget = tween.target;
+            tween.target = null;
+
+            DOTween.Kill(target ?? tween.target);
+
+            tween.target = target ?? previousTarget;
+
+            return tween;
+        }
     }
 }

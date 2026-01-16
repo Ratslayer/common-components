@@ -8,5 +8,5 @@ namespace BB
 		public Vector3 _strength = new(0.1f, 0, 0.1f);
 		public float _randomness = 50;
 		public int _vibrato = 10;
-	}
+    }
 }
