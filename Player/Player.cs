@@ -5,6 +5,16 @@ namespace BB
     public sealed class Player : EntityVariable<Player>
     {
         public Vector3 Position => Has(out Root root) ? root.Position : Vector3.zero;
+
+        //[Inject] PlayerInstaller _playerInstaller;
+        //[OnEvent]
+        //void InitPlayer(EntityCreatedEvent _)
+        //{
+        //    Value = Entity.Spawn(new SpawnEntityFromInstaller3DContext
+        //    {
+        //        Installer = _playerInstaller,
+        //    });
+        //}
     }
     public abstract class SubscribeToEntityVariableEventSystem<TVariable, TEvent>
         : EntitySystem, IEventHandler<TEvent>
@@ -42,13 +52,13 @@ namespace BB
 
         public abstract void OnEvent(TEvent msg);
 
-		sealed class EventHandler
-			: IEventHandler<TVariable>
-		{
+        sealed class EventHandler
+            : IEventHandler<TVariable>
+        {
             public SubscribeToEntityVariableEventSystem<TVariable, TEvent> _subscription;
 
             public void OnEvent(TVariable msg)
-			{
+            {
                 Unsubscribe(_subscription._var.PreviousValue);
                 Subscribe(_subscription._var.Value);
                 //для тех событий которые являеются своими же источниками
@@ -57,7 +67,7 @@ namespace BB
             }
             public void Subscribe(Entity entity)
             {
-                if(entity.Has(out IEvent<TEvent> e))
+                if (entity.Has(out IEvent<TEvent> e))
                     e.Subscribe(_subscription);
             }
             public void Unsubscribe(Entity entity)
@@ -65,6 +75,6 @@ namespace BB
                 if (entity.Has(out IEvent<TEvent> e))
                     e.Unsubscribe(_subscription);
             }
-		}
-	}
+        }
+    }
 }

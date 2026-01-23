@@ -34,7 +34,7 @@ namespace BB
                 });
             }
             if (context.Point)
-                PlayerUtils.WarpPlayerToPoint(context.Point,player.Value.Require<Root>().ForwardFlat);
+                PlayerUtils.WarpPlayerToPoint(context.Point, player.Value.Require<Root>().ForwardFlat);
 
             return player;
         }
@@ -71,6 +71,21 @@ namespace BB
             {
                 Point = point
             };
+        }
+    }
+    public sealed class BlockAndShowCursorOnSpawn : EntitySystem
+    {
+        IDisposable _disposable;
+        [OnEvent]
+        void OnSpawn(EntitySpawnedEvent _)
+        {
+            _disposable = PlayerUtils.SwitchToCursorMode(this);
+        }
+        [OnEvent]
+        void OnDespawn(EntityDespawnedEvent _)
+        {
+            _disposable?.Dispose();
+            _disposable = null;
         }
     }
 }

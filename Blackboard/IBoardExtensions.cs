@@ -71,18 +71,8 @@ namespace BB
             key.Add(board, value);
             return AddBoardValueOnDispose.GetPooled(board, key, -value);
         }
-        public static double Get(
-            this IBoardKey key,
-            in Entity entity)
-            => GetBoardContext.FromEntity(entity).WithKey(key).Get();
-        public static double Get(
-            this IBoardKey key,
-            in IBoard board)
-            => new GetBoardContext
-            {
-                Board = board,
-                Key = key
-            }.Get();
+        public static double Get(this IBoard board, IBoardKey key)
+            => board.Get(new() { Board = board, Key = key });
 
         public static bool CanAdd(this IBoardKey key, IBoard board, double value)
         {

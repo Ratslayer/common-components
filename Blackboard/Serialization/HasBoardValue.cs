@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BB.Board.Serialization
+namespace BB.Blackboard.Serialization
 {
 	[Serializable]
     public sealed class HasBoardValue : ISerializedBoardValueCondition

@@ -34,7 +34,7 @@ namespace BB
                 else EditorGUILayout.LabelField(name);
                 //draw editable field
                 EditorGUI.BeginChangeCheck();
-                var value = key.Get(board);
+                var value = board.Get(key);
                 var newValue = EditorGUILayout.DoubleField(value);
                 if (EditorGUI.EndChangeCheck())
                 {

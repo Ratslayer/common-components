@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-namespace BB
+namespace BB.Blackboard
 {
-    public sealed class Blackboard
+    public sealed class BlackboardImpl
         : EntitySystem, IBoard, ISerializableComponent
     {
         [Inject] IEvent<IBoard> _changed;
@@ -148,7 +148,7 @@ namespace BB
         }
         private static double GetValueRecursive(in GetBoardContext context, IBoard startingBoard)
         {
-            var board = (Blackboard)context.Board;
+            var board = (BlackboardImpl)context.Board;
             var key = context.Key;
             var container = board.GetOrCreate(context.Key);
             var value = container.Value;

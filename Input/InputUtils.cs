@@ -7,7 +7,7 @@ namespace BB
 		{
 			container.Instance(config);
 
-			container.Event<InputEvent>();
+			container.Event<PlayerInputEvent>();
 			container.Event<MouseMovedEvent>();
 			container.Event<MovePlayerInputEvent>();
 			container.Event<TurnPlayerInputEvent>();

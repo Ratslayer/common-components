@@ -1,4 +1,4 @@
-﻿namespace BB.Board.Serialization
+﻿namespace BB.Blackboard.Serialization
 {
 	public interface ISerializedBoardValueModifier { }
 }

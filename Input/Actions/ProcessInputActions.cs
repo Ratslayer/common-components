@@ -7,7 +7,7 @@ namespace BB
 
         readonly List<InputActionData> _pressedActions = new();
         [OnEvent]
-        void OnInput(InputEvent e)
+        void OnInput(PlayerInputEvent e)
         {
             if (Actions.Value is null)
                 return;

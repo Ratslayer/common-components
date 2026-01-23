@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BB.Board.Serialization
+namespace BB.Blackboard.Serialization
 {
     public interface ISerializedBoardValueCondition : ISerializedBoardValueModifier, IBoardValueCondition
     {

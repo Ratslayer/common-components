@@ -1,6 +1,10 @@
 ﻿using System;
 namespace BB
 {
+    public readonly struct BoardCostContext
+    {
+        public IBoard Board { get; init; }
+    }
     public readonly struct AddBoardContext
     {
         public IBoardKey Key { get; init; }

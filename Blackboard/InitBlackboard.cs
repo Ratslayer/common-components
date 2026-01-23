@@ -7,7 +7,7 @@
         [OnEvent]
         void OnSpawn(EntitySpawnedEvent _)
         {
-            _values.Add(new() { Board = _board });
+            Board.Add(_board, _values);
         }
     }
     public sealed record InitResources()

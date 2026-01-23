@@ -1,4 +1,5 @@
-﻿using BB.Di;
+﻿using BB.Blackboard;
+using BB.Di;
 namespace BB
 {
 
@@ -6,7 +7,7 @@ namespace BB
     {
         public static void BindBlackboard(this IDiContainer container, in BlackboardInstallContext context)
         {
-            container.Service<IBoard, Blackboard>();
+            container.Service<IBoard, BlackboardImpl>();
             container.Event<IBoard>();
 
             if (context.InitialValues is not null)

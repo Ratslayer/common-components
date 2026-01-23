@@ -4,8 +4,7 @@ namespace BB
 {
 	public interface IBoardValuesProvider
 	{
-		void Add(in AddBoardContext context);
-		bool CanAdd(in CanAddBoardValuesContext context);
+		IEnumerable<IBoardValue> GetBoardValues();
 	}
 	public readonly struct CanAddBoardValuesContext
 	{

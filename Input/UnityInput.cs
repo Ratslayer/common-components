@@ -13,7 +13,7 @@ namespace BB
     {
         [Inject] IInputConfig _inputConfig;
         [Inject] IEvent<MouseMovedEvent> _mouseMoved;
-        [Inject] IEvent<InputEvent> _inputPublisher;
+        [Inject] IEvent<PlayerInputEvent> _inputPublisher;
 
         readonly List<InputActionSubscription> _actionSubscriptions = new();
         public string GetName(InputActionWrapperAsset e)
@@ -53,7 +53,7 @@ namespace BB
             UnityInput Input,
             InputAction Action,
             InputActionWrapperAsset Event,
-            IEvent<InputEvent> InputPublisher)
+            IEvent<PlayerInputEvent> InputPublisher)
         {
             const string Regex = @"\[(.*)\]";
             public string InputName => Action.ToString().MatchWithRegex(Regex).Split('/')[^1].ToUpper();
