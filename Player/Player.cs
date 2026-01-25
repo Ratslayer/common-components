@@ -1,10 +1,31 @@
 ﻿using BB.Di;
+using BB.Map;
 using UnityEngine;
 namespace BB
 {
     public sealed class Player : EntityVariable<Player>
     {
-        public Vector3 Position => Has(out Root root) ? root.Position : Vector3.zero;
+        PlayerCamera _camera;
+        Root _root;
+        CurrentPlayerMapPoint _point;
+        public Vector3 Position => _root.Position;
+        protected override void OnUpdate()
+        {
+            base.OnUpdate();
+            _camera = Require<PlayerCamera>();
+            _root = Require<Root>();
+            _point = Require<CurrentPlayerMapPoint>();
+        }
+        public void WarpToPoint(Vector3 point)
+        {
+            _root.Position = point;
+            _camera.Value.transform.position = point;
+        }
+        public void SetMapPosition(PlayerMapPosition position)
+        {
+            _point.Value = position;
+            WarpToPoint(position.Point.transform.position);
+        }
 
         //[Inject] PlayerInstaller _playerInstaller;
         //[OnEvent]
