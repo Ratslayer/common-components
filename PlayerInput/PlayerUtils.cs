@@ -68,11 +68,20 @@ namespace BB
         {
             var player = World.Require<Player>();
             player.Require<Root>().Position = point.transform.position;
-            player.Require<PlayerCamera>().Value.transform.forward = viewDir;
             player.Require<CurrentPlayerMapPoint>().Value = new()
             {
                 Point = point
             };
+
+            var playerCamera = player.Require<PlayerCamera>();
+            playerCamera.Value.transform.forward = viewDir;
+
+            //var activeCamera = player.Require<ActiveCamera>();
+            //if (activeCamera.Value == playerCamera.Value)
+            //{
+            //    var mainCamera = player.Require<MainCamera>();
+            //    mainCamera.Brain.transform.position = playerCamera.Value.transform.position;
+            //}
         }
     }
     public sealed class BlockAndShowCursorOnSpawn : EntitySystem

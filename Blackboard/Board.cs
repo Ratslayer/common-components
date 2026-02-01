@@ -37,37 +37,43 @@
                 Board = board,
                 Key = key,
             });
-
-        public static bool CanAdd(IBoard board, in CanAddBoardValueContext context)
+        public static double? GetMaxValue(IBoard board, IBoardKey key)
         {
-            var getContext = new GetBoardContext
-            {
-                Board = board,
-                Multiplier = context.Multiplier
-            };
+            if (key is not IBoardKeyWithBounds keyWithBounds)
+                return null;
 
-            if (context.Key is IBoardKeyWithBounds bounds)
+            return keyWithBounds.GetMaxValue(new() { Board = board, Key = key });
+        }
+        public static bool Has(IBoard board, IBoardKey key)
+            => Get(board, key).IsPositive();
+        public static bool CanAdd(IBoard board, IBoardKey key, in CanAddBoardValueContext context = default)
+        {
+            var multiplier = context.Multiplier ?? 1;
+
+            if (context.AllowOverflow is not true && key is IBoardKeyWithBounds bounds)
             {
-                var value = Get(board, context.Key);
+                var value = Get(board, key);
                 var newValue = value + 1;
                 var max = bounds.GetMaxValue(new()
                 {
                     Board = board,
-                    Key = context.Key,
+                    Key = key,
                 });
                 var min = bounds.GetMinValue(new()
                 {
                     Board = board,
-                    Key = context.Key,
+                    Key = key,
                 });
                 if (value < min || value > max)
                     return false;
             }
 
-            if (!CanPayCost(board, context.Requirements, context.Multiplier ?? 1))
+            if (key is IBoardKeyWithRequirements reqs
+                && !CanPayCost(board, reqs.Requirements, multiplier))
                 return false;
 
-            if (!CanPayCost(board, context.Cost, context.Multiplier ?? 1))
+            if (key is IBoardKeyWithCost cost
+                && !CanPayCost(board, cost.Cost, multiplier))
                 return false;
 
             return true;
@@ -120,16 +126,16 @@
             values.DisposeAndClear();
             return canPay;
         }
-        public static bool CanAdd(in Entity entity, in CanAddBoardValueContext context)
-            => CanAdd(entity.Require<IBoard>(), context);
-        public static bool TryAdd(IBoard board, in CanAddBoardValueContext context)
+        public static bool CanAdd(in Entity entity, IBoardKey key, in CanAddBoardValueContext context = default)
+            => CanAdd(entity.Require<IBoard>(), key, context);
+        public static bool TryAdd(IBoard board, IBoardKey key, in CanAddBoardValueContext context = default)
         {
-            if (!CanAdd(board, context))
+            if (!CanAdd(board, key, context))
                 return false;
 
             var multiplier = context.Multiplier ?? 1;
-            Add(board, context.Key, multiplier);
-            if (context.Cost is null)
+            Add(board, key, multiplier);
+            if (key is not IBoardKeyWithCost keyCost)
                 return true;
 
             var spendCostContext = new AddBoardContext
@@ -138,22 +144,28 @@
                 Value = -multiplier,
             };
 
-            var costValues = context.Cost.GetBoardValues().ToPooledList();
+            var costValues = keyCost.Cost.GetBoardValues().ToPooledList();
             foreach (var cost in costValues)
                 cost.Add(spendCostContext);
             costValues.DisposeAndClear();
 
             return true;
         }
-        public static bool TryAdd(in Entity entity, in CanAddBoardValueContext context)
-            => TryAdd(entity.Require<IBoard>(), context);
+        public static bool TryAdd(in Entity entity, IBoardKey key, in CanAddBoardValueContext context = default)
+            => TryAdd(entity.Require<IBoard>(), key, context);
 
+    }
+    public interface IBoardKeyWithRequirements
+    {
+        IBoardValuesProvider Requirements { get; }
+    }
+    public interface IBoardKeyWithCost
+    {
+        IBoardValuesProvider Cost { get; }
     }
     public readonly struct CanAddBoardValueContext
     {
-        public IBoardKey Key { get; init; }
-        public IBoardValuesProvider Requirements { get; init; }
-        public IBoardValuesProvider Cost { get; init; }
         public double? Multiplier { get; init; }
+        public bool? AllowOverflow { get; init; }
     }
 }
