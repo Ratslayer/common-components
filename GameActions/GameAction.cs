@@ -31,7 +31,7 @@ namespace BB
 
 		public override void Dispose()
 		{
-			_components.DisposeAndClear();
+			_components.DisposeElementsAndClear();
 			base.Dispose();
 		}
 

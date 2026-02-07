@@ -34,7 +34,7 @@ namespace BB.States
         }
         void DisposeAll()
         {
-            _disposables.DisposeAndClear();
+            _disposables.DisposeElementsAndClear();
         }
     }
     public sealed class StateBehaviour : BaseComponent, IStateProvider

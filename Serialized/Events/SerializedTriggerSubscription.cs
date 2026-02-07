@@ -28,7 +28,7 @@ namespace BB.Serialized.Events
 		{
             foreach (var sub in _subscriptions)
                 sub.Unsubscribe(_entity._ref);
-            _subscriptions.DisposeAndClear();
+            _subscriptions.DisposeElementsAndClear();
 			base.Dispose();
 		}
 	}

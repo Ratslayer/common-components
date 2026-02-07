@@ -117,7 +117,7 @@ namespace BB
 		{
 			base.Dispose();
 			OnExit();
-			_appendedStates.DisposeAndClear();
+			_appendedStates.DisposeElementsAndClear();
 			_parentState?._appendedStates.Remove(GetTypedToken());
 			_parentState = null;
 			_stateMachine = null;

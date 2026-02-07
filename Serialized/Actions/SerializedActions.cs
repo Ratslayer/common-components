@@ -22,6 +22,10 @@ namespace BB.Serialized.Actions
     public sealed class SerializedAssetActions : SerializedActions<ISerializedAssetAction>
     {
     }
+    [Serializable]
+    public sealed class SerializedSceneActions : SerializedActions<ISerializedSceneAction>
+    {
+    }
     public abstract class SerializedActionSync : SerializedAction
     {
         public override bool WaitForExecution => false;

@@ -8,4 +8,10 @@
     {
         string Desc { get; }
     }
+
+    public readonly struct NameDesc
+    {
+        public string Name { get; init; }
+        public string Desc { get; init; }
+    }
 }

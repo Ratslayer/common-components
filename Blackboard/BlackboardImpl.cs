@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 namespace BB.Blackboard
 {
-    public sealed class BlackboardImpl
-        : EntitySystem, IBoard, ISerializableComponent
+    public sealed class BlackboardImpl : EntitySystem, IBoard, ISerializableComponent
     {
         [Inject] IEvent<IBoard> _changed;
         [InjectFromParent]

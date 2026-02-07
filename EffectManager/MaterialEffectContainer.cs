@@ -14,7 +14,7 @@ namespace BB
 		public override void Dispose()
 		{
 			_renderer.SetPropertyBlock(null);
-			_effects.DisposeAndClear();
+			_effects.DisposeElementsAndClear();
 			base.Dispose();
 		}
 

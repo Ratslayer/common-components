@@ -32,7 +32,7 @@ namespace BB
         {
             foreach (var provider in _providers)
                 Board.Add(_context.Board, provider, _context.Value ?? 1);
-            _providers.DisposeAndClear();
+            _providers.DisposeElementsAndClear();
             _context = default;
             base.Dispose();
         }
