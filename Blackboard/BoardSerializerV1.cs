@@ -18,7 +18,7 @@ namespace BB
 
         protected override void ApplyAfterSpawn(IBoard target, BoardSaveData data)
         {
-            using var _ = target.DisableAutoFlush();
+            using var _ = target.FlushOnDispose();
             foreach (var value in data.Values)
                 if (HasLoadableAsset(value.KeyName, out BaseBoardKey key))
                     target.Set(key, value.Value);

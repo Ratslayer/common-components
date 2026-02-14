@@ -31,8 +31,8 @@ namespace BB
                     Board.Add(board, key, kvp.Value);
         }
 
-        public IEntityComponentSerializer GetSerializer()
-            => PlayerProgressionStatsSerializerV1.Default;
+        public IEntityComponentSerializer[] GetSerializers()
+            => new[] { PlayerProgressionStatsSerializerV1.Default };
     }
     public sealed class PlayerProgressionStatsSerializerV1 : BaseSerializer<
         PlayerProgressionStatsSerializerV1,

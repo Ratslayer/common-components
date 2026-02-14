@@ -10,17 +10,16 @@
             Board.Add(_board, _values);
         }
     }
-    public sealed record InitResources()
+    public sealed class InitResources
     {
-        [Inject]
-        IBoard Board;
-        [OnEvent(typeof(PostEntitySpawnedEvent),typeof(BeforeGameStartEvent))]
+        [Inject] IBoard _board;
+        [OnEvent(typeof(PostEntitySpawnedEvent), typeof(BeforeGameStartEvent))]
         void OnPostSpawn()
         {
-            foreach (var key in Board.Keys)
+            foreach (var key in _board.Keys)
                 if (key is IResourceBoardKey resource
                     && resource.SetToMaxOnSpawn)
-                    resource.SetToMax(Board);
+                    resource.SetToMax(_board);
         }
     }
 }

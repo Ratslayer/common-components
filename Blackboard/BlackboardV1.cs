@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 namespace BB.Blackboard
 {
-    public sealed class BlackboardImpl : EntitySystem, IBoard, ISerializableComponent
+    public sealed class BlackboardV1 : EntitySystem, IBoard, ISerializableComponent
     {
         [Inject] IEvent<IBoard> _changed;
         [InjectFromParent]
@@ -78,6 +78,7 @@ namespace BB.Blackboard
             container.PreviousValue = container.Value;
             container.Value = value;
             container._conditionalValues?.Clear();
+            _dirtyContainers.Add(container);
         }
 
         public void Add(IBoardKey key, IBoardValueCondition condition, double value)
@@ -147,7 +148,7 @@ namespace BB.Blackboard
         }
         private static double GetValueRecursive(in GetBoardContext context, IBoard startingBoard)
         {
-            var board = (BlackboardImpl)context.Board;
+            var board = (BlackboardV1)context.Board;
             var key = context.Key;
             var container = board.GetOrCreate(context.Key);
             var value = container.Value;
@@ -200,7 +201,7 @@ namespace BB.Blackboard
             return result;
         }
 
-        public IEntityComponentSerializer GetSerializer()
-            => BoardSerializerV1.Default;
+        public IEntityComponentSerializer[] GetSerializers()
+            => new[] { BoardSerializerV1.Default };
     }
 }
