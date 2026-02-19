@@ -10,6 +10,7 @@ namespace BB.Serialized
     {
         [SerializeReference]
         ISerializedEvent[] _events = { };
+        [SerializeField] bool _oneShot = false;
         public IDisposable Subscribe(Entity entity)
         {
             var subscription = CreateSubscription(entity);
@@ -18,12 +19,12 @@ namespace BB.Serialized
         }
         public SerializedTriggerSubscription CreateSubscription(Entity entity)
         {
+            var result = SerializedTriggerSubscription.GetPooled(entity);
             var context = new SerializedEventSubscriptionContext
             {
                 Entity = entity,
                 Action = Invoke
             };
-            var result = SerializedTriggerSubscription.GetPooled(entity);
             foreach (var e in _events)
             {
                 var subscription = e.CreateSubscription(context);
@@ -35,6 +36,8 @@ namespace BB.Serialized
             void Invoke()
             {
                 this.Invoke(new() { Entity = entity });
+                if (_oneShot)
+                    result.Dispose();
             }
         }
     }

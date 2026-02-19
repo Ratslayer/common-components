@@ -23,8 +23,4 @@ namespace BB.Serialized.Actions
     {
         bool CanInvoke(in SerializedActionContext context);
     }
-
-    public static class SerializedActionExtensions
-    {
-    }
 }
