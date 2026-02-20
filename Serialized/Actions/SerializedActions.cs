@@ -31,8 +31,15 @@ namespace BB.Serialized.Actions
         public override bool WaitForExecution => false;
         public override UniTask Invoke(SerializedActionContext context)
         {
-            if (IsValid(context))
-                InvokeSync(context);
+            try
+            {
+                if (IsValid(context))
+                    InvokeSync(context);
+            }
+            catch (Exception e)
+            {
+                context.Entity.LogError($"Exception during execution of action {GetType().Name}: {e.Message}");
+            }
             return UniTask.CompletedTask;
         }
         protected abstract void InvokeSync(SerializedActionContext context);
@@ -43,14 +50,21 @@ namespace BB.Serialized.Actions
         public override bool WaitForExecution => _waitForExecution;
         public override UniTask Invoke(SerializedActionContext context)
         {
-            if (!IsValid(context))
-                return UniTask.CompletedTask;
+            try
+            {
+                if (!IsValid(context))
+                    return UniTask.CompletedTask;
 
-            var task = InvokeAsync(context);
-            if (WaitForExecution)
-                return task;
+                var task = InvokeAsync(context);
+                if (WaitForExecution)
+                    return task;
 
-            task.Forget();
+                task.Forget();
+            }
+            catch (Exception e)
+            {
+                context.Entity.LogError($"Exception during execution of action {GetType().Name}: {e.Message}");
+            }
             return UniTask.CompletedTask;
         }
         protected abstract UniTask InvokeAsync(SerializedActionContext context);

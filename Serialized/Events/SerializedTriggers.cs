@@ -2,6 +2,7 @@
 using UnityEngine;
 using BB.Serialized.Events;
 using BB.Serialized.Actions;
+using Sirenix.OdinInspector;
 
 namespace BB.Serialized
 {
@@ -10,7 +11,7 @@ namespace BB.Serialized
     {
         [SerializeReference]
         ISerializedEvent[] _events = { };
-        [SerializeField] bool _oneShot = false;
+        [SerializeField, HorizontalGroup] bool _oneShot = true, _enabled = true;
         public IDisposable Subscribe(Entity entity)
         {
             var subscription = CreateSubscription(entity);
@@ -35,6 +36,8 @@ namespace BB.Serialized
 
             void Invoke()
             {
+                if (!_enabled)
+                    return;
                 this.Invoke(new() { Entity = entity });
                 if (_oneShot)
                     result.Dispose();
