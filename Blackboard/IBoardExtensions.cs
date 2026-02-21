@@ -1,6 +1,14 @@
 ﻿using System;
 namespace BB
 {
+    public static class IBoardValueContainerExtensions
+    {
+        public static bool HasGained(this IBoardValueContainer container, out double gain)
+        {
+            gain = container.Value - container.PreviousValue;
+            return gain.IsPositive();
+        }
+    }
     public static class IBoardExtensions
     {
         public static void SetToMax(this IBoardKeyWithBounds key, IBoard board)

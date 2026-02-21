@@ -8,7 +8,8 @@ namespace BB.Blackboard
         readonly IBoard _parent;
         readonly Dictionary<IBoardKey, BoardValueContainer> _values = new();
         readonly List<IBoardProcessor> _processors = new();
-        readonly List<BoardValueContainer> _dirtyContainers = new();
+        readonly List<BoardValueContainer> _dirtyContainers = new(), _dirtyContainersBuffer = new();
+        bool _isFlushing;
 
         public bool AutoFlushDisabled { get; set; }
         public IReadOnlyCollection<IBoardKey> Keys => _values.Keys;
@@ -48,6 +49,18 @@ namespace BB.Blackboard
 
         public void ForceFlushChanges()
         {
+            _isFlushing = true;
+            Flush(0);
+            _isFlushing = false;
+        }
+        void Flush(int counter)
+        {
+            if (counter >= 10)
+            {
+                LogError($"Board flush reached 10 cycles. Possible stack overflow.");
+                return;
+            }
+
             if (_dirtyContainers.Count == 0)
                 return;
 
@@ -62,6 +75,19 @@ namespace BB.Blackboard
                 container.PreviousValue = container.Value;
 
             _dirtyContainers.Clear();
+
+            if (_dirtyContainersBuffer.Count == 0)
+                return;
+
+            _dirtyContainers.AddRange(_dirtyContainersBuffer);
+            _dirtyContainersBuffer.Clear();
+
+            Flush(++counter);
+        }
+        void SetDirty(BoardValueContainer container)
+        {
+            var containers = _isFlushing ? _dirtyContainersBuffer : _dirtyContainers;
+            containers.AddUnique(container);
         }
 
         [OnEvent(typeof(EntityDespawnedEvent))]
@@ -78,7 +104,7 @@ namespace BB.Blackboard
             container.PreviousValue = container.Value;
             container.Value = value;
             container._conditionalValues?.Clear();
-            _dirtyContainers.Add(container);
+            SetDirty(container);
         }
 
         public void Add(IBoardKey key, IBoardValueCondition condition, double value)
@@ -120,6 +146,7 @@ namespace BB.Blackboard
             };
             var finalValue = context.GetValue();
             finalValue = ApplyMultipliers(getContext, finalValue, BoardEventUsage.Set);
+            finalValue = ApplyAdders(getContext, finalValue, BoardEventUsage.Set);
             finalValue = key.Stack(container.Value, finalValue);
             finalValue = ClampValue(getContext, finalValue, BoardEventUsage.Set);
 
@@ -131,7 +158,7 @@ namespace BB.Blackboard
             if (!valueChanged)
                 return;
             container.Value = finalValue;
-            _dirtyContainers.AddUnique(container);
+            SetDirty(container);
             this.SetDirtyAndAutoFlushChanges();
         }
 
@@ -143,6 +170,7 @@ namespace BB.Blackboard
             var value = GetValueRecursive(context, this);
             value *= context.Multiplier ?? 1;
             value = ApplyMultipliers(context, value, BoardEventUsage.Get);
+            value = ApplyAdders(context, value, BoardEventUsage.Get);
             value = ClampValue(context, value, BoardEventUsage.Get);
             return value;
         }
@@ -181,7 +209,22 @@ namespace BB.Blackboard
             foreach (var multiplier in km.Multipliers)
             {
                 var multValue = Get(context.WithKey(multiplier));
-                result *= multValue;
+                result *= (1 + multValue);
+            }
+            return result;
+        }
+        private double ApplyAdders(GetBoardContext context, double value, BoardEventUsage usage)
+        {
+            if (context.Key is not IBoardKeyWithAdders ka)
+                return value;
+            if (!ka.AdderUsage.HasFlag(usage))
+                return value;
+
+            var result = value;
+            foreach (var adder in ka.Adders)
+            {
+                var addValue = Get(context.WithKey(adder));
+                result += addValue;
             }
             return result;
         }

@@ -37,6 +37,11 @@ namespace BB
         IReadOnlyCollection<IBoardKey> Multipliers { get; }
         BoardEventUsage MultiplierUsage { get; }
     }
+    public interface IBoardKeyWithAdders : IBoardKey
+    {
+        IReadOnlyCollection<IBoardKey> Adders { get; }
+        BoardEventUsage AdderUsage { get; }
+    }
     public interface IBoardKeyWithGeneration : IBoardKey
     {
         double GetGenerationValue(in GetBoardContext context);
