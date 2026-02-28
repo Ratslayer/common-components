@@ -89,8 +89,6 @@ namespace BB
             _key.Add(board, GetValue(context.Entity));
         }
     }
-    [Serializable]
-    public sealed class SerializedBoardValueCost : SerializedBoardValueCost<BaseBoardKey> { }
     public sealed class AddExpressionBoardValueAction
         : AbstractAddBoardValueAction<AddExpressionBoardValueAction>
     {
@@ -109,21 +107,5 @@ namespace BB
         }
         protected override double GetValue(Entity entity)
             => _expression.GetValue(entity) * _multiplier;
-    }
-    public abstract class SerializedBoardValueCost<TKey>
-        : IFactory<IGameAction>
-        where TKey : IBoardKey
-    {
-        public TKey _key;
-        public EntityExpression _expression = new();
-        public IGameAction Create()
-        {
-            var result = GameAction
-                .GetPooled()
-                .Add(AddExpressionBoardValueAction.GetPooled(_key, _expression, -1));
-            return result;
-        }
-        public double GetValue(Entity entity)
-            => _expression.GetValue(entity);
     }
 }
