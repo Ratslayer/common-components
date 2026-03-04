@@ -13,5 +13,16 @@
     {
         public string Name { get; init; }
         public string Desc { get; init; }
+
+        public static implicit operator NameDesc((string name, string desc) data)
+            => new()
+            {
+                Name = data.name,
+                Desc = data.desc
+            };
+        public static implicit operator NameDesc(string name)
+            => new() { Name = name };
+        public static implicit operator bool(NameDesc nameDesc)
+            => nameDesc.Name.IsValid() || nameDesc.Desc.IsValid();
     }
 }

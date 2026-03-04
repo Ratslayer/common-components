@@ -136,6 +136,8 @@ namespace BB.Blackboard
         public void Add(in AddBoardContext context)
         {
             var key = context.Key;
+            if (key.NullIfDestroyedUnityEngineObject() is null)
+                return;
 
             var container = GetOrCreate(key);
 

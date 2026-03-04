@@ -24,33 +24,28 @@ namespace BB
             base.Dispose();
         }
     }
-    public sealed class ApplyBoardValueProvidersOnDispose : PooledObject<ApplyBoardValueProvidersOnDispose>
+    public sealed class ApplyBoardValuesOnDispose : PooledObject<ApplyBoardValuesOnDispose>
     {
-        readonly List<IBoardValuesProvider> _providers = new();
+        readonly List<IBoardValue> _values = new();
         AddBoardContext _context;
         public override void Dispose()
         {
-            foreach (var provider in _providers)
+            foreach (var provider in _values)
                 Board.Add(_context.Board, provider, _context.Value ?? 1);
-            _providers.DisposeElementsAndClear();
+            _values.DisposeElementsAndClear();
             _context = default;
             base.Dispose();
         }
 
-        public ApplyBoardValueProvidersOnDispose WithContext(in AddBoardContext context)
+        public ApplyBoardValuesOnDispose WithContext(in AddBoardContext context)
         {
             _context = context;
             return this;
         }
 
-        public ApplyBoardValueProvidersOnDispose WithProvider(IBoardValuesProvider provider)
+        public ApplyBoardValuesOnDispose WithValues(IEnumerable<IBoardValue> values)
         {
-            _providers.Add(provider);
-            return this;
-        }
-        public ApplyBoardValueProvidersOnDispose WithProviders(IEnumerable<IBoardValuesProvider> providers)
-        {
-            _providers.AddRange(providers);
+            _values.AddRange(values);
             return this;
         }
     }

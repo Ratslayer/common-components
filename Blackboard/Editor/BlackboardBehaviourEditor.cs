@@ -52,10 +52,10 @@ namespace BB
             }
         }
     }
-    [CustomEditor(typeof(BlackboardBehaviour))]
+    [CustomEditor(typeof(BlackboardComponent))]
     public sealed class BlackboardBehaviourEditor : Editor
     {
-        BlackboardBehaviour Target => target as BlackboardBehaviour;
+        BlackboardComponent Target => target as BlackboardComponent;
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();

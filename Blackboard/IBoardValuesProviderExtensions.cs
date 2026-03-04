@@ -20,14 +20,14 @@ namespace BB
         public static IDisposable AddTemp(this IBoardValuesProvider provider, IBoard board, double value = 1)
         {
             Board.Add(board, provider, value);
-            return ApplyBoardValueProvidersOnDispose
+            return ApplyBoardValuesOnDispose
                 .GetPooled()
                 .WithContext(new AddBoardContext
                 {
                     Board = board,
                     Value = -value
                 })
-                .WithProvider(provider);
+                .WithValues(provider.GetBoardValues());
         }
         public static IDisposable AddTemp(this IBoardValuesProvider provider, Entity entity, double value = 1)
         {
