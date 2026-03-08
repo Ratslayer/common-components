@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
+
 namespace BB.Blackboard
 {
     public sealed class BlackboardV1 : EntitySystem, IBoard, ISerializableComponent
     {
         [Inject] IEvent<IBoard> _changed;
-        [InjectFromParent]
-        readonly IBoard _parent;
+        [InjectFromParent] readonly IBoard _parent;
         readonly Dictionary<IBoardKey, BoardValueContainer> _values = new();
         readonly List<IBoardProcessor> _processors = new();
         readonly List<BoardValueContainer> _dirtyContainers = new(), _dirtyContainersBuffer = new();
@@ -17,17 +17,21 @@ namespace BB.Blackboard
         public IReadOnlyCollection<IBoardValueContainer> Containers => _values.Values;
         string _action;
         List<IBoardValueContainer> _generationContainers;
+
         public void InitKey(IBoardKey key)
         {
             GetOrCreate(key);
             this.SetDirtyAndAutoFlushChanges();
         }
+
         public void AddProcessor(IBoardProcessor processor)
         {
             _processors.Add(processor);
             _processors.SortByPriority();
         }
+
         public void RemoveProcessor(IBoardProcessor processor) => _processors.Remove(processor);
+
         private BoardValueContainer GetOrCreate(IBoardKey key)
         {
             if (key is null)
@@ -41,6 +45,7 @@ namespace BB.Blackboard
                     _generationContainers ??= new();
                     _generationContainers.Add(container);
                 }
+
                 _values.Add(key, container);
             }
 
@@ -53,6 +58,7 @@ namespace BB.Blackboard
             Flush(0);
             _isFlushing = false;
         }
+
         void Flush(int counter)
         {
             if (counter >= 10)
@@ -65,6 +71,9 @@ namespace BB.Blackboard
                 return;
 
             using var _ = this.DisableAutoFlush();
+
+            foreach (var container in _dirtyContainers)
+                UpdateDirtyContainer(container);
 
             foreach (var processor in _processors)
                 processor.Process(this);
@@ -84,6 +93,32 @@ namespace BB.Blackboard
 
             Flush(++counter);
         }
+
+        void UpdateDirtyContainer(BoardValueContainer container)
+        {
+            if (container.AddedValue.IsZero())
+                return;
+
+            var initialDiff = container.AddedValue;
+            container.AddedValue = 0;
+            var key = container.Key;
+            initialDiff = ApplyMultipliers(key, initialDiff, BoardEventUsage.Set);
+            initialDiff = ApplyAdders(key, initialDiff, BoardEventUsage.Set);
+
+            var finalValue = ClampValue(key, container.Value + initialDiff, BoardEventUsage.Set);
+            var finalDiff = finalValue - container.Value;
+
+            var valueChanged = finalDiff.NotZero();
+            if (valueChanged && key is IBoardKeyWithOnAddEffect add)
+                add.OnAdd(new AddBoardContext
+                {
+                    Board = this,
+                    Key = key,
+                    Value = finalDiff
+                });
+            container.Value = finalValue;
+        }
+
         void SetDirty(BoardValueContainer container)
         {
             var containers = _isFlushing ? _dirtyContainersBuffer : _dirtyContainers;
@@ -103,6 +138,7 @@ namespace BB.Blackboard
             var container = GetOrCreate(key);
             container.PreviousValue = container.Value;
             container.Value = value;
+            container.AddedValue = 0;
             container._conditionalValues?.Clear();
             SetDirty(container);
         }
@@ -130,6 +166,7 @@ namespace BB.Blackboard
                     container.Key.Add(this, value);
                 }
             }
+
             this.AutoFlushChangesIfDirty();
         }
 
@@ -138,28 +175,12 @@ namespace BB.Blackboard
             var key = context.Key;
             if (key.NullIfDestroyedUnityEngineObject() is null)
                 return;
+            var value = context.Value ?? 1;
+            if (value.IsZero())
+                return;
 
             var container = GetOrCreate(key);
-
-            var getContext = new GetBoardContext
-            {
-                Board = this,
-                Key = key
-            };
-            var finalValue = context.GetValue();
-            finalValue = ApplyMultipliers(getContext, finalValue, BoardEventUsage.Set);
-            finalValue = ApplyAdders(getContext, finalValue, BoardEventUsage.Set);
-            finalValue = key.Stack(container.Value, finalValue);
-            finalValue = ClampValue(getContext, finalValue, BoardEventUsage.Set);
-
-            var diff = finalValue - container.Value;
-            var valueChanged = diff.NotZero();
-            if (valueChanged && key is IBoardKeyWithOnAddEffect add)
-                add.OnAdd(context.WithValue(diff));
-
-            if (!valueChanged)
-                return;
-            container.Value = finalValue;
+            container.AddedValue += value;
             SetDirty(container);
             this.SetDirtyAndAutoFlushChanges();
         }
@@ -171,15 +192,15 @@ namespace BB.Blackboard
                 return 0;
             var value = GetValueRecursive(context, this);
             value *= context.Multiplier ?? 1;
-            value = ApplyMultipliers(context, value, BoardEventUsage.Get);
-            value = ApplyAdders(context, value, BoardEventUsage.Get);
-            value = ClampValue(context, value, BoardEventUsage.Get);
+            value = ApplyMultipliers(key, value, BoardEventUsage.Get);
+            value = ApplyAdders(key, value, BoardEventUsage.Get);
+            value = ClampValue(key, value, BoardEventUsage.Get);
             return value;
         }
+
         private static double GetValueRecursive(in GetBoardContext context, IBoard startingBoard)
         {
             var board = (BlackboardV1)context.Board;
-            var key = context.Key;
             var container = board.GetOrCreate(context.Key);
             var value = container.Value;
             //add conditional values
@@ -189,20 +210,22 @@ namespace BB.Blackboard
                 foreach (var (condition, v) in container._conditionalValues)
                 {
                     if (condition?.IsValid(conditionalContext) is true)
-                        value = key.Stack(value, v);
+                        value += v;
                 }
             }
+
             if (board._parent is IBoard parent)
             {
                 var parentValue = GetValueRecursive(context.WithBoard(parent), startingBoard);
-                value = key.Stack(value, parentValue);
+                value += parentValue;
             }
+
             return value;
         }
 
-        private double ApplyMultipliers(GetBoardContext context, double value, BoardEventUsage usage)
+        private double ApplyMultipliers(IBoardKey key, double value, BoardEventUsage usage)
         {
-            if (context.Key is not IBoardKeyWithMultipliers km)
+            if (key is not IBoardKeyWithMultipliers km)
                 return value;
             if (!km.MultiplierUsage.HasFlag(usage))
                 return value;
@@ -210,14 +233,23 @@ namespace BB.Blackboard
             var result = value;
             foreach (var multiplier in km.Multipliers)
             {
-                var multValue = Get(context.WithKey(multiplier));
+                if (!_values.TryGetValue(multiplier, out var multiplierContainer))
+                    continue;
+                UpdateDirtyContainer(multiplierContainer);
+                var multValue = Get(new()
+                {
+                    Board = this,
+                    Key = multiplier
+                });
                 result *= (1 + multValue);
             }
+
             return result;
         }
-        private double ApplyAdders(GetBoardContext context, double value, BoardEventUsage usage)
+
+        private double ApplyAdders(IBoardKey key, double value, BoardEventUsage usage)
         {
-            if (context.Key is not IBoardKeyWithAdders ka)
+            if (key is not IBoardKeyWithAdders ka)
                 return value;
             if (!ka.AdderUsage.HasFlag(usage))
                 return value;
@@ -225,25 +257,51 @@ namespace BB.Blackboard
             var result = value;
             foreach (var adder in ka.Adders)
             {
-                var addValue = Get(context.WithKey(adder));
+                if (!_values.TryGetValue(adder, out var adderContainer))
+                    continue;
+                UpdateDirtyContainer(adderContainer);
+                var addValue = Get(new()
+                {
+                    Board = this,
+                    Key = adder
+                });
                 result += addValue;
             }
+
             return result;
         }
-        private double ClampValue(in GetBoardContext context, double value, BoardEventUsage usage)
+
+        private double ClampValue(IBoardKey key, double value, BoardEventUsage usage)
         {
-            if (context.Key is not IBoardKeyWithBounds bounds)
+            if (key is not IBoardKeyWithBounds bounds)
                 return value;
             if (!bounds.ClampingUsage.HasFlag(usage))
                 return value;
 
-            var min = bounds.GetMinValue(context);
-            var max = bounds.GetMaxValue(context);
+            var context = new GetBoardContext
+            {
+                Board = this,
+                Key = key
+            };
+
+            var min = GetValue(bounds.MinValue);
+            var max = GetValue(bounds.MaxValue);
             if (min.IsZero() && max.IsZero())
                 return value;
 
             var result = value.Clamp(min, max);
             return result;
+        }
+
+        double GetValue(in BoardValueGetter getter, bool updateIfDirty = true)
+        {
+            if (getter.Type is BoardValueGetterType.Const)
+                return getter.ConstValue;
+            if (getter.Key is null || !_values.TryGetValue(getter.Key, out var container))
+                return 0;
+            if (updateIfDirty)
+                UpdateDirtyContainer(container);
+            return container.Value;
         }
 
         public IEntityComponentSerializer[] GetSerializers()

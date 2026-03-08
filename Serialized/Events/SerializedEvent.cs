@@ -26,8 +26,15 @@ namespace BB.Serialized.Events
     }
     public abstract class SerializedEvent : ISerializedEvent
     {
-        public abstract IEntitySubscription CreateSubscription(in SerializedEventSubscriptionContext context);
+        public IEntitySubscription CreateSubscription(in SerializedEventSubscriptionContext context)
+        {
+            _selfEntity = context.Entity;
+            return CreateSubscriptionInternal(context);
+        }
 
+        protected abstract IEntitySubscription
+            CreateSubscriptionInternal(in SerializedEventSubscriptionContext context);
+        protected Entity _selfEntity;
         protected sealed class Subscription<TEvent>
             : ProtectedPooledObject<Subscription<TEvent>>,
             IEntitySubscription,
@@ -64,7 +71,7 @@ namespace BB.Serialized.Events
     }
     public abstract class SerializedEvent<TEvent> : SerializedEvent
     {
-        public override IEntitySubscription CreateSubscription(in SerializedEventSubscriptionContext context)
+        protected override IEntitySubscription CreateSubscriptionInternal(in SerializedEventSubscriptionContext context)
         {
             var subscription = EntitySubscriptionBag.GetPooled();
             if (context.Entity.Has(out IEvent<TEvent> e))
@@ -80,7 +87,7 @@ namespace BB.Serialized.Events
     }
     public abstract class SerializedEvent<TEvent1, TEvent2> : SerializedEvent
     {
-        public override IEntitySubscription CreateSubscription(in SerializedEventSubscriptionContext context)
+        protected override IEntitySubscription CreateSubscriptionInternal(in SerializedEventSubscriptionContext context)
         {
             var subscription = EntitySubscriptionBag.GetPooled();
             if (context.Entity.Has(out IEvent<TEvent1> e))

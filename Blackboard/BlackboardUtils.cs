@@ -1,4 +1,6 @@
-﻿using BB.Blackboard;
+﻿using System.Collections.Generic;
+using System.Linq;
+using BB.Blackboard;
 using BB.Di;
 namespace BB
 {
@@ -12,14 +14,14 @@ namespace BB
 
             if (context.InitialValues is not null)
                 container.SystemWithArgs<InitBlackboard, InitBlackboard>(
-                    (typeof(IBoardValuesProvider), context.InitialValues));
+                    (typeof(IBoardValue[]), context.InitialValues.ToArray()));
             if (context.FillResources)
                 container.System<InitResources>();
         }
     }
     public readonly struct BlackboardInstallContext
     {
-        public IBoardValuesProvider InitialValues { get; init; }
+        public IEnumerable<IBoardValue> InitialValues { get; init; }
         public bool FillResources { get; init; }
     }
 }

@@ -11,7 +11,7 @@ namespace BB
             base.Install(container);
             container.BindBlackboard(new()
             {
-                InitialValues = _values,
+                InitialValues = _values?.GetBoardValues(),
                 FillResources = true
             });
         }

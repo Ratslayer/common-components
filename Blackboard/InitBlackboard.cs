@@ -3,7 +3,7 @@
     public sealed class InitBlackboard : EntitySystem
     {
         [Inject] IBoard _board;
-        [Inject] IBoardValuesProvider _values;
+        [Inject] IBoardValue[] _values;
         [OnEvent]
         void OnSpawn(EntitySpawnedEvent _)
         {
@@ -13,8 +13,9 @@
     public sealed class InitResources
     {
         [Inject] IBoard _board;
-        [OnEvent(typeof(PostEntitySpawnedEvent), typeof(BeforeGameStartEvent))]
-        void OnPostSpawn()
+
+        [OnEvent(typeof(PostEntitySpawnedEvent),typeof(BeforeGameInitEvent))]
+        void InitializeResources()
         {
             foreach (var key in _board.Keys)
                 if (key is IResourceBoardKey resource

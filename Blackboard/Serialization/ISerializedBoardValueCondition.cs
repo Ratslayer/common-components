@@ -21,7 +21,7 @@ namespace BB.Blackboard.Serialization
     [Serializable]
     public sealed class BoardValueMultiplier : ISerializedBoardValueMultiplier
     {
-        public BoardValueGetter _getter = new();
+        public SerializedBoardValueGetter _getter = new();
 
         public double GetMultiplier(in GetBoardContext context)
             => _getter.GetValue(context);

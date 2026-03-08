@@ -23,9 +23,11 @@ namespace BB
         public static void Add(in Entity entity, IBoardKey key, double value = 1)
             => Add(entity.Get<IBoard>(), key, value);
 
-        public static void Add(IBoard board, IBoardValuesProvider provider, double multiplier = 1)
+        public static void Add(IBoard board, IEnumerable<IBoardValue> values, double multiplier = 1)
         {
-            var values = provider.GetBoardValues().ToPooledList();
+            if (values is null)
+                return;
+            
             var context = new AddBoardContext
             {
                 Board = board,
@@ -34,11 +36,14 @@ namespace BB
             using var _ = board.FlushOnDispose();
             foreach (var value in values)
                 value.Add(context);
-            values.DisposeElementsAndClear();
         }
 
-        public static void Add(in Entity entity, IBoardValuesProvider values, double multiplier = 1)
+        public static void Add(in Entity entity, IEnumerable<IBoardValue> values, double multiplier = 1)
              => Add(entity.Get<IBoard>(), values, multiplier);
+        public static void Add(in Entity entity, IBoardValuesProvider values, double multiplier = 1)
+            => Add(entity, values?.GetBoardValues(), multiplier);
+        public static void Add(in IBoard board, IBoardValuesProvider values, double multiplier = 1)
+            => Add(board, values?.GetBoardValues(), multiplier);
         public static double Get(IBoard board, IBoardKey key)
             => board.Get(new()
             {
@@ -50,7 +55,7 @@ namespace BB
             if (key is not IBoardKeyWithBounds keyWithBounds)
                 return null;
 
-            return keyWithBounds.GetMaxValue(new() { Board = board, Key = key });
+            return keyWithBounds.MaxValue.Get(board);
         }
         public static bool Has(IBoard board, IBoardKey key)
             => Get(board, key).IsPositive();
@@ -80,16 +85,8 @@ namespace BB
             {
                 var value = Get(context.Board, context.KeyBounds);
                 var newValue = value + addValue;
-                var max = context.KeyBounds.GetMaxValue(new()
-                {
-                    Board = context.Board,
-                    Key = context.KeyBounds,
-                });
-                var min = context.KeyBounds.GetMinValue(new()
-                {
-                    Board = context.Board,
-                    Key = context.KeyBounds,
-                });
+                var max = context.KeyBounds.MaxValue.Get(context.Board);
+                var min = context.KeyBounds.MinValue.Get(context.Board);
                 if (newValue < min || newValue > max)
                     return false;
             }
