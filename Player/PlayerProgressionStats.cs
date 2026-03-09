@@ -5,6 +5,7 @@ namespace BB
     public interface IPlayerProgressionStats
     {
         void Add(ILoadableAsset key, double value);
+        void ApplyToPlayer();
     }
     public sealed class PlayerProgressionStats : IPlayerProgressionStats, ISerializableComponent
     {
@@ -21,8 +22,7 @@ namespace BB
         }
         public IEnumerable<KeyValuePair<ILoadableAsset, double>> Values => _values;
 
-        [OnEvent]
-        void ApplyToPlayer(BeforeGameStartEvent _)
+        public void ApplyToPlayer()
         {
             var board = _player.Require<IBoard>();
             using var __ = board.FlushOnDispose();
