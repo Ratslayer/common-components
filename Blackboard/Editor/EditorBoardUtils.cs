@@ -1,15 +1,18 @@
-﻿using UnityEditor;
+﻿using System.Linq;
+using UnityEditor;
 using UnityEngine;
+
 namespace BB
 {
     public static class EditorBoardUtils
     {
         static string _searchString;
+
         public static void DrawBoard(IBoard board)
         {
             var newKey = EditorGUILayout.ObjectField("Add new key", null, typeof(BaseBoardKey), false) as BaseBoardKey;
             if (newKey)
-                board.Set(newKey, 0);
+                board.Set(newKey, 0, "Editor");
 
             if (GUILayout.Button("Update Board"))
                 board.ForceFlushChanges();
@@ -32,6 +35,7 @@ namespace BB
                     GUI.enabled = true;
                 }
                 else EditorGUILayout.LabelField(name);
+
                 //draw editable field
                 EditorGUI.BeginChangeCheck();
                 var value = board.Get(key);
@@ -42,7 +46,24 @@ namespace BB
                     diff = newValue - value;
                 }
 
+#if DEBUG
+                var container = board.Containers.FirstOrDefault(c => c.Key == key) as BoardValueContainer;
+                var foldoutContainer = EditorGuiUtils.Foldout(container);
                 EditorGUILayout.EndHorizontal();
+                if (foldoutContainer)
+                {
+                    if (container is not null)
+                        foreach (var source in container._sources)
+                            if (source.Value.NotZero())
+                            {
+                                using var _ = LayoutUtils.Horizontal;
+                                EditorGUILayout.LabelField(source.Key.ToString());
+                                EditorGUILayout.LabelField($"{source.Value:n1}");
+                            }
+                }
+#else
+                EditorGUILayout.EndHorizontal();
+#endif
             }
 
             if (changedKey is not null)
@@ -52,10 +73,12 @@ namespace BB
             }
         }
     }
+
     [CustomEditor(typeof(BlackboardComponent))]
     public sealed class BlackboardBehaviourEditor : Editor
     {
         BlackboardComponent Target => target as BlackboardComponent;
+
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();

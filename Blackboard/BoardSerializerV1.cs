@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+
 namespace BB
 {
     public sealed class BoardSerializerV1 : BaseSerializer<BoardSerializerV1, IBoard, BoardSerializerV1.BoardSaveData>
@@ -9,6 +10,7 @@ namespace BB
         {
             public List<BoardRow> Values;
         }
+
         [Serializable]
         public struct BoardRow
         {
@@ -21,7 +23,7 @@ namespace BB
             using var _ = target.FlushOnDispose();
             foreach (var value in data.Values)
                 if (HasLoadableAsset(value.KeyName, out BaseBoardKey key))
-                    target.Set(key, value.Value);
+                    target.Set(key, value.Value, this);
         }
 
         protected override BoardSaveData Serialize(IBoard target)

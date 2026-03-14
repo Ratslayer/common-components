@@ -4,52 +4,109 @@ namespace BB
 {
     public static class Board
     {
-        public static void Add(IBoard board, IBoardKey key, double value = 1)
+        public static void Add(IBoard board, IBoardKey key, object source, double value)
         {
             board?.Add(new()
             {
                 Board = board,
                 Key = key,
-                Value = value
+                Value = value,
+                Source = source
             });
         }
 
-        public static void Add(IBoard board, IBoardValue value, double multiplier = 1)
+        public static void Add(IBoard board, IBoardValue value, object source, double multiplier = 1)
             => value.Add(new()
             {
                 Board = board,
-                Value = multiplier
+                Value = multiplier,
+                Source = source
             });
-        public static void Add(in Entity entity, IBoardKey key, double value = 1)
-            => Add(entity.Get<IBoard>(), key, value);
 
-        public static void Add(IBoard board, IEnumerable<IBoardValue> values, double multiplier = 1)
+        public static void Add(in Entity entity, IBoardKey key, object source, double value = 1)
+            => Add(entity.Get<IBoard>(), key, source, value);
+
+        public static void Add(IBoard board, IEnumerable<IBoardValue> values, object source, double multiplier = 1)
         {
             if (values is null)
                 return;
-            
+
             var context = new AddBoardContext
             {
                 Board = board,
                 Value = multiplier,
+                Source = source
             };
             using var _ = board.FlushOnDispose();
             foreach (var value in values)
                 value.Add(context);
         }
 
-        public static void Add(in Entity entity, IEnumerable<IBoardValue> values, double multiplier = 1)
-             => Add(entity.Get<IBoard>(), values, multiplier);
-        public static void Add(in Entity entity, IBoardValuesProvider values, double multiplier = 1)
-            => Add(entity, values?.GetBoardValues(), multiplier);
-        public static void Add(in IBoard board, IBoardValuesProvider values, double multiplier = 1)
-            => Add(board, values?.GetBoardValues(), multiplier);
+        public static void Add(in Entity entity, IEnumerable<IBoardValue> values, object source, double multiplier = 1)
+            => Add(entity.Get<IBoard>(), values, source, multiplier);
+
+        public static void Add(in Entity entity, IBoardValuesProvider values, object source, double multiplier = 1)
+            => Add(entity, values?.GetBoardValues(), source, multiplier);
+
+        public static void Add(in IBoard board, IBoardValuesProvider values, object source, double multiplier = 1)
+            => Add(board, values?.GetBoardValues(), source, multiplier);
+
+        public static bool TryAdd(in TryAddBoardContext context)
+        {
+            if (!CanAdd(new CanAddBoardContext
+                {
+                    Board = context.Board,
+                    Multiplier = context.Multiplier,
+                    KeyBounds = context.Key as IBoardKeyWithBounds,
+                    Cost = context.Cost,
+                    Requirements = context.Reqs,
+                }))
+                return false;
+
+            PayCost(context.Board, context.Cost, context.Source);
+            if (context.Key is not null)
+                Add(context.Board, context.Key, context.Source, context.Multiplier ?? 1);
+
+            return true;
+        }
+
+        public static bool TryAdd(IBoard board, IBoardKey key, object source,
+            in CanAddBoardValueOptions context = default)
+        {
+            if (!CanAdd(board, key, context))
+                return false;
+
+            var multiplier = context.Multiplier ?? 1;
+            Add(board, key, source, multiplier);
+            if (key is not IBoardCostProvider keyCost)
+                return true;
+
+            var spendCostContext = new AddBoardContext
+            {
+                Board = board,
+                Value = -multiplier,
+                Source = source
+            };
+
+            var costValues = keyCost.Cost.GetBoardValues().ToPooledList();
+            foreach (var cost in costValues)
+                cost.Add(spendCostContext);
+            costValues.DisposeElementsAndClear();
+
+            return true;
+        }
+
+        public static bool TryAdd(in Entity entity, IBoardKey key, object source,
+            in CanAddBoardValueOptions context = default)
+            => TryAdd(entity.Require<IBoard>(), key, source, context);
+
         public static double Get(IBoard board, IBoardKey key)
             => board.Get(new()
             {
                 Board = board,
                 Key = key,
             });
+
         public static double? GetMaxValue(IBoard board, IBoardKey key)
         {
             if (key is not IBoardKeyWithBounds keyWithBounds)
@@ -57,26 +114,10 @@ namespace BB
 
             return keyWithBounds.MaxValue.Get(board);
         }
+
         public static bool Has(IBoard board, IBoardKey key)
             => Get(board, key).IsPositive();
-        public static bool TryAdd(in TryAddBoardContext context)
-        {
-            if (!CanAdd(new CanAddBoardContext
-            {
-                Board = context.Board,
-                Multiplier = context.Multiplier,
-                KeyBounds = context.Key as IBoardKeyWithBounds,
-                Cost = context.Cost,
-                Requirements = context.Reqs,
-            }))
-                return false;
 
-            PayCost(context.Board, context.Cost);
-            if (context.Key is not null)
-                Add(context.Board, context.Key, context.Multiplier ?? 1);
-
-            return true;
-        }
         public static bool CanAdd(in CanAddBoardContext context)
         {
             var addValue = context.Multiplier ?? 1;
@@ -99,6 +140,7 @@ namespace BB
 
             return true;
         }
+
         public static bool CanAdd(IBoard board, IBoardKey key, in CanAddBoardValueOptions context = default)
             => CanAdd(new CanAddBoardContext
             {
@@ -108,14 +150,17 @@ namespace BB
                 Cost = (key as IBoardCostProvider)?.Cost.GetBoardValues(),
                 Requirements = (key as IBoardRequirementsProvider)?.Requirements.GetBoardValues()
             });
-        static void PayCost(IBoard board, IEnumerable<IBoardValue> values)
+
+        static void PayCost(IBoard board, IEnumerable<IBoardValue> values, object source)
         {
             if (values is null)
                 return;
             foreach (var value in values)
-                Add(board, value, -1);
+                Add(board, value, source, -1);
         }
-        static bool CanPayCost(IBoard board, IEnumerable<IBoardValue> values, IList<IBoardValue> missingValues, double multiplier = 1)
+
+        static bool CanPayCost(IBoard board, IEnumerable<IBoardValue> values, IList<IBoardValue> missingValues,
+            double multiplier = 1)
         {
             if (values is null)
                 return true;
@@ -140,60 +185,49 @@ namespace BB
 
             return canPay;
         }
+
         public static bool CanAdd(in Entity entity, IBoardKey key, in CanAddBoardValueOptions context = default)
             => CanAdd(entity.Require<IBoard>(), key, context);
-        public static bool TryAdd(IBoard board, IBoardKey key, in CanAddBoardValueOptions context = default)
-        {
-            if (!CanAdd(board, key, context))
-                return false;
-
-            var multiplier = context.Multiplier ?? 1;
-            Add(board, key, multiplier);
-            if (key is not IBoardCostProvider keyCost)
-                return true;
-
-            var spendCostContext = new AddBoardContext
-            {
-                Board = board,
-                Value = -multiplier,
-            };
-
-            var costValues = keyCost.Cost.GetBoardValues().ToPooledList();
-            foreach (var cost in costValues)
-                cost.Add(spendCostContext);
-            costValues.DisposeElementsAndClear();
-
-            return true;
-        }
-        public static bool TryAdd(in Entity entity, IBoardKey key, in CanAddBoardValueOptions context = default)
-            => TryAdd(entity.Require<IBoard>(), key, context);
-
     }
+
     public interface IBoardRequirementsProvider
     {
         IBoardValuesProvider Requirements { get; }
     }
+
     public interface IBoardCostProvider
     {
         IBoardValuesProvider Cost { get; }
     }
+
     public readonly struct CanAddBoardValueOptions
     {
         public double? Multiplier { get; init; }
         public bool? AllowOverflow { get; init; }
     }
+
     public readonly struct TryAddBoardContext
     {
-        public Entity Entity { init => Board = value.Get<IBoard>(); }
+        public Entity Entity
+        {
+            init => Board = value.Get<IBoard>();
+        }
+
         public IBoard Board { get; init; }
         public IBoardKey Key { get; init; }
         public double? Multiplier { get; init; }
+        public object Source { get; init; }
         public IEnumerable<IBoardValue> Cost { get; init; }
         public IEnumerable<IBoardValue> Reqs { get; init; }
     }
+
     public readonly struct CanAddBoardContext
     {
-        public Entity Entity { init => Board = value.Get<IBoard>(); }
+        public Entity Entity
+        {
+            init => Board = value.Get<IBoard>();
+        }
+
         public IBoard Board { get; init; }
         public IBoardKeyWithBounds KeyBounds { get; init; }
         public double? Multiplier { get; init; }

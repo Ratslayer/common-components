@@ -56,12 +56,6 @@ namespace BB
             value = container.Value - container.PreviousValue;
             return value.NotZero();
         }
-        public static void Set(this IBoardKey key, IBoard board, double value)
-        {
-            if (key is null || board is null)
-                return;
-            board.Set(key, value);
-        }
         public static void Add(this IBoardKey key, IBoard board, double value)
             => new AddBoardContext
             {

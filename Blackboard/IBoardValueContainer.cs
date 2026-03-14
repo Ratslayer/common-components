@@ -19,6 +19,10 @@ namespace BB
 
         public override string ToString()
             => $"{Value.Nicify()}; {PreviousValue.Nicify()}; {Key.Name}; {Board.Entity}";
+#if DEBUG
+        public readonly Dictionary<object, double> _sources = new();
+
+#endif
     }
 
     public interface IBoardValueContainer
@@ -26,6 +30,6 @@ namespace BB
         IBoard Board { get; }
         IBoardKey Key { get; }
         double Value { get; }
-        public double PreviousValue { get; }
+        double PreviousValue { get; }
     }
 }

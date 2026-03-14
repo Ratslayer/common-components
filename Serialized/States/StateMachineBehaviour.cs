@@ -13,7 +13,7 @@ namespace BB.States
         [ValueDropdown(nameof(GetStateNames))]
         public string _startingStateName;
         public SerializedState[] _states = { };
-        IState _currentState;
+        public IState CurrentState { get; private set; }
         readonly List<IState> _runtimeStates = new();
         [OnEvent(typeof(EntitySpawnedEvent))]
         void OnSpawn()
@@ -25,14 +25,14 @@ namespace BB.States
         void OnDespawn() => EnterState(default(IState));
         public void EnterState(IState state)
         {
-            if (_currentState is IStateExit exit)
+            if (CurrentState is IStateExit exit)
                 exit.Exit(new()
                 {
                     Machine = this,
                     Entity = Entity
                 });
-            _currentState = state;
-            if (_currentState is IStateEnter enter)
+            CurrentState = state;
+            if (CurrentState is IStateEnter enter)
                 enter.Enter(new()
                 {
                     Machine = this,

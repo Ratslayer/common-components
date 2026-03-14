@@ -8,7 +8,7 @@
         [OnEvent]
         void OnSpawn(EntitySpawnedEvent _)
         {
-            Board.Add(_board, _values);
+            Board.Add(_board, _values, this);
         }
     }
 

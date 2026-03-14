@@ -114,7 +114,7 @@ namespace BB.Blackboard
                 {
                     Board = this,
                     Key = key,
-                    Value = finalDiff
+                    Value = finalDiff,
                 });
             container.Value = finalValue;
         }
@@ -133,7 +133,7 @@ namespace BB.Blackboard
             _dirtyContainers.Clear();
         }
 
-        public void Set(IBoardKey key, double value)
+        public void Set(IBoardKey key, double value, object source)
         {
             var container = GetOrCreate(key);
             container.PreviousValue = container.Value;
@@ -141,6 +141,11 @@ namespace BB.Blackboard
             container.AddedValue = 0;
             container._conditionalValues?.Clear();
             SetDirty(container);
+#if DEBUG
+            container._sources.Clear();
+            if (source is not null)
+                container._sources[source] = value;
+#endif
         }
 
         public void Add(IBoardKey key, IBoardValueCondition condition, double value)
@@ -183,6 +188,16 @@ namespace BB.Blackboard
             container.AddedValue += value;
             SetDirty(container);
             this.SetDirtyAndAutoFlushChanges();
+
+#if DEBUG
+            if (context.Source is not null)
+            {
+                var sourceValue = container._sources.TryGetValue(context.Source, out var currentSourceValue)
+                    ? currentSourceValue + value
+                    : value;
+                container._sources[context.Source] = sourceValue;
+            }
+#endif
         }
 
         public double Get(in GetBoardContext context)
