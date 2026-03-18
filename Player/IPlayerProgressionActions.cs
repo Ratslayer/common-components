@@ -22,7 +22,7 @@ namespace BB
                 _actions.AddUnique(asset);
         }
 
-        public IEnumerable<PlayerActionData> GetActions(GetPlayerActionsContext context)
+        public IEnumerable<PlayerActionData> GetActions(UpdatePlayerActionsContext context)
             => _actions
                 .Where(a => a.IsActive(context))
                 .Select(a => a.GetData());
