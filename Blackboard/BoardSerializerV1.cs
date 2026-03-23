@@ -34,11 +34,8 @@ namespace BB
                 if (container.Key is not ILoadableAsset key)
                     continue;
 
-                if (string.IsNullOrWhiteSpace(key.AssetLoadKey))
-                {
-                    Log.Error($"{container.Key.Name} does not have an {nameof(ILoadableAsset.AssetLoadKey)}");
+                if (!IsValidLoadableAsset(key))
                     continue;
-                }
 
                 rows.Add(new()
                 {

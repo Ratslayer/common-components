@@ -52,7 +52,9 @@ namespace BB
         void LogTestResult(Entity entity)
         {
             var value = GetValue(entity);
-            Log.Logger.Info($"Expression {_expression} evaluates to {value}");
+            entity
+                .GetLogger()
+                .Info($"Expression {_expression} evaluates to {value}");
         }
     }
     public sealed class FormulaValueGetterAsset : BoardValueGetterAsset

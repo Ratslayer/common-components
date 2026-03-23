@@ -11,15 +11,15 @@ namespace BB
             => new Data
             {
                 Values = target.Values
-                    .Select(x => (GetLoadableAsset<BaseBoardKey>(x.Key.AssetLoadKey) as ILoadableAsset, x.Value))
-                    .Where(x => x.Item1 is not null)
+                    .Where(x => IsValidLoadableAsset(x.Key))
                     .Select(x => new StatValue
                     {
-                        BoardKeyName = x.Item1.AssetLoadKey,
+                        BoardKeyName = x.Key.AssetLoadKey,
                         Value = x.Value
                     })
                     .ToArray()
             };
+
         protected override void ApplySpawn(PlayerProgressionStats target, Data data)
         {
             foreach (var kvp in data.Values)
@@ -29,6 +29,7 @@ namespace BB
                     LogError($"Board key with name {kvp.BoardKeyName} not found.");
                     continue;
                 }
+
                 target.Set(boardKey, kvp.Value);
             }
         }
@@ -37,6 +38,7 @@ namespace BB
         {
             public StatValue[] Values { get; init; }
         }
+
         public sealed class StatValue
         {
             public string BoardKeyName { get; init; }

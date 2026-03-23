@@ -176,49 +176,49 @@ namespace BB
 	//		return machine.EnterState(state);
 	//	}
 	//}
-	public readonly struct EnteredStateDisposable : IDisposable
-	{
-		readonly IEntityStateMachine _machine;
-		readonly IEntityState _state;
-		public EnteredStateDisposable(IEntityStateMachine machine, IEntityState state)
-		{
-			_machine = machine;
-			_state = state;
-		}
+	// public readonly struct EnteredStateDisposable : IDisposable
+	// {
+	// 	readonly IEntityStateMachine _machine;
+	// 	readonly IEntityState _state;
+	// 	public EnteredStateDisposable(IEntityStateMachine machine, IEntityState state)
+	// 	{
+	// 		_machine = machine;
+	// 		_state = state;
+	// 	}
+	//
+	// 	public void Dispose()
+	// 	{
+	// 		_machine?.ExitState(_state);
+	// 	}
+	// }
 
-		public void Dispose()
-		{
-			_machine?.ExitState(_state);
-		}
-	}
-
-	public static class CompositionUtils
-	{
-		public static void GetFlatListRecursionSafe<T>(
-			IEnumerable<T> componentSource,
-			IList<T> components)
-		{
-			var set = new HashSet<T>();
-			GetAllComponents(componentSource, components, set);
-		}
-		public static void GetAllComponents<T>(
-			IEnumerable<T> componentSource,
-			IList<T> components,
-			HashSet<T> addedComponents)
-		{
-			foreach (var c in componentSource)
-				if (c is null)
-					continue;
-				else if (addedComponents.Add(c))
-				{
-					if (c is IEnumerable<T> subComponents)
-						GetAllComponents(subComponents, components, addedComponents);
-					else components.Add(c);
-				}
-				else Log.Logger.Error(
-					$"{c} has been added more than once. " +
-					$"This usually indicates cyclic referencing.");
-
-		}
-	}
+	// public static class CompositionUtils
+	// {
+	// 	public static void GetFlatListRecursionSafe<T>(
+	// 		IEnumerable<T> componentSource,
+	// 		IList<T> components)
+	// 	{
+	// 		var set = new HashSet<T>();
+	// 		GetAllComponents(componentSource, components, set);
+	// 	}
+	// 	public static void GetAllComponents<T>(
+	// 		IEnumerable<T> componentSource,
+	// 		IList<T> components,
+	// 		HashSet<T> addedComponents)
+	// 	{
+	// 		foreach (var c in componentSource)
+	// 			if (c is null)
+	// 				continue;
+	// 			else if (addedComponents.Add(c))
+	// 			{
+	// 				if (c is IEnumerable<T> subComponents)
+	// 					GetAllComponents(subComponents, components, addedComponents);
+	// 				else components.Add(c);
+	// 			}
+	// 			else Log.Logger.Error(
+	// 				$"{c} has been added more than once. " +
+	// 				$"This usually indicates cyclic referencing.");
+	//
+	// 	}
+	// }
 }

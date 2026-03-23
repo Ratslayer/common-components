@@ -8,8 +8,10 @@ namespace BB.Serialized.Actions
     public abstract class SerializedActions<TAction> where TAction : ISerializedAction
     {
         [SerializeReference] TAction[] _actions = { };
+
         public void Invoke(in SerializedActionContext context)
             => InvokeAsync(context).Forget();
+
         public UniTask InvokeAsync(in SerializedActionContext context)
             => _actions.Invoke(context);
     }
@@ -18,17 +20,21 @@ namespace BB.Serialized.Actions
     public sealed class SerializedActions : SerializedActions<ISerializedAction>
     {
     }
+
     [Serializable]
     public sealed class SerializedAssetActions : SerializedActions<ISerializedAssetAction>
     {
     }
+
     [Serializable]
     public sealed class SerializedSceneActions : SerializedActions<ISerializedSceneAction>
     {
     }
+
     public abstract class SerializedActionSync : SerializedAction
     {
         public override bool WaitForExecution => false;
+
         public override UniTask Invoke(SerializedActionContext context)
         {
             try
@@ -38,16 +44,20 @@ namespace BB.Serialized.Actions
             }
             catch (Exception e)
             {
-                context.Entity.LogError($"Exception during execution of action {GetType().Name}: {e.Message}");
+                context.Entity.GetLogger().Exception(e, $"Exception during execution of action {GetType().Name}");
             }
+
             return UniTask.CompletedTask;
         }
+
         protected abstract void InvokeSync(SerializedActionContext context);
     }
+
     public abstract class SerializedActionAsync : SerializedAction
     {
         public bool _waitForExecution;
         public override bool WaitForExecution => _waitForExecution;
+
         public override UniTask Invoke(SerializedActionContext context)
         {
             try
@@ -63,12 +73,17 @@ namespace BB.Serialized.Actions
             }
             catch (Exception e)
             {
-                context.Entity.LogError($"Exception during execution of action {GetType().Name}: {e.Message}");
+                context.Entity
+                    .GetLogger()
+                    .Exception(e, $"Exception during execution of action {GetType().Name}");
             }
+
             return UniTask.CompletedTask;
         }
+
         protected abstract UniTask InvokeAsync(SerializedActionContext context);
     }
+
     public abstract class SerializedAction : ISerializedAction
     {
         public abstract bool WaitForExecution { get; }
@@ -83,6 +98,7 @@ namespace BB.Serialized.Actions
             SetupValidator(validator, context);
             return validator.ValidateAndDispose();
         }
+
         protected virtual void SetupValidator(Validator validator, SerializedActionContext context)
         {
         }
