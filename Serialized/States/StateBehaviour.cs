@@ -9,7 +9,7 @@ using UnityEngine;
 namespace BB.States
 {
     [Serializable]
-    public sealed class SerializedState : IState
+    public sealed class SerializedState : IStateEnter,IStateExit
     {
         public string _name;
         [SerializeReference]

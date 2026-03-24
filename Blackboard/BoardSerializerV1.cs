@@ -23,7 +23,12 @@ namespace BB
             using var _ = target.FlushOnDispose();
             foreach (var value in data.Values)
                 if (HasLoadableAsset(value.KeyName, out BaseBoardKey key))
-                    target.Set(key, value.Value, this);
+                    target.Set(new()
+                    {
+                        Key = key,
+                        Value = value.Value,
+                        Source = this
+                    });
         }
 
         protected override BoardSaveData Serialize(IBoard target)

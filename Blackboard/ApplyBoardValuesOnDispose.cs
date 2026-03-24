@@ -7,46 +7,66 @@ namespace BB
         IBoard _board;
         IBoardKey _key;
         double _value;
-        public static AddBoardValueOnDispose GetPooled(IBoard board, IBoardKey key, double value)
+        object _source;
+
+        public static AddBoardValueOnDispose GetPooled(IBoard board, IBoardKey key, object source, double value)
         {
             var result = GetPooledInternal();
             result._board = board;
             result._key = key;
             result._value = value;
+            result._source = source;
             return result;
         }
+
         public override void Dispose()
         {
             if (_key is not null
                 && _board is not null
                 && _value.NotZero())
-                _key.Add(_board, _value);
+                Board.Add(_board, _key, _source, _value);
             base.Dispose();
         }
     }
-    public sealed class ApplyBoardValuesOnDispose : PooledObject<ApplyBoardValuesOnDispose>
+
+    public sealed class ApplyBoardValuesOnDispose : ProtectedPooledObject<ApplyBoardValuesOnDispose>
     {
         readonly List<IBoardValue> _values = new();
-        AddBoardContext _context;
+        private object _source;
+        private IBoard _board;
+        private double _multiplier;
+
+        public static ApplyBoardValuesOnDispose GetPooled(IBoard board, IEnumerable<IBoardValue> values, object source,
+            double multiplier)
+        {
+            var result = GetPooledInternal();
+            result._values.AddRange(values);
+            result._board = board;
+            result._source = source;
+            result._multiplier = multiplier;
+            return result;
+        }
+
         public override void Dispose()
         {
-            foreach (var provider in _values)
-                Board.Add(_context.Board, provider, _context.Value ?? 1);
+            Board.Add(_board, _values, _source, _multiplier);
             _values.DisposeElementsAndClear();
-            _context = default;
+            _board = default;
+            _source = default;
+            _multiplier = default;
             base.Dispose();
         }
 
-        public ApplyBoardValuesOnDispose WithContext(in AddBoardContext context)
-        {
-            _context = context;
-            return this;
-        }
-
-        public ApplyBoardValuesOnDispose WithValues(IEnumerable<IBoardValue> values)
-        {
-            _values.AddRange(values);
-            return this;
-        }
+        // public ApplyBoardValuesOnDispose WithContext(in AddBoardContext context)
+        // {
+        //     _context = context;
+        //     return this;
+        // }
+        //
+        // public ApplyBoardValuesOnDispose WithValues(IEnumerable<IBoardValue> values)
+        // {
+        //     _values.AddRange(values);
+        //     return this;
+        // }
     }
 }

@@ -29,7 +29,7 @@ namespace BB
     }
 
     public abstract class SerializedBoardValueGetter<KeyType>
-        where KeyType : BaseScriptableObject, IBoardKey
+        where KeyType : BaseBoardKey
     {
         [HorizontalGroup, HideLabel] public BoardValueGetterType _type;
 
@@ -39,13 +39,19 @@ namespace BB
         [HorizontalGroup, HideLabel, ShowIf(nameof(ShowKey))]
         public KeyType _key;
 
-        public double GetValue(in GetBoardContext context)
+        public double GetValue(IBoard board, in GetBoardContext context)
             => _type switch
             {
                 BoardValueGetterType.Const => _value,
-                BoardValueGetterType.Key => context.WithKey(_key).Get(),
+                BoardValueGetterType.Key => board.Get(context.WithKey(_key)),
                 _ => 0
             };
+
+        public bool HasKey(out BaseBoardKey key)
+        {
+            key = _key;
+            return key && _type is BoardValueGetterType.Key;
+        }
 
         bool ShowValue => _type == BoardValueGetterType.Const;
         bool ShowKey => _type == BoardValueGetterType.Key;

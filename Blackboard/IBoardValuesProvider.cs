@@ -8,6 +8,7 @@ namespace BB
 	}
 	public readonly struct CanAddBoardValuesContext
 	{
+		public IBoard Board { get; init; }
 		public AddBoardContext BoardContext { get; init; }
 		public List<IBoardKey> ErrorKeys { get; init; }
 		public double? Multiplier { get; init; }

@@ -15,14 +15,6 @@ namespace BB.Blackboard
         public IReadOnlyCollection<IBoardKey> Keys => _values.Keys;
         public IReadOnlyCollection<IBoardValueContainer> DirtyContainers => _dirtyContainers;
         public IReadOnlyCollection<IBoardValueContainer> Containers => _values.Values;
-        string _action;
-        List<IBoardValueContainer> _generationContainers;
-
-        public void InitKey(IBoardKey key)
-        {
-            GetOrCreate(key);
-            this.SetDirtyAndAutoFlushChanges();
-        }
 
         public void AddProcessor(IBoardProcessor processor)
         {
@@ -40,12 +32,6 @@ namespace BB.Blackboard
             if (!_values.TryGetValue(key, out var container))
             {
                 container = new(this, key);
-                if (key is IBoardKeyWithGeneration)
-                {
-                    _generationContainers ??= new();
-                    _generationContainers.Add(container);
-                }
-
                 _values.Add(key, container);
             }
 
@@ -110,12 +96,7 @@ namespace BB.Blackboard
 
             var valueChanged = finalDiff.NotZero();
             if (valueChanged && key is IBoardKeyWithOnAddEffect add)
-                add.OnAdd(new AddBoardContext
-                {
-                    Board = this,
-                    Key = key,
-                    Value = finalDiff,
-                });
+                add.OnAdd(this, finalDiff);
             container.Value = finalValue;
         }
 
@@ -133,19 +114,27 @@ namespace BB.Blackboard
             _dirtyContainers.Clear();
         }
 
-        public void Set(IBoardKey key, double value, object source)
+        public void Set(in SetBoardContext context)
         {
-            var container = GetOrCreate(key);
-            container.PreviousValue = container.Value;
-            container.Value = value;
-            container.AddedValue = 0;
-            container._conditionalValues?.Clear();
-            SetDirty(container);
+            var container = GetOrCreate(context.Key);
+            if (context.Condition is not null)
+            {
+                container._conditionalValues ??= new();
+                container._conditionalValues[context.Condition] = context.Value;
+            }
+            else
+            {
+                container.PreviousValue = container.Value;
+                container.Value = context.Value;
+                container.AddedValue = 0;
 #if DEBUG
-            container._sources.Clear();
-            if (source is not null)
-                container._sources[source] = value;
+                container._sources.Clear();
+                if (context.Source is not null)
+                    container._sources[context.Source] = context.Value;
 #endif
+            }
+
+            SetDirty(container);
         }
 
         public void Add(IBoardKey key, IBoardValueCondition condition, double value)
@@ -157,30 +146,12 @@ namespace BB.Blackboard
             container._conditionalValues[condition] = value;
         }
 
-        public void UpdateGeneration(float seconds)
-        {
-            if (_generationContainers is null)
-                return;
-            using (this.DisableAutoFlush())
-            {
-                var context = new GetBoardContext { Board = this };
-                foreach (var container in _generationContainers)
-                {
-                    var genValue = ((IBoardKeyWithGeneration)container.Key).GetGenerationValue(context);
-                    var value = genValue * seconds;
-                    container.Key.Add(this, value);
-                }
-            }
-
-            this.AutoFlushChangesIfDirty();
-        }
-
         public void Add(in AddBoardContext context)
         {
             var key = context.Key;
             if (key.NullIfDestroyedUnityEngineObject() is null)
                 return;
-            var value = context.Value ?? 1;
+            var value = context.Value;
             if (value.IsZero())
                 return;
 
@@ -205,7 +176,7 @@ namespace BB.Blackboard
             var key = context.Key;
             if (key is null)
                 return 0;
-            var value = GetValueRecursive(context, this);
+            var value = GetValueRecursive(context, this, this);
             value *= context.Multiplier ?? 1;
             value = ApplyMultipliers(key, value, BoardEventUsage.Get);
             value = ApplyAdders(key, value, BoardEventUsage.Get);
@@ -213,25 +184,23 @@ namespace BB.Blackboard
             return value;
         }
 
-        private static double GetValueRecursive(in GetBoardContext context, IBoard startingBoard)
+        private static double GetValueRecursive(in GetBoardContext context, BlackboardV1 board, IBoard startingBoard)
         {
-            var board = (BlackboardV1)context.Board;
             var container = board.GetOrCreate(context.Key);
             var value = container.Value;
             //add conditional values
             if (container._conditionalValues is not null)
             {
-                var conditionalContext = context.WithBoard(startingBoard);
                 foreach (var (condition, v) in container._conditionalValues)
                 {
-                    if (condition?.IsValid(conditionalContext) is true)
+                    if (condition?.IsValid(board, context) is true)
                         value += v;
                 }
             }
 
-            if (board._parent is IBoard parent)
+            if (board._parent is BlackboardV1 parent)
             {
-                var parentValue = GetValueRecursive(context.WithBoard(parent), startingBoard);
+                var parentValue = GetValueRecursive(context, parent, startingBoard);
                 value += parentValue;
             }
 
@@ -253,7 +222,6 @@ namespace BB.Blackboard
                 UpdateDirtyContainer(multiplierContainer);
                 var multValue = Get(new()
                 {
-                    Board = this,
                     Key = multiplier
                 });
                 result *= (1 + multValue);
@@ -277,7 +245,6 @@ namespace BB.Blackboard
                 UpdateDirtyContainer(adderContainer);
                 var addValue = Get(new()
                 {
-                    Board = this,
                     Key = adder
                 });
                 result += addValue;
@@ -292,12 +259,6 @@ namespace BB.Blackboard
                 return value;
             if (!bounds.ClampingUsage.HasFlag(usage))
                 return value;
-
-            var context = new GetBoardContext
-            {
-                Board = this,
-                Key = key
-            };
 
             var min = GetValue(bounds.MinValue);
             var max = GetValue(bounds.MaxValue);

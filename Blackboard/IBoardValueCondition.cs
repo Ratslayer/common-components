@@ -1,7 +1,7 @@
 ﻿namespace BB
 {
-	public interface IBoardValueCondition
-	{
-		bool IsValid(in GetBoardContext context);
-	}
+    public interface IBoardValueCondition
+    {
+        bool IsValid(IBoard board, in GetBoardContext context);
+    }
 }

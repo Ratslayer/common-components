@@ -2,6 +2,7 @@
 using Sirenix.OdinInspector;
 using System;
 using UnityEngine;
+
 namespace BB
 {
     [Serializable]
@@ -10,12 +11,14 @@ namespace BB
         public string _name;
         public SerializedDouble _value;
     }
+
     [Serializable]
     public sealed class EntityExpression
     {
         public ExpressionVariable[] _variables = { };
         public string _expression;
         private IGenericExpression<double> _compiledExpression;
+
         public double GetValue(Entity entity)
         {
             if (_compiledExpression is null)
@@ -32,6 +35,7 @@ namespace BB
             var result = _compiledExpression.Evaluate();
             return result;
         }
+
         [Button]
         void Recompile()
         {
@@ -43,6 +47,7 @@ namespace BB
 
             _compiledExpression = context.CompileGeneric<double>(_expression);
         }
+
         [Button, HideInPlayMode]
         void Test() => LogTestResult(World.Entity);
 
@@ -57,10 +62,12 @@ namespace BB
                 .Info($"Expression {_expression} evaluates to {value}");
         }
     }
+
     public sealed class FormulaValueGetterAsset : BoardValueGetterAsset
     {
         public EntityExpression _expression = new();
-        public override double GetValue(in GetBoardContext context)
-            => _expression.GetValue(context.Entity);
+
+        public override double GetValue(IBoard board, in GetBoardContext context)
+            => _expression.GetValue(board.Entity);
     }
 }

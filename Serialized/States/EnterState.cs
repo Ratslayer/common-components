@@ -7,7 +7,7 @@ namespace BB.Serialized.Actions
     [Serializable]
     public sealed class EnterState : SerializedActionSync, ISerializedSceneAction
     {
-        public StateMachineBehaviour _machine;
+        public StateMachineComponent _machine;
         [ValueDropdown(nameof(States))]
         public string _state;
         protected override void InvokeSync(SerializedActionContext context)

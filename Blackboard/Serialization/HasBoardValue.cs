@@ -2,17 +2,16 @@
 
 namespace BB.Blackboard.Serialization
 {
-	[Serializable]
+    [Serializable]
     public sealed class HasBoardValue : ISerializedBoardValueCondition
     {
         public BaseBoardKey _key;
-        public bool IsValid(in GetBoardContext context)
+
+        public bool IsValid(IBoard board, in GetBoardContext context)
         {
             if (!_key)
                 return false;
-            var value = context
-                .WithKey(_key)
-                .Get();
+            var value = board.Get(context.WithKey(_key));
             return value.IsPositive();
         }
     }

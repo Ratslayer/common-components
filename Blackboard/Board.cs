@@ -4,42 +4,44 @@ namespace BB
 {
     public static class Board
     {
-        public static void Add(IBoard board, IBoardKey key, object source, double value)
+        public static AddBoardValueOnDispose Add(IBoard board, IBoardKey key, object source, double value)
         {
             board?.Add(new()
             {
-                Board = board,
                 Key = key,
                 Value = value,
                 Source = source
             });
+
+            return AddBoardValueOnDispose.GetPooled(board, key, source, -value);
         }
 
         public static void Add(IBoard board, IBoardValue value, object source, double multiplier = 1)
-            => value.Add(new()
+            => value.Add(board, new()
             {
-                Board = board,
                 Value = multiplier,
                 Source = source
             });
 
-        public static void Add(in Entity entity, IBoardKey key, object source, double value = 1)
+        public static AddBoardValueOnDispose Add(in Entity entity, IBoardKey key, object source, double value = 1)
             => Add(entity.Get<IBoard>(), key, source, value);
 
-        public static void Add(IBoard board, IEnumerable<IBoardValue> values, object source, double multiplier = 1)
+        public static ApplyBoardValuesOnDispose Add(IBoard board, IEnumerable<IBoardValue> values, object source,
+            double multiplier = 1)
         {
-            if (values is null)
-                return;
+            if (values is null || board is null)
+                return default;
 
             var context = new AddBoardContext
             {
-                Board = board,
                 Value = multiplier,
                 Source = source
             };
             using var _ = board.FlushOnDispose();
             foreach (var value in values)
-                value.Add(context);
+                value.Add(board, context);
+
+            return ApplyBoardValuesOnDispose.GetPooled(board, values, source, -multiplier);
         }
 
         public static void Add(in Entity entity, IEnumerable<IBoardValue> values, object source, double multiplier = 1)
@@ -83,14 +85,13 @@ namespace BB
 
             var spendCostContext = new AddBoardContext
             {
-                Board = board,
                 Value = -multiplier,
                 Source = source
             };
 
             var costValues = keyCost.Cost.GetBoardValues().ToPooledList();
             foreach (var cost in costValues)
-                cost.Add(spendCostContext);
+                cost.Add(board, spendCostContext);
             costValues.DisposeElementsAndClear();
 
             return true;
@@ -100,10 +101,12 @@ namespace BB
             in CanAddBoardValueOptions context = default)
             => TryAdd(entity.Require<IBoard>(), key, source, context);
 
+        public static double Get(in Entity entity, IBoardKey key)
+            => Get(entity.Require<IBoard>(), key);
+
         public static double Get(IBoard board, IBoardKey key)
             => board.Get(new()
             {
-                Board = board,
                 Key = key,
             });
 
@@ -167,14 +170,13 @@ namespace BB
 
             var getContext = new GetBoardContext
             {
-                Board = board,
                 Multiplier = multiplier
             };
 
             var canPay = true;
             foreach (var value in values)
             {
-                var cost = value.Get(getContext);
+                var cost = value.Get(board, getContext);
                 var v = Get(board, value.Key);
                 if (cost > v)
                 {

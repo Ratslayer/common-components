@@ -1,7 +1,7 @@
 ﻿namespace BB
 {
-	public interface ISerializedBoardValue
-	{
-		void Add(in AddBoardContext context);
-	}
+    public interface ISerializedBoardValue
+    {
+        void Add(IBoard board, in AddBoardContext context);
+    }
 }

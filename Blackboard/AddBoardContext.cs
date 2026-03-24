@@ -2,37 +2,43 @@
 
 namespace BB
 {
-    public readonly struct BoardCostContext
+    public readonly struct SetBoardContext
     {
-        public IBoard Board { get; init; }
+        public IBoardKey Key { get; init; }
+        public double Value { get; init; }
+        public object Source { get; init; }
+
+        public IBoardValueCondition Condition { get; init; }
     }
 
     public readonly struct AddBoardContext
     {
         public IBoardKey Key { get; init; }
-        public IBoard Board { get; init; }
-        public double? Value { get; init; }
+
+        // public IBoard Board { get; init; }
+        public double Value { get; init; }
         public object Source { get; init; }
 
-        public Entity Entity
-        {
-            get => Board.Entity;
-            init => Board = value.Get<IBoard>();
-        }
+        public IBoardValueCondition Condition { get; init; }
 
-        public static AddBoardContext FromEntity(in Entity entity)
-            => new()
-            {
-                Board = entity.Get<IBoard>(),
-                Source = entity._ref,
-                Value = 1,
-            };
+        // public Entity Entity
+        // {
+        //     get => Board.Entity;
+        //     init => Board = value.Get<IBoard>();
+        // }
+        //
+        // public static AddBoardContext FromEntity(in Entity entity)
+        //     => new()
+        //     {
+        //         Board = entity.Get<IBoard>(),
+        //         Source = entity._ref,
+        //         Value = 1,
+        //     };
 
         public AddBoardContext WithKey(IBoardKey key)
             => new()
             {
                 Key = key,
-                Board = Board,
                 Source = Source,
                 Value = Value
             };
@@ -42,27 +48,11 @@ namespace BB
             {
                 Key = Key,
                 Source = Source,
-                Board = Board,
+                // Board = Board,
                 Value = value
             };
 
         public AddBoardContext TimesValue(double value)
-            => WithValue(GetValue() * value);
-
-        public GetBoardContext ToGetContext()
-            => new()
-            {
-                Key = Key,
-                Board = Board,
-            };
-
-        public double GetValue() => Value ?? 1;
-        public void Add() => Board.Add(this);
-
-        public IDisposable AddTemp()
-        {
-            Add();
-            return AddBoardContextOnDispose.GetPooled(TimesValue(-1));
-        }
+            => WithValue(Value * value);
     }
 }

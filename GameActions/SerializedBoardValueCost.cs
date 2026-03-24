@@ -5,12 +5,14 @@ namespace BB
 {
     public sealed class PublishEventAction<TEvent>
         : ProtectedPooledObject<PublishEventAction<TEvent>>,
-        IGameActionSuccess
+            IGameActionSuccess
     {
         TEvent _event;
         IEvent<TEvent> _publisher;
+
         public void ExecuteSuccess(IGameActionContext context)
             => _publisher?.Publish(_event);
+
         public static PublishEventAction<TEvent> GetPooled(TEvent e, IEvent<TEvent> publisher = null)
         {
             var result = GetPooledInternal();
@@ -19,9 +21,11 @@ namespace BB
             return result;
         }
     }
+
     public sealed class AddConstBoardValueAction : AbstractAddBoardValueAction<AddConstBoardValueAction>
     {
         double _value;
+
         public static AddConstBoardValueAction GetPooled(IBoardKey key, double value)
         {
             var result = GetPooledInternal();
@@ -29,13 +33,16 @@ namespace BB
             result._value = value;
             return result;
         }
+
         protected override double GetValue(Entity entity)
             => _value;
     }
+
     public sealed class AddOtherBoardValueAction : AbstractAddBoardValueAction<AddOtherBoardValueAction>
     {
         double _multiplier;
         IBoardKey _addedKey;
+
         public static AddOtherBoardValueAction GetPooled(IBoardKey key, IBoardKey addedKey, double multiplier = 1)
         {
             var result = GetPooledInternal();
@@ -44,9 +51,11 @@ namespace BB
             result._addedKey = addedKey;
             return result;
         }
+
         protected override double GetValue(Entity entity)
             => entity.Require<IBoard>().Get(_addedKey) * _multiplier;
     }
+
     public abstract class AbstractAddBoardValueAction<TSelf> : ProtectedPooledObject<TSelf>,
         IGameActionCondition,
         IGameActionFailure,
@@ -81,19 +90,22 @@ namespace BB
 
             context.Messages.Add(data);
         }
+
         public void ExecuteSuccess(IGameActionContext context)
         {
             if (_key is null || !context.Entity.Has(out IBoard board))
                 return;
 
-            _key.Add(board, GetValue(context.Entity));
+            Board.Add(board, _key, this, GetValue(context.Entity));
         }
     }
+
     public sealed class AddExpressionBoardValueAction
         : AbstractAddBoardValueAction<AddExpressionBoardValueAction>
     {
         EntityExpression _expression;
         double _multiplier;
+
         public static AddExpressionBoardValueAction GetPooled(
             IBoardKey key,
             EntityExpression expression,
@@ -105,6 +117,7 @@ namespace BB
             result._multiplier = multiplier;
             return result;
         }
+
         protected override double GetValue(Entity entity)
             => _expression.GetValue(entity) * _multiplier;
     }
