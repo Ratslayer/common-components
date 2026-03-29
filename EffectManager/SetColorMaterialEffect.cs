@@ -18,9 +18,9 @@ namespace BB
 				Update();
 			}
 		}
-		public override void Apply(MaterialPropertyBlock mpb)
+		public override void Apply(in ApplyMaterialEffectContext context)
 		{
-			mpb.SetColor(_colorName, _color);
+			context.Block.SetColor(_colorName, _color);
 		}
 	}
 }

@@ -1,34 +1,53 @@
-﻿using Cinemachine;
+﻿using System;
+using Cinemachine;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using System.Threading;
+using DG.Tweening.Core;
 using UnityEngine;
+
 namespace BB
 {
     public static class ITweenCurveExtensions
     {
+        public static Tween To(this ITweenCurve curve, float from, float to, DOSetter<float> setter)
+            => DOTween
+                .To(setter, from, to, curve.Duration)
+                .SetEase(curve);
+
+        public static UniTask To(this ITweenCurve curve, float from, float to, DOSetter<float> setter,
+            CancellationToken ct)
+            => DOTween
+                .To(setter, from, to, curve.Duration)
+                .SetEase(curve)
+                .WithCancellation(ct);
+
         public static Tween LocalMoveTo(
             this ITweenCurve curve, in TransformAdapter transform, in Vector3Adapter position)
             => transform._transform
-            .DOLocalMove(position, curve.Duration)
-            .SetEase(curve);
+                .DOLocalMove(position, curve.Duration)
+                .SetEase(curve);
+
         public static UniTask LocalMoveTo(
             this ITweenCurve curve,
             in TransformAdapter transform,
             in Vector3Adapter position,
             CancellationToken ct)
-                => curve.LocalMoveTo(transform, position).WithCancellation(ct);
+            => curve.LocalMoveTo(transform, position).WithCancellation(ct);
+
         public static Tween MoveTo(
             this ITweenCurve curve, in TransformAdapter transform, in Vector3Adapter position)
             => transform._transform
-            .DOMove(position, curve.Duration)
-            .SetEase(curve);
+                .DOMove(position, curve.Duration)
+                .SetEase(curve);
+
         public static UniTask MoveTo(
             this ITweenCurve curve,
             in TransformAdapter mover,
             in Vector3Adapter position,
             CancellationToken ct)
-                => curve.MoveTo(mover, position).WithCancellation(ct);
+            => curve.MoveTo(mover, position).WithCancellation(ct);
+
         public static Tween MoveToTransform(
             this ITweenCurve curve, in TransformAdapter mover, in TransformAdapter target)
         {
@@ -43,6 +62,7 @@ namespace BB
                 .SetEase(curve);
 
             float GetPos() => 1;
+
             void SetPos(float value)
             {
                 var diff = startingPos - to.position;
@@ -50,25 +70,30 @@ namespace BB
                 from.position = newPos;
             }
         }
+
         public static UniTask MoveToTransform(
             this ITweenCurve curve,
             in TransformAdapter transform,
             in TransformAdapter target,
             CancellationToken ct)
             => curve.MoveToTransform(transform, target).ToUniTask(cancellationToken: ct);
+
         public static Tween MoveAdd(
             this ITweenCurve curve, in TransformAdapter transform, Vector3 offset)
             => transform._transform
-            .DOMove(transform._transform.position + offset, curve.Duration)
-            .SetEase(curve);
+                .DOMove(transform._transform.position + offset, curve.Duration)
+                .SetEase(curve);
+
         public static UniTask MoveAdd(
             this ITweenCurve curve, in TransformAdapter transform, Vector3 offset, CancellationToken ct)
             => curve.MoveAdd(transform, offset).ToUniTask(ct);
+
         public static Tween MoveY(
             this ITweenCurve curve, in TransformAdapter t, float target)
             => t._transform
-            .DOMoveY(target, curve.Duration)
-            .SetEase(curve);
+                .DOMoveY(target, curve.Duration)
+                .SetEase(curve);
+
         public static UniTask MoveY(
             this ITweenCurve curve, in TransformAdapter t, float target, CancellationToken ct)
             => curve.MoveY(t, target).ToUniTask(cancellationToken: ct);
@@ -76,22 +101,24 @@ namespace BB
         public static Tween MoveXZ(
             this ITweenCurve curve, TransformAdapter t, Vector3 target)
             => DOTween
-            .To(() => t._transform.position.Flat(),
-                v => t._transform.position = new(v.x, t._transform.position.y, v.z),
-                target,
-                curve.Duration)
-            .SetEase(curve);
+                .To(() => t._transform.position.Flat(),
+                    v => t._transform.position = new(v.x, t._transform.position.y, v.z),
+                    target,
+                    curve.Duration)
+                .SetEase(curve);
+
         public static UniTask MoveXZ(
             this ITweenCurve curve, TransformAdapter t, Vector3 target, CancellationToken ct)
             => curve.MoveXZ(t, target).ToUniTask(cancellationToken: ct);
+
         public static Tween Alpha(
             this ITweenCurve curve, AlphaAdapter alphaProvider, float alpha)
             => DOTween
-            .To(() => alphaProvider.Alpha,
-                a => alphaProvider.Alpha = a,
-                alpha,
-                curve.Duration)
-            .SetEase(curve);
+                .To(() => alphaProvider.Alpha,
+                    a => alphaProvider.Alpha = a,
+                    alpha,
+                    curve.Duration)
+                .SetEase(curve);
 
         public static Tween RotateForward(
             this ITweenCurve curve,
@@ -104,12 +131,14 @@ namespace BB
                 .DORotateQuaternion(rotation, curve.Duration)
                 .SetEase(curve);
         }
+
         public static UniTask RotateForward(
             this ITweenCurve curve,
             in TransformAdapter transform,
             Vector3 dir,
             CancellationToken ct)
             => curve.RotateForward(transform, dir).ToUniTask(cancellationToken: ct);
+
         public static Tween RotateX(
             this ITweenCurve curve,
             in TransformAdapter transform,
@@ -117,22 +146,25 @@ namespace BB
         {
             var t = transform._transform;
             return DOTween.To(
-                () => t.eulerAngles.x.ClampAngle(),
-                v => t.eulerAngles = t.eulerAngles.SetX(v),
-                rotation,
-                curve.Duration)
+                    () => t.eulerAngles.x.ClampAngle(),
+                    v => t.eulerAngles = t.eulerAngles.SetX(v),
+                    rotation,
+                    curve.Duration)
                 .SetEase(curve);
         }
+
         public static UniTask RotateX(
-           this ITweenCurve curve,
-           in TransformAdapter transform,
-           float rotation,
-           CancellationToken ct)
+            this ITweenCurve curve,
+            in TransformAdapter transform,
+            float rotation,
+            CancellationToken ct)
             => curve.RotateX(transform, rotation).ToUniTask(cancellationToken: ct);
+
         public static Tween Scale(this ITweenCurve curve, in TransformAdapter transform, float scale)
             => transform._transform
-            .DOScale(scale, curve.Duration)
-            .SetEase(curve);
+                .DOScale(scale, curve.Duration)
+                .SetEase(curve);
+
         public static UniTask Scale(
             this ITweenCurve curve,
             in TransformAdapter transform,
@@ -142,33 +174,35 @@ namespace BB
 
         public static Tween Alpha(this ITweenCurve curve, CanvasGroup group, float alpha)
             => group
-            .DOFade(alpha, curve.Duration)
-            .SetEase(curve);
+                .DOFade(alpha, curve.Duration)
+                .SetEase(curve);
 
         public static UniTask Alpha(this ITweenCurve curve, CanvasGroup group, float alpha, CancellationToken ct)
             => curve
-            .Alpha(group, alpha)
-            .ToUniTask(cancellationToken: ct);
+                .Alpha(group, alpha)
+                .ToUniTask(cancellationToken: ct);
 
         public static Tween MoveAnchored(this ITweenCurve curve, RectTransform t, Vector2 pos)
             => t
-            .DOAnchorPos(pos, curve.Duration)
-            .SetEase(curve);
+                .DOAnchorPos(pos, curve.Duration)
+                .SetEase(curve);
 
         public static UniTask MoveAnchored(this ITweenCurve curve, RectTransform t, Vector2 pos, CancellationToken ct)
             => curve
-            .MoveAnchored(t, pos)
-            .ToUniTask(cancellationToken: ct);
+                .MoveAnchored(t, pos)
+                .ToUniTask(cancellationToken: ct);
 
         public static Tween Fov(this ITweenCurve curve, CinemachineVirtualCamera camera, float fov)
             => DOTween
-            .To(
-                () => camera.GetFov(),
-                f => camera.SetFov(f),
-                fov,
-                curve.Duration)
-            .SetEase(curve);
-        public static UniTask Fov(this ITweenCurve curve, CinemachineVirtualCamera camera, float fov, CancellationToken ct)
+                .To(
+                    () => camera.GetFov(),
+                    f => camera.SetFov(f),
+                    fov,
+                    curve.Duration)
+                .SetEase(curve);
+
+        public static UniTask Fov(this ITweenCurve curve, CinemachineVirtualCamera camera, float fov,
+            CancellationToken ct)
             => curve.Fov(camera, fov).ToUniTask(cancellationToken: ct);
 
         public static Tween RestrictToTarget(this Tween tween, object target = null)

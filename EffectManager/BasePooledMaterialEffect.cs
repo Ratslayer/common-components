@@ -10,7 +10,7 @@ namespace BB
 	{
 		readonly List<IMaterialEffectContainer> _containers = new();
 		IMaterialEffectManager _manager;
-		public abstract void Apply(MaterialPropertyBlock mpb);
+		public abstract void Apply(in ApplyMaterialEffectContext context);
 		public TSelf WithContainer(IMaterialEffectContainer container)
 		{
 			_containers.Add(container);
