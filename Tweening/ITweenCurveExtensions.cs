@@ -173,9 +173,12 @@ namespace BB
             => curve.Scale(transform, scale).ToUniTask(cancellationToken: ct);
 
         public static Tween Alpha(this ITweenCurve curve, CanvasGroup group, float alpha)
-            => group
+        {
+            group.DOKill();
+            return group
                 .DOFade(alpha, curve.Duration)
                 .SetEase(curve);
+        }
 
         public static UniTask Alpha(this ITweenCurve curve, CanvasGroup group, float alpha, CancellationToken ct)
             => curve
