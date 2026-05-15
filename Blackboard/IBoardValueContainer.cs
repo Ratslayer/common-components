@@ -2,6 +2,13 @@
 
 namespace BB
 {
+    public sealed class ConditionalBoardValue
+    {
+        public double _value;
+#if DEBUG
+        public readonly Dictionary<object, double> _sources = new();
+#endif
+    }
     public sealed class BoardValueContainer : IBoardValueContainer
     {
         public IBoard Board { get; private set; }
@@ -9,7 +16,7 @@ namespace BB
         public double Value { get; set; }
         public double AddedValue { get; set; }
         public double PreviousValue { get; set; }
-        public Dictionary<IBoardValueCondition, double> _conditionalValues;
+        public Dictionary<IBoardValueCondition, ConditionalBoardValue> _conditionalValues;
 
         public BoardValueContainer(IBoard board, IBoardKey key)
         {
@@ -21,7 +28,6 @@ namespace BB
             => $"{Value.Nicify()}; {PreviousValue.Nicify()}; {Key.Name}; {Board.Entity}";
 #if DEBUG
         public readonly Dictionary<object, double> _sources = new();
-
 #endif
     }
 

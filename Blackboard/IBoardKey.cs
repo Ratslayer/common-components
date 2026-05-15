@@ -23,6 +23,11 @@ namespace BB
         BoardValueStackingMethod StackingMethod { get; }
     }
 
+    public interface ISerializableBoardKey : IBoardKey, ILoadableAsset
+    {
+        int SerializationPriority { get; }
+    }
+
     public interface IBoardKeyWithBounds : IBoardKey
     {
         BoardValueGetter MinValue { get; }

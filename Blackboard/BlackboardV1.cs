@@ -117,10 +117,21 @@ namespace BB.Blackboard
         public void Set(in SetBoardContext context)
         {
             var container = GetOrCreate(context.Key);
+            var diff = context.Value - container.Value;
+            Add(new AddBoardContext
+            {
+                Key = context.Key,
+                Source = context.Source,
+                Value = diff
+            });
+            return;
+
             if (context.Condition is not null)
             {
                 container._conditionalValues ??= new();
-                container._conditionalValues[context.Condition] = context.Value;
+                var cv = container._conditionalValues.GetOrCreate(context.Condition);
+                cv._value = context.Value;
+                cv._sources.Clear();
             }
             else
             {
@@ -137,14 +148,13 @@ namespace BB.Blackboard
             SetDirty(container);
         }
 
-        public void Add(IBoardKey key, IBoardValueCondition condition, double value)
-        {
-            var container = GetOrCreate(key);
-            container._conditionalValues ??= new();
-            if (container._conditionalValues.TryGetValue(condition, out var currentValue))
-                value += currentValue;
-            container._conditionalValues[condition] = value;
-        }
+        // public void Add(IBoardKey key, IBoardValueCondition condition, double value)
+        // {
+        //     var container = GetOrCreate(key);
+        //     container._conditionalValues ??= new();
+        //     var cv = container._conditionalValues.GetOrCreate(condition);
+        //     cv._value += value;
+        // }
 
         public void Add(in AddBoardContext context)
         {
@@ -156,19 +166,37 @@ namespace BB.Blackboard
                 return;
 
             var container = GetOrCreate(key);
-            container.AddedValue += value;
+            if (context.Condition is null)
+            {
+                container.AddedValue += value;
+#if DEBUG
+                if (context.Source is not null)
+                {
+                    var sourceValue = container._sources.TryGetValue(context.Source, out var currentSourceValue)
+                        ? currentSourceValue + value
+                        : value;
+                    container._sources[context.Source] = sourceValue;
+                }
+#endif
+            }
+            else
+            {
+                container._conditionalValues ??= new();
+                var cv = container._conditionalValues.GetOrCreate(context.Condition);
+                cv._value += context.Value;
+#if DEBUG
+                if (context.Source is not null)
+                {
+                    var sourceValue = cv._sources.TryGetValue(context.Source, out var currentSourceValue)
+                        ? currentSourceValue + value
+                        : value;
+                    cv._sources[context.Source] = sourceValue;
+                }
+#endif
+            }
+
             SetDirty(container);
             this.SetDirtyAndAutoFlushChanges();
-
-#if DEBUG
-            if (context.Source is not null)
-            {
-                var sourceValue = container._sources.TryGetValue(context.Source, out var currentSourceValue)
-                    ? currentSourceValue + value
-                    : value;
-                container._sources[context.Source] = sourceValue;
-            }
-#endif
         }
 
         public double Get(in GetBoardContext context)
@@ -194,7 +222,7 @@ namespace BB.Blackboard
                 foreach (var (condition, v) in container._conditionalValues)
                 {
                     if (condition?.IsValid(board, context) is true)
-                        value += v;
+                        value += v._value;
                 }
             }
 

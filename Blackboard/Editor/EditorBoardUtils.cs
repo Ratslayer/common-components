@@ -55,16 +55,37 @@ namespace BB
                 var container = board.Containers.FirstOrDefault(c => c.Key == key) as BoardValueContainer;
                 var foldoutContainer = EditorGuiUtils.Foldout(container);
                 EditorGUILayout.EndHorizontal();
-                if (foldoutContainer)
+                if (foldoutContainer && container is not null)
                 {
-                    if (container is not null)
+                    using var __ = LayoutUtils.Indent;
+
+                    if (container._sources.Count > 0)
+                    {
+                        EditorGUILayout.LabelField("Values");
                         foreach (var source in container._sources)
-                            if (source.Value.NotZero())
-                            {
-                                using var _ = LayoutUtils.Horizontal;
-                                EditorGUILayout.LabelField(source.Key.ToString());
-                                EditorGUILayout.LabelField($"{source.Value:n1}");
-                            }
+                            DrawValue(source.Key, source.Value);
+                    }
+
+                    if (container._conditionalValues?.Count > 0)
+                    {
+                        EditorGUILayout.LabelField("Conditional Values");
+                        foreach (var cv in container._conditionalValues.Values)
+                        foreach (var source in cv._sources)
+                            DrawValue(source.Key, source.Value);
+                    }
+
+
+                    void DrawValue(object source, double value)
+                    {
+                        if (value.IsZero())
+                            return;
+
+                        using var _ = LayoutUtils.Horizontal;
+                        if (source is Object obj)
+                            EditorGUILayout.ObjectField(obj, typeof(Object));
+                        else EditorGUILayout.LabelField(source.ToString());
+                        EditorGUILayout.LabelField($"{value:n1}");
+                    }
                 }
 #else
                 EditorGUILayout.EndHorizontal();
@@ -73,7 +94,7 @@ namespace BB
 
             if (changedKey is not null)
             {
-                Board.Add(board, changedKey,"BoardEdit", diff);
+                Board.Add(board, changedKey, "BoardEdit", diff);
                 board.ForceFlushChanges();
             }
         }
