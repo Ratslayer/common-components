@@ -15,25 +15,10 @@ namespace BB
     {
         public IBoardKey Key { get; init; }
 
-        // public IBoard Board { get; init; }
         public double Value { get; init; }
         public object Source { get; init; }
 
         public IBoardValueCondition Condition { get; init; }
-
-        // public Entity Entity
-        // {
-        //     get => Board.Entity;
-        //     init => Board = value.Get<IBoard>();
-        // }
-        //
-        // public static AddBoardContext FromEntity(in Entity entity)
-        //     => new()
-        //     {
-        //         Board = entity.Get<IBoard>(),
-        //         Source = entity._ref,
-        //         Value = 1,
-        //     };
 
         public AddBoardContext WithKey(IBoardKey key)
             => new()

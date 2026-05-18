@@ -4,20 +4,9 @@ namespace BB
     public readonly struct GetBoardContext
     {
         public IBoardKey Key { get; init; }
-        // public IBoard Board { get; init; }
         public IBoard TargetBoard { get; init; }
-        // public Entity Entity
-        // {
-        //     get => Board.Entity;
-        //     init => Board = value.Get<IBoard>();
-        // }
         public double? Multiplier { get; init; }
         public double GetMultiplier() => Multiplier ?? 1;
-        // public static GetBoardContext FromEntity(in Entity entity)
-        //     => new()
-        //     {
-        //         Board = entity.Get<IBoard>()
-        //     };
         public GetBoardContext WithKey(IBoardKey key)
             => new()
             {

@@ -4,6 +4,25 @@ namespace BB
 {
     public static class Board
     {
+        public static double AddAndGetDiff(IBoard board, IBoardValue value, object source)
+        {
+            var oldValue = value.Get(board, new GetBoardContext
+            {
+                
+            })
+            Add(board, key, source, value);
+            var newValue = Get(board, key);
+            return newValue - oldValue;
+        }
+
+        public static double AddAndGetDiff(IBoard board, IBoardKey key, double value, object source)
+        {
+            var oldValue = Board.Get(board, key);
+            Add(board, key, source, value);
+            var newValue = Get(board, key);
+            return newValue - oldValue;
+        }
+
         public static AddBoardValueOnDispose Add(IBoard board, IBoardKey key, object source, double value)
         {
             board?.Add(new()
