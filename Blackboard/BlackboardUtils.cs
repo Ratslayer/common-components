@@ -14,14 +14,14 @@ namespace BB
 
             if (context.InitialValues is not null)
                 container.SystemWithArgs<InitBlackboard, InitBlackboard>(
-                    (typeof(IBoardValue[]), context.InitialValues.ToArray()));
+                    (typeof(BoardValue[]), context.InitialValues?.Values.ToArray()));
             if (context.FillResources)
                 container.System<InitResources>();
         }
     }
     public readonly struct BlackboardInstallContext
     {
-        public IEnumerable<IBoardValue> InitialValues { get; init; }
+        public BoardValues? InitialValues { get; init; }
         public bool FillResources { get; init; }
     }
 }

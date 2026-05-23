@@ -1,16 +1,46 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace BB
 {
-	public interface IBoardValuesProvider
-	{
-		IEnumerable<IBoardValue> GetBoardValues();
-	}
-	public readonly struct CanAddBoardValuesContext
-	{
-		public IBoard Board { get; init; }
-		public AddBoardContext BoardContext { get; init; }
-		public List<IBoardKey> ErrorKeys { get; init; }
-		public double? Multiplier { get; init; }
-	}
+    public interface IBoardValuesProvider
+    {
+        BoardValues GetBoardValues();
+    }
+
+    public readonly struct BoardValues
+    {
+        public IEnumerable<BoardValue> Values { get; init; }
+
+        public static implicit operator bool(BoardValues v)
+            => v.Values?.Any() ?? false;
+
+        public static BoardValues operator -(BoardValues v)
+            => v * -1;
+
+        public static BoardValues operator *(BoardValues boardValues, double multiplier)
+        {
+            return new()
+            {
+                Values = boardValues.Values?.Select(v => v * multiplier)
+            };
+        }
+
+        public static BoardValues operator +(BoardValues v1, BoardValues v2)
+        {
+            return new()
+            {
+                Values = v1.Values?.Concat(v2.Values)
+            };
+        }
+
+        public static implicit operator BoardValues(BoardValue[] values)
+            => new() { Values = values };
+        
+        public static implicit operator BoardValues(List<BoardValue> values)
+            => new() { Values = values };
+        
+        public static implicit operator BoardValues(PooledList<BoardValue> values)
+            => new() { Values = values };
+    }
 }

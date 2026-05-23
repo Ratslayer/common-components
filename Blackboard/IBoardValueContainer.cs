@@ -9,6 +9,7 @@ namespace BB
         public readonly Dictionary<object, double> _sources = new();
 #endif
     }
+
     public sealed class BoardValueContainer : IBoardValueContainer
     {
         public IBoard Board { get; private set; }
@@ -23,6 +24,12 @@ namespace BB
             Board = board;
             Key = key;
         }
+
+        public double GetValue(IBoardValueCondition condition)
+            => condition is not null 
+               && _conditionalValues?.TryGetValue(condition, out var value) is true
+                ? value._value
+                : Value;
 
         public override string ToString()
             => $"{Value.Nicify()}; {PreviousValue.Nicify()}; {Key.Name}; {Board.Entity}";

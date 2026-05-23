@@ -23,7 +23,7 @@ namespace BB
             using var __ = board.FlushOnDispose();
             foreach (var kvp in _values)
                 if (kvp.Key is IBoardKey key)
-                    Board.Add(board, key, this, kvp.Value);
+                    board.Add((key, kvp.Value), this);
         }
 
         public IEntityComponentSerializer[] GetSerializers()

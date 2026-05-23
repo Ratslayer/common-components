@@ -24,7 +24,7 @@ namespace BB
             var valueGroups = data.Values
                 .Select(v =>
                     (GetLoadableAsset<BaseBoardKey>(v.KeyName) as ISerializableBoardKey, v.Value))
-                .Where(v=>v.Item1 is not null)
+                .Where(v => v.Item1 is not null)
                 .OrderBy(v => v.Item1.SerializationPriority)
                 .GroupBy(v => v.Item1.SerializationPriority)
                 .ToList();
@@ -36,8 +36,7 @@ namespace BB
                     {
                         Key = value.Item1,
                         Value = value.Item2,
-                        Source = this
-                    });
+                    }, this);
             }
 
             // foreach (var value in data.Values)

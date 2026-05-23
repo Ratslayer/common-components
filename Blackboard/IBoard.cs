@@ -5,11 +5,9 @@ namespace BB
     public interface IBoard : IAutoFlushable
     {
         Entity Entity { get; }
-        void Add(in AddBoardContext context);
+        void Add(in BoardValue value, object source);
         double Get(in GetBoardContext context);
-        void Set(in SetBoardContext context);
-        void AddProcessor(IBoardProcessor processor);
-        void RemoveProcessor(IBoardProcessor processor);
+        void Set(in BoardValue value, object source);
         IReadOnlyCollection<IBoardKey> Keys { get; }
         IReadOnlyCollection<IBoardValueContainer> Containers { get; }
         IReadOnlyCollection<IBoardValueContainer> DirtyContainers { get; }

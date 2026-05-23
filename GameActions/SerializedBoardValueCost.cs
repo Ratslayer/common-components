@@ -96,7 +96,7 @@ namespace BB
             if (_key is null || !context.Entity.Has(out IBoard board))
                 return;
 
-            Board.Add(board, _key, this, GetValue(context.Entity));
+            board.Add((_key, GetValue(context.Entity)), this);
         }
     }
 

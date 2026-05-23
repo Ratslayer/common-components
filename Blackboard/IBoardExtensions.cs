@@ -13,13 +13,9 @@ namespace BB
 
     public static class IBoardExtensions
     {
-        public static void SetToMax(this IBoardKeyWithBounds key, IBoard board)
+        public static void SetToMax(this IBoardKeyWithBounds key, IBoard board, object source)
         {
-           board.Add( new AddBoardContext
-            {
-                Key = key,
-                Value = 1e100
-            });
+            board.Add((key, 1e100), source);
         }
 
         // public static double Stack(this IBoardKey key, double v1, double v2)

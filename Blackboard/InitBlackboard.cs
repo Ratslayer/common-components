@@ -3,12 +3,12 @@
     public sealed class InitBlackboard : EntitySystem
     {
         [Inject] IBoard _board;
-        [Inject] IBoardValue[] _values;
+        [Inject] BoardValue[] _values;
 
         [OnEvent]
         void OnSpawn(EntitySpawnedEvent _)
         {
-            Board.Add(_board, _values, this);
+            _board.Add(_values, this);
         }
     }
 
@@ -22,7 +22,7 @@
             foreach (var key in _board.Keys)
                 if (key is IResourceBoardKey resource
                     && resource.SetToMaxOnSpawn)
-                    resource.SetToMax(_board);
+                    resource.SetToMax(_board, "InitResources");
         }
     }
 }

@@ -12,12 +12,7 @@ namespace BB
         {
             var newKey = EditorGUILayout.ObjectField("Add new key", null, typeof(BaseBoardKey), false) as BaseBoardKey;
             if (newKey)
-                board.Set(new SetBoardContext
-                {
-                    Key = newKey,
-                    Value = 0,
-                    Source = "Editor"
-                });
+                board.Set((newKey, 0), "Editor");
 
             if (GUILayout.Button("Update Board"))
                 board.ForceFlushChanges();
@@ -94,7 +89,7 @@ namespace BB
 
             if (changedKey is not null)
             {
-                Board.Add(board, changedKey, "BoardEdit", diff);
+                board.Add((changedKey, diff), "BoardEdit");
                 board.ForceFlushChanges();
             }
         }

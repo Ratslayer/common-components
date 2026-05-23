@@ -114,38 +114,37 @@ namespace BB.Blackboard
             _dirtyContainers.Clear();
         }
 
-        public void Set(in SetBoardContext context)
+        public void Set(in BoardValue value, object source)
         {
-            var container = GetOrCreate(context.Key);
-            var diff = context.Value - container.Value;
-            Add(new AddBoardContext
-            {
-                Key = context.Key,
-                Source = context.Source,
-                Value = diff
-            });
-            return;
+            if (value.Key is null)
+                return;
 
-            if (context.Condition is not null)
-            {
-                container._conditionalValues ??= new();
-                var cv = container._conditionalValues.GetOrCreate(context.Condition);
-                cv._value = context.Value;
-                cv._sources.Clear();
-            }
-            else
-            {
-                container.PreviousValue = container.Value;
-                container.Value = context.Value;
-                container.AddedValue = 0;
-#if DEBUG
-                container._sources.Clear();
-                if (context.Source is not null)
-                    container._sources[context.Source] = context.Value;
-#endif
-            }
+            var container = GetOrCreate(value.Key);
+            var oldValue = container.GetValue(value.Condition);
+            var diff = value.Value - oldValue;
+            Add(value.WithValue(diff), source);
+            // return;
+//
+//             if (context.Condition is not null)
+//             {
+//                 container._conditionalValues ??= new();
+//                 var cv = container._conditionalValues.GetOrCreate(context.Condition);
+//                 cv._value = context.Value;
+//                 cv._sources.Clear();
+//             }
+//             else
+//             {
+//                 container.PreviousValue = container.Value;
+//                 container.Value = context.Value;
+//                 container.AddedValue = 0;
+// #if DEBUG
+//                 container._sources.Clear();
+//                 if (context.Source is not null)
+//                     container._sources[context.Source] = context.Value;
+// #endif
+//             }
 
-            SetDirty(container);
+            // SetDirty(container);
         }
 
         // public void Add(IBoardKey key, IBoardValueCondition condition, double value)
@@ -156,41 +155,41 @@ namespace BB.Blackboard
         //     cv._value += value;
         // }
 
-        public void Add(in AddBoardContext context)
+        public void Add(in BoardValue bv, object source)
         {
-            var key = context.Key;
+            var key = bv.Key;
             if (key.NullIfDestroyedUnityEngineObject() is null)
                 return;
-            var value = context.Value;
+            var value = bv.Value;
             if (value.IsZero())
                 return;
 
             var container = GetOrCreate(key);
-            if (context.Condition is null)
+            if (bv.Condition is null)
             {
                 container.AddedValue += value;
 #if DEBUG
-                if (context.Source is not null)
+                if (source is not null)
                 {
-                    var sourceValue = container._sources.TryGetValue(context.Source, out var currentSourceValue)
+                    var sourceValue = container._sources.TryGetValue(source, out var currentSourceValue)
                         ? currentSourceValue + value
                         : value;
-                    container._sources[context.Source] = sourceValue;
+                    container._sources[source] = sourceValue;
                 }
 #endif
             }
             else
             {
                 container._conditionalValues ??= new();
-                var cv = container._conditionalValues.GetOrCreate(context.Condition);
-                cv._value += context.Value;
+                var cv = container._conditionalValues.GetOrCreate(bv.Condition);
+                cv._value += value;
 #if DEBUG
-                if (context.Source is not null)
+                if (source is not null)
                 {
-                    var sourceValue = cv._sources.TryGetValue(context.Source, out var currentSourceValue)
+                    var sourceValue = cv._sources.TryGetValue(source, out var currentSourceValue)
                         ? currentSourceValue + value
                         : value;
-                    cv._sources[context.Source] = sourceValue;
+                    cv._sources[source] = sourceValue;
                 }
 #endif
             }
