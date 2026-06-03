@@ -6,6 +6,23 @@ namespace BB
 {
     public static class Board
     {
+        public static BoardValues AddAndGetDiff(this IBoard board, BoardValues values, object source)
+        {
+            return new()
+            {
+                Values = GetDiffValues()
+            };
+
+            IEnumerable<BoardValue> GetDiffValues()
+            {
+                foreach (var value in values)
+                {
+                    var diff = board.AddAndGetDiff(value, source);
+                    yield return (value.Key, diff);
+                }
+            }
+        }
+
         public static double AddAndGetDiff(this IBoard board, BoardValue value, object source)
         {
             var oldValue = board.Get(value.Key);
@@ -88,7 +105,7 @@ namespace BB
             if (value.Key is not IBoardCostProvider keyCost)
                 return true;
 
-            var costValues = keyCost.Cost.GetBoardValues();
+            var costValues = -keyCost.Cost.GetBoardValues();
             board.Add(costValues, source);
 
             return true;

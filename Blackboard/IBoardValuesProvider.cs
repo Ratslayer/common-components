@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BB
@@ -8,7 +9,7 @@ namespace BB
         BoardValues GetBoardValues();
     }
 
-    public readonly struct BoardValues
+    public readonly struct BoardValues : IEnumerable<BoardValue>
     {
         public IEnumerable<BoardValue> Values { get; init; }
 
@@ -36,11 +37,15 @@ namespace BB
 
         public static implicit operator BoardValues(BoardValue[] values)
             => new() { Values = values };
-        
+
         public static implicit operator BoardValues(List<BoardValue> values)
             => new() { Values = values };
-        
+
         public static implicit operator BoardValues(PooledList<BoardValue> values)
             => new() { Values = values };
+
+        public IEnumerator<BoardValue> GetEnumerator() => Values.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => Values.GetEnumerator();
     }
 }
