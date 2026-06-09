@@ -6,9 +6,8 @@ namespace BB.Blackboard.Serialization
     {
     }
 
-    public interface ISerializedBoardValueMultiplier
+    public interface ISerializedBoardValueMultiplier : IBoardValueMultiplier
     {
-        double GetMultiplier(IBoard board, in GetBoardContext context);
     }
 
     [Serializable]

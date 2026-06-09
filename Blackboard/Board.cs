@@ -85,10 +85,8 @@ namespace BB
 
             if (context.Context.Cost is { } cost)
                 context.Context.Board.Add(-cost, context.Source);
-            if (context.Context.Value.Key is not null)
-                context.Context.Board.Add(
-                    context.Context.Value,
-                    context.Source);
+            if (context.Context.Value is { Key: not null } value)
+                context.Context.Board.Add(value, context.Source);
 
             return true;
         }
@@ -136,9 +134,9 @@ namespace BB
 
         public static bool CanAdd(in CanAddBoardContext context)
         {
-            var addValue = context.Value.Value;
+            var addValue = context.Value?.Value ?? 1;
 
-            if (context.Value.Key is IBoardKeyWithBounds key)
+            if (context.Value?.Key is IBoardKeyWithBounds key)
             {
                 var value = Get(context.Board, key);
                 var newValue = value + addValue;
@@ -218,7 +216,7 @@ namespace BB
         }
 
         public IBoard Board { get; init; }
-        public BoardValue Value { get; init; }
+        public BoardValue? Value { get; init; }
         public BoardValues? Requirements { get; init; }
         public BoardValues? Cost { get; init; }
         public IList<BoardValue> MissingValues { get; init; }

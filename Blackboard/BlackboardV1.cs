@@ -123,37 +123,7 @@ namespace BB.Blackboard
             var oldValue = container.GetValue(value.Condition);
             var diff = value.Value - oldValue;
             Add(value.WithValue(diff), source);
-            // return;
-//
-//             if (context.Condition is not null)
-//             {
-//                 container._conditionalValues ??= new();
-//                 var cv = container._conditionalValues.GetOrCreate(context.Condition);
-//                 cv._value = context.Value;
-//                 cv._sources.Clear();
-//             }
-//             else
-//             {
-//                 container.PreviousValue = container.Value;
-//                 container.Value = context.Value;
-//                 container.AddedValue = 0;
-// #if DEBUG
-//                 container._sources.Clear();
-//                 if (context.Source is not null)
-//                     container._sources[context.Source] = context.Value;
-// #endif
-//             }
-
-            // SetDirty(container);
         }
-
-        // public void Add(IBoardKey key, IBoardValueCondition condition, double value)
-        // {
-        //     var container = GetOrCreate(key);
-        //     container._conditionalValues ??= new();
-        //     var cv = container._conditionalValues.GetOrCreate(condition);
-        //     cv._value += value;
-        // }
 
         public void Add(in BoardValue bv, object source)
         {
@@ -163,6 +133,15 @@ namespace BB.Blackboard
             var value = bv.Value;
             if (value.IsZero())
                 return;
+
+            if (bv.Multiplier is not null)
+            {
+                var mult = bv.Multiplier.GetMultiplier(this, new()
+                {
+                    Key = bv.Key
+                });
+                value *= mult;
+            }
 
             var container = GetOrCreate(key);
             if (bv.Condition is null)
