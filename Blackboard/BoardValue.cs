@@ -5,15 +5,17 @@
         public IBoardKey Key { get; init; }
         public double Value { get; init; }
         public IBoardValueCondition Condition { get; init; }
+        public IBoardValueMultiplier Multiplier { get; init; }
 
         public BoardValue WithValue(double value)
             => new()
             {
                 Key = Key,
                 Value = value,
-                Condition = Condition
+                Condition = Condition,
+                Multiplier = Multiplier
             };
-        
+
         public static implicit operator bool(BoardValue value)
             => value.Key is not null && value.Value.NotZero();
 
@@ -22,7 +24,8 @@
             {
                 Key = v.Key,
                 Value = -v.Value,
-                Condition = v.Condition
+                Condition = v.Condition,
+                Multiplier = v.Multiplier
             };
 
         public static BoardValue operator *(BoardValue v, double multiplier)
@@ -30,7 +33,8 @@
             {
                 Key = v.Key,
                 Value = v.Value * multiplier,
-                Condition = v.Condition
+                Condition = v.Condition,
+                Multiplier = v.Multiplier
             };
 
         public static implicit operator BoardValue((IBoardKey key, double value) kvp)

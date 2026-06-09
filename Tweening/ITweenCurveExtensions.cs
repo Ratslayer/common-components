@@ -1,5 +1,4 @@
-﻿using System;
-using Cinemachine;
+﻿using Cinemachine;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using System.Threading;
