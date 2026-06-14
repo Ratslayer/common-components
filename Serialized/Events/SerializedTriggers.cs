@@ -6,19 +6,26 @@ using Sirenix.OdinInspector;
 
 namespace BB.Serialized
 {
+    public interface IActionSubscriber
+    {
+        bool HasBeenTriggered { get; set; }
+    }
     [Serializable]
     public sealed class SerializedActionsWithTriggers : SerializedActions<ISerializedAction>
     {
         [SerializeReference]
         ISerializedEvent[] _events = { };
         [SerializeField, HorizontalGroup] bool _oneShot = true, _enabled = true;
-        public IDisposable Subscribe(Entity entity)
+        public IDisposable Subscribe(Entity entity, IActionSubscriber subscriber)
         {
-            var subscription = CreateSubscription(entity);
+            if (_oneShot && subscriber.HasBeenTriggered)
+                return null;
+            
+            var subscription = CreateSubscription(entity, subscriber);
             subscription.Subscribe();
             return subscription;
         }
-        public SerializedTriggerSubscription CreateSubscription(Entity entity)
+        public SerializedTriggerSubscription CreateSubscription(Entity entity, IActionSubscriber subscriber)
         {
             var result = SerializedTriggerSubscription.GetPooled(entity);
             var context = new SerializedEventSubscriptionContext
@@ -39,6 +46,7 @@ namespace BB.Serialized
                 if (!_enabled)
                     return;
                 this.Invoke(new() { Entity = entity });
+                subscriber.HasBeenTriggered = true;
                 if (_oneShot)
                     result.Dispose();
             }

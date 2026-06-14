@@ -9,37 +9,43 @@ using UnityEngine;
 namespace BB.States
 {
     [Serializable]
-    public sealed class SerializedState : IStateEnter,IStateExit
+    public sealed class SerializedState : IStateEnter, IStateExit, IActionSubscriber
     {
         public string _name;
-        [SerializeReference]
-        ISerializedStateAction[] _stateActions = { };
+        [SerializeReference] ISerializedStateAction[] _stateActions = { };
         [SerializeField] SerializedActions _onEnter = new(), _onExit = new();
         [SerializeField] SerializedActionsWithTriggers[] _subscriptions = { };
         readonly List<IDisposable> _disposables = new();
         public string Name => _name;
+
         public void Enter(in StateContext context)
         {
             DisposeAll();
             foreach (var action in _subscriptions)
-                _disposables.Add(action.Subscribe(context.Entity));
+                _disposables.Add(action.Subscribe(context.Entity, this));
             _stateActions.Invoke(new() { Entity = context.Entity }).Forget();
             _onEnter.Invoke(new() { Entity = context.Entity });
         }
+
         public void Exit(in StateContext context)
         {
             DisposeAll();
             _stateActions.Exit(new() { Entity = context.Entity }).Forget();
             _onExit.Invoke(new() { Entity = context.Entity });
         }
+
         void DisposeAll()
         {
             _disposables.DisposeElementsAndClear();
         }
+
+        public bool HasBeenTriggered { get; set; }
     }
+
     public sealed class StateBehaviour : BaseComponent, IStateProvider
     {
         public SerializedState _state = new();
+
         public IEnumerable<IState> GetStates()
         {
             yield return _state;
