@@ -99,12 +99,13 @@ namespace BB
             if (!board.CanAdd(value))
                 return false;
 
-            board.Add(value, source);
-            if (value.Key is not IBoardCostProvider keyCost)
-                return true;
+            if (value.Key is IBoardCostProvider keyCost)
+            {
+                var costValues = -keyCost.Cost.GetBoardValues();
+                board.Add(costValues, source);
+            }
 
-            var costValues = -keyCost.Cost.GetBoardValues();
-            board.Add(costValues, source);
+            board.Add(value, source);
 
             return true;
         }
@@ -164,6 +165,21 @@ namespace BB
                 Requirements = (value.Key as IBoardRequirementsProvider)?.Requirements.GetBoardValues()
             });
 
+        public static double GetCost(this IBoard board, BoardValue bv, double multiplier)
+        {
+            if (bv.Key is null)
+                return 0;
+
+            var value = bv.Value;
+            value *= bv.Multiplier?.GetMultiplier(board, new()
+            {
+                Key = bv.Key,
+                Multiplier = multiplier
+            }) ?? 1;
+
+            return value;
+        }
+
         static bool CanPayCost(
             IBoard board,
             BoardValues? values,
@@ -176,7 +192,7 @@ namespace BB
             var canPay = true;
             foreach (var value in values.Value.Values)
             {
-                var cost = value.Value * multiplier;
+                var cost = GetCost(board, value, multiplier);
                 var v = Get(board, value.Key);
                 if (cost > v)
                 {

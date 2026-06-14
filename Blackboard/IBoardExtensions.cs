@@ -17,13 +17,6 @@ namespace BB
         {
             board.Add((key, 1e100), source);
         }
-
-        // public static double Stack(this IBoardKey key, double v1, double v2)
-        //     => key.StackingMethod switch
-        //     {
-        //         BoardValueStackingMethod.Multiplicative => (1 + v1) * (1 + v2) - 1,
-        //         _ => v1 + v2
-        //     };
         public static bool IsDirty(this IBoard board, IBoardKey key, out IBoardValueContainer container)
         {
             foreach (var c in board.DirtyContainers)
