@@ -186,11 +186,11 @@ namespace BB
             IList<BoardValue> missingValues,
             double multiplier = 1)
         {
-            if (values is null)
+            if (values?.Values is not { } vals)
                 return true;
 
             var canPay = true;
-            foreach (var value in values.Value.Values)
+            foreach (var value in vals)
             {
                 var cost = GetCost(board, value, multiplier);
                 var v = Get(board, value.Key);
